@@ -15,6 +15,7 @@
 
 ## Upgrading MariaDB MaxScale
 
+- [Upgrading MariaDB MaxScale from 2.2 to 2.3](Upgrading/Upgrading-To-MaxScale-2.3.md)
 - [Upgrading MariaDB MaxScale from 2.1 to 2.2](Upgrading/Upgrading-To-MaxScale-2.2.md)
 - [Upgrading MariaDB MaxScale from 2.0 to 2.1](Upgrading/Upgrading-To-MaxScale-2.1.md)
 - [Upgrading MariaDB MaxScale from 1.4 to 2.0](Upgrading/Upgrading-To-MaxScale-2.0.md)
@@ -39,7 +40,12 @@ These tutorials are for specific use cases and module combinations.
 
  - [Administration Tutorial](Tutorials/Administration-Tutorial.md)
  - [Avro Router Tutorial](Tutorials/Avrorouter-Tutorial.md)
+ - [Configuring Servers](Tutorials/Configuring-Servers.md)
+ - [Configuring the Galera Monitor](Tutorials/Configuring-Galera-Monitor.md)
+ - [Configuring the MariaDB Monitor](Tutorials/Configuring-MariaDB-Monitor.md)
+ - [Configuring MaxAdmin](Tutorials/Configuring-MaxAdmin.md)
  - [Connection Routing Tutorial](Tutorials/Connection-Routing-Tutorial.md)
+ - [Encrypting Passwords](Tutorials/Encrypting-Passwords.md)
  - [Filter Tutorial](Tutorials/Filter-Tutorial.md)
  - [MariaDB MaxScale Information Schema Tutorial](Tutorials/MaxScale-Information-Schema.md)
  - [MariaDB Monitor Failover Tutorial](Tutorials/MariaDB-Monitor-Failover.md)
@@ -85,6 +91,7 @@ configure them.
 
  - [Binlog Filter](Filters/BinlogFilter.md)
  - [Cache](Filters/Cache.md)
+ - [Comment Filter](Filters/Comment.md)
  - [Consistent Critical Read Filter](Filters/CCRFilter.md)
  - [Database Firewall Filter](Filters/Database-Firewall-Filter.md)
  - [Insert Stream Filter](Filters/Insert-Stream-Filter.md)
