@@ -9,9 +9,9 @@
 
 ## Getting Started
 
- - [MariaDB MaxScale Installation Guide](Getting-Started/MariaDB-MaxScale-Installation-Guide.md)
  - [Building MariaDB MaxScale from Source Code](Getting-Started/Building-MaxScale-from-Source-Code.md)
  - [Configuration Guide](Getting-Started/Configuration-Guide.md)
+ - [MariaDB MaxScale Installation Guide](Getting-Started/MariaDB-MaxScale-Installation-Guide.md)
 
 ## Upgrading MariaDB MaxScale
 
@@ -29,27 +29,30 @@
 
 ## Tutorials
 
-The main tutorial for MariaDB MaxScale consist of setting up MariaDB MaxScale for the environment you are using with either a connection-based or a read/write-based configuration.
+The main tutorial for MariaDB MaxScale consist of setting up MariaDB MaxScale
+for the environment you are using with either a connection-based or a
+read/write-based configuration.
 
  - [MariaDB MaxScale Tutorial](Tutorials/MaxScale-Tutorial.md)
 
 These tutorials are for specific use cases and module combinations.
 
- - [Connection Routing Tutorial](Tutorials/Connection-Routing-Tutorial.md)
- - [Read Write Splitting Tutorial](Tutorials/Read-Write-Splitting-Tutorial.md)
  - [Administration Tutorial](Tutorials/Administration-Tutorial.md)
  - [Avro Router Tutorial](Tutorials/Avrorouter-Tutorial.md)
- - [MaxScale Failover with Keepalived and MaxCtrl](Tutorials/MaxScale-Failover-with-Keepalived-and-MaxCtrl.md)
- - [MariaDB Monitor Failover Tutorial](Tutorials/MariaDB-Monitor-Failover.md)
+ - [Connection Routing Tutorial](Tutorials/Connection-Routing-Tutorial.md)
+ - [Filter Tutorial](Tutorials/Filter-Tutorial.md)
  - [MariaDB MaxScale Information Schema Tutorial](Tutorials/MaxScale-Information-Schema.md)
+ - [MariaDB Monitor Failover Tutorial](Tutorials/MariaDB-Monitor-Failover.md)
+ - [MaxScale Failover with Keepalived and MaxCtrl](Tutorials/MaxScale-Failover-with-Keepalived-and-MaxCtrl.md)
+ - [MySQL Cluster Setup](Tutorials/MySQL-Cluster-Setup.md)
+ - [RabbitMQ Setup and MariaDB MaxScale Integration Tutorial](Tutorials/RabbitMQ-Setup-And-MaxScale-Integration.md)
+ - [RabbitMQ and Tee Filter Data Archiving Tutorial](Tutorials/RabbitMQ-And-Tee-Archiving.md)
+ - [Read Write Splitting Tutorial](Tutorials/Read-Write-Splitting-Tutorial.md)
  - [Replication Proxy with the Binlog Router Tutorial](Tutorials/Replication-Proxy-Binlog-Router-Tutorial.md)
  - [Simple Schema Sharding Tutorial](Tutorials/Simple-Sharding-Tutorial.md)
- - [Filter Tutorial](Tutorials/Filter-Tutorial.md)
- - [MySQL Cluster Setup](Tutorials/MySQL-Cluster-Setup.md)
- - [RabbitMQ and Tee Filter Data Archiving Tutorial](Tutorials/RabbitMQ-And-Tee-Archiving.md)
- - [RabbitMQ Setup and MariaDB MaxScale Integration Tutorial](Tutorials/RabbitMQ-Setup-And-MaxScale-Integration.md)
 
-Here are tutorials on monitoring and managing MariaDB MaxScale in cluster environments.
+Here are tutorials on monitoring and managing MariaDB MaxScale in cluster
+environments.
 
  - [MariaDB MaxScale HA with Lsyncd](Tutorials/MaxScale-HA-with-lsyncd.md)
  - [Nagios Plugins for MariaDB MaxScale Tutorial](Tutorials/Nagios-Plugins.md)
@@ -62,11 +65,11 @@ of their use.
 
  - [Avrorouter](Routers/Avrorouter.md)
  - [Binlogrouter](Routers/Binlogrouter.md)
+ - [Cat](Routers/Cat.md)
  - [HintRouter](Routers/HintRouter.md)
  - [Read Connection Router](Routers/ReadConnRoute.md)
  - [Read Write Split](Routers/ReadWriteSplit.md)
  - [Schemarouter](Routers/SchemaRouter.md)
- - [Cat](Routers/Cat.md)
 
 There are also two diagnostic routing modules. The CLI is for MaxAdmin and
 the Debug CLI client for Telnet.
@@ -75,8 +78,12 @@ the Debug CLI client for Telnet.
 
 ## Filters
 
-Here are detailed documents about the filters MariaDB MaxScale offers. They contain configuration guides and example use cases. Before reading these, you should have read the filter tutorial so that you know how they work and how to configure them.
+Here are detailed documents about the filters MariaDB MaxScale offers. They
+contain configuration guides and example use cases. Before reading these, you
+should have read the filter tutorial so that you know how they work and how to
+configure them.
 
+ - [Binlog Filter](Filters/BinlogFilter.md)
  - [Cache](Filters/Cache.md)
  - [Consistent Critical Read Filter](Filters/CCRFilter.md)
  - [Database Firewall Filter](Filters/Database-Firewall-Filter.md)
@@ -91,7 +98,6 @@ Here are detailed documents about the filters MariaDB MaxScale offers. They cont
  - [Tee Filter](Filters/Tee-Filter.md)
  - [Top N Filter](Filters/Top-N-Filter.md)
  - [Transaction Performance Monitoring Filter](Filters/Transaction-Performance-Monitoring-Filter.md)
- - [Binlog Filter](Filters/BinlogFilter.md)
 
 ## Monitors
 
@@ -103,8 +109,8 @@ Module specific documentation.
 
  - [Aurora Monitor](Monitors/Aurora-Monitor.md)
  - [Galera Monitor](Monitors/Galera-Monitor.md)
- - [Multi-Master Monitor](Monitors/MM-Monitor.md)
  - [MariaDB Monitor](Monitors/MariaDB-Monitor.md)
+ - [Multi-Master Monitor](Monitors/MM-Monitor.md)
  - [MySQL Cluster Monitor](Monitors/NDB-Cluster-Monitor.md)
 
 ## Protocols
@@ -114,7 +120,8 @@ Documentation for MaxScale protocol modules.
  - [Change Data Capture (CDC) Protocol](Protocols/CDC.md)
  - [Change Data Capture (CDC) Users](Protocols/CDC_users.md)
 
-The MaxScale CDC Connector provides a C++ API for consuming data from a CDC system.
+The MaxScale CDC Connector provides a C++ API for consuming data from a CDC
+system.
 
  - [CDC Connector](Connectors/CDC-Connector.md)
 
@@ -124,8 +131,8 @@ A short description of the authentication module type can be found in the
 [Authentication Modules](Authenticators/Authentication-Modules.md)
 document.
 
- - [MySQL Authenticator](Authenticators/MySQL-Authenticator.md)
  - [GSSAPI Authenticator](Authenticators/GSSAPI-Authenticator.md)
+ - [MySQL Authenticator](Authenticators/MySQL-Authenticator.md)
 
 ## Utilities
 
