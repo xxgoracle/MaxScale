@@ -1,0 +1,88 @@
+[maxscale]
+threads=4
+#log_info=1
+passive=0
+auth_connect_timeout=20
+auth_read_timeout=20
+auth_write_timeout=20
+
+[MySQL Monitor]
+type=monitor
+module=mariadbmon
+###repl51###
+servers=server1,server2
+user=maxskysql
+password=skysql
+monitor_interval=5000
+auto_failover=true
+auto_rejoin=true
+enforce_read_only_slaves=true
+
+[RW Split Router]
+type=service
+router=readwritesplit
+servers=server1,server2
+user=maxskysql
+password=skysql
+master_failure_mode=fail_on_write
+
+[Read Connection Router Slave]
+type=service
+router=readconnroute
+router_options=slave
+servers=server1,server2
+user=maxskysql
+password=skysql
+
+[Read Connection Router Master]
+type=service
+router=readconnroute
+router_options=master
+servers=server1,server2
+user=maxskysql
+password=skysql
+
+[RW Split Listener]
+type=listener
+service=RW Split Router
+protocol=MySQLClient
+address=0.0.0.0
+port=4006
+
+[Read Connection Listener Slave]
+type=listener
+service=Read Connection Router Slave
+protocol=MySQLClient
+address=0.0.0.0
+port=4009
+
+[Read Connection Listener Master]
+type=listener
+service=Read Connection Router Master
+protocol=MySQLClient
+address=0.0.0.0
+port=4008
+
+[MaxAdmin Service]
+type=service
+router=cli
+
+[MaxAdmin Listener]
+type=listener
+service=MaxAdmin Service
+protocol=maxscaled
+address=0.0.0.0
+port=6603
+
+[server1]
+type=server
+address=###node_server_IP_1###
+port=###node_server_port_1###
+protocol=MySQLBackend
+
+[server2]
+type=server
+address=###node_server_IP_2###
+port=###node_server_port_2###
+protocol=MySQLBackend
+

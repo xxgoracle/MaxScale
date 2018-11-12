@@ -987,6 +987,10 @@ add_test_executable(mxs2111_auth_string.cpp mxs2111_auth_string replication LABE
 # MXS-2115: Automatic version_string detection
 add_test_executable(mxs2115_version_string.cpp mxs2115_version_string replication LABELS REPL_BACKEND)
 
+# support-209298
+add_test_executable(support-19086_failover_readonly.cpp support-19086_failover_readonly support-19086 LABELS REPL_BACKEND)
+
+
 configure_file(templates.h.in templates.h @ONLY)
 
 include(CTest)
