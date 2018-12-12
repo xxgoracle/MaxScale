@@ -60,7 +60,7 @@ export name=`echo $name | sed "s/?//g"`
 
 ${script_dir}/create_config.sh
 res=$?
-
+set -x
 ulimit -c unlimited
 if [ $res == 0 ] ; then
     . ${script_dir}/set_env.sh $name
@@ -69,6 +69,8 @@ if [ $res == 0 ] ; then
     mkdir build && cd build
     cmake .. -DBUILD_SYSTEM_TESTS=Y -DBUILDNAME=$name -DCMAKE_BUILD_TYPE=Debug
     cd maxscale-system-test
+    echo "Building tests in the "
+    pwd
     make
 
     if [ ! -z "${named_test}" ] ; then
