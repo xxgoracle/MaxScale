@@ -31,6 +31,7 @@
 class Monitor;
 struct DCB;
 struct json_t;
+struct EXTERNCMD;
 
 /**
  * @verbatim
@@ -123,12 +124,33 @@ enum mxs_monitor_event_t
     NEW_NDB_EVENT     = (1 << 21),  /**< new_ndb */
 };
 
+enum credentials_approach_t
+{
+    CREDENTIALS_INCLUDE,
+    CREDENTIALS_EXCLUDE,
+};
+
 /**
  * The linked list of servers that are being monitored by the monitor module.
  */
 class MXS_MONITORED_SERVER
 {
 public:
+    class ConnectionSettings
+    {
+    public:
+        std::string username;       /**< Monitor username */
+        std::string password;       /**< Monitor password */
+        int connect_timeout {1};    /**< Connect timeout in seconds for mysql_real_connect */
+        int write_timeout {1};      /**< Timeout in seconds for each attempt to write to the server.
+                                     *   There are retries and the total effective timeout value is two
+                                     *   times the option value. */
+        int read_timeout {1};       /**< Timeout in seconds to read from the server. There are retries
+                                     *   and the total effective timeout value is three times the
+                                     *   option value. */
+        int connect_attempts {1};   /**< How many times a connection is attempted */
+    };
+
     MXS_MONITORED_SERVER(SERVER* server);
 
     /**
@@ -139,6 +161,16 @@ public:
     static const int MAINT_ON          = 2;
     static const int BEING_DRAINED_OFF = 3;
     static const int BEING_DRAINED_ON  = 4;
+
+    /**
+     * Ping or connect to a database. If connection does not exist or ping fails, a new connection is created.
+     * This will always leave a valid database handle in the database->con pointer, allowing the user to call
+     * MySQL C API functions to find out the reason of the failure.
+     *
+     * @param settings Connection settings
+     * @return Connection status.
+     */
+    mxs_connect_result_t ping_or_connect(const ConnectionSettings& settings);
 
     SERVER*  server = nullptr;      /**< The server being monitored */
     MYSQL*   con = nullptr;         /**< The MySQL connection */
@@ -231,6 +263,43 @@ public:
      */
     bool clear_server_status(SERVER* srv, int bit, std::string* errmsg_out);
 
+    /**
+     * Set Monitor timeouts for connect/read/write
+     *
+     * @param type          The timeout handling type
+     * @param value         The timeout to set
+     * @param key           Timeout setting name
+     */
+    bool set_network_timeout(int, int, const char*);
+
+    /**
+     * Set username used to connect to backends.
+     *
+     * @param user The default username to use when connecting
+     */
+    void set_user(const std::string& user);
+
+    /**
+     * Set password used to connect to backends.
+     *
+     * @param passwd The password in encrypted form
+     */
+    void set_password(const std::string& passwd);
+
+    void set_script_timeout(int value);
+
+    void monitor_set_journal_max_age(time_t value);
+
+    /**
+     * Create a list of running servers
+     *
+     * @param dest Destination where the string is appended, must be null terminated
+     * @param len Length of @c dest
+     * @param approach Whether credentials should be included or not.
+     */
+    void append_node_names(char* dest, int len, int status,
+                           credentials_approach_t approach = CREDENTIALS_EXCLUDE);
+
     void show(DCB* dcb);
 
     const char* const m_name;           /**< Monitor instance name. TODO: change to string */
@@ -250,22 +319,6 @@ public:
     MXS_CONFIG_PARAMETER* parameters = nullptr;         /**< Configuration parameters */
     std::vector<MXS_MONITORED_SERVER*> m_servers;       /**< Monitored servers */
 
-    char user[MAX_MONITOR_USER_LEN];            /**< Monitor username */
-    char password[MAX_MONITOR_PASSWORD_LEN];    /**< Monitor password */
-
-    int connect_timeout;    /**< Connect timeout in seconds for mysql_real_connect */
-    int connect_attempts;   /**< How many times a connection is attempted */
-    int read_timeout;       /**< Timeout in seconds to read from the server. There are retries
-                             *   and the total effective timeout value is three times the option value. */
-    int write_timeout;      /**< Timeout in seconds for each attempt to write to the server.
-                             *   There are retries and the total effective timeout value is two times
-                             *   the option value. */
-
-    time_t      journal_max_age;    /**< Maximum age of journal file */
-    uint32_t    script_timeout;     /**< Timeout in seconds for the monitor scripts */
-    const char* script;             /**< Launchable script. */
-    uint64_t    events;             /**< Enabled monitor events. */
-
 protected:
 
     /**
@@ -278,19 +331,34 @@ protected:
     bool test_permissions(const std::string& query);
 
     /**
+     * Detect and handle state change events. This function should be called by all monitors at the end
+     * of each monitoring cycle. The function logs state changes and executes the monitor script on
+     * servers whose status changed.
+     */
+    void detect_handle_state_changes();
+
+    /**
      * Contains monitor base class settings. Since monitors are stopped before a setting change,
      * the items cannot be modified while a monitor is running. No locking required.
      */
     class Settings
     {
     public:
-        int64_t interval {0};    /**< Monitor interval in milliseconds */
+        int64_t     interval {0};        /**< Monitor interval in milliseconds */
+
+        std::string script;              /**< Script triggered by events */
+        int         script_timeout {0};  /**< Timeout in seconds for the monitor scripts */
+        uint64_t    events {0};          /**< Bitfield of events which trigger the script */
+
+        time_t      journal_max_age {0}; /**< Maximum age of journal file */
 
         SERVER::DiskSpaceLimits  disk_space_limits;     /**< Disk space thresholds */
         /**
          * How often should a disk space check be made at most, in milliseconds. Negative values imply
          * disabling. */
         int64_t disk_space_check_interval = -1;
+
+        MXS_MONITORED_SERVER::ConnectionSettings conn_settings;
     };
 
     Settings m_settings;
@@ -305,6 +373,28 @@ private:
      * @return True on success
      */
     bool configure_base(const MXS_CONFIG_PARAMETER* params);
+
+    /**
+     * Launch a script
+     *
+     * @param ptr     The server which has changed state
+     * @return Return value of the executed script or -1 on error
+     */
+    int launch_script(MXS_MONITORED_SERVER* ptr);
+
+    /**
+     * Launch a command
+     *
+     * @param ptr  The server which has changed state
+     * @param cmd  The command to execute.
+     *
+     * @note All default script variables will be replaced.
+     *
+     * @return Return value of the executed script or -1 on error.
+     */
+    int launch_command(MXS_MONITORED_SERVER* ptr, EXTERNCMD* cmd);
+
+    bool journal_is_stale();
 };
 
 /**
@@ -355,24 +445,14 @@ bool mon_print_fail_status(MXS_MONITORED_SERVER* mon_srv);
  * is created. This will always leave a valid database handle in @c *ppCon, allowing the user
  * to call MySQL C API functions to find out the reason of the failure.
  *
- * @param mon      A monitor.
- * @param pServer  A server.
- * @param ppCon    Address of pointer to a MYSQL instance. The instance should either be
- *                 valid or NULL.
+ * @param sett        Connection settings
+ * @param pServer     A server
+ * @param ppConn      Address of pointer to a MYSQL instance. The instance should either be
+ *                    valid or NULL.
  * @return Connection status.
  */
-mxs_connect_result_t mon_ping_or_connect_to_db(const Monitor& mon, SERVER& server, MYSQL** ppCon);
-
-/**
- * Ping or connect to a database. If connection does not exist or ping fails, a new connection is created.
- * This will always leave a valid database handle in the database->con pointer, allowing the user to call
- * MySQL C API functions to find out the reason of the failure.
- *
- * @param mon Monitor
- * @param database Monitored database
- * @return Connection status.
- */
-mxs_connect_result_t mon_ping_or_connect_to_db(Monitor* mon, MXS_MONITORED_SERVER* database);
+mxs_connect_result_t mon_ping_or_connect_to_db(const MXS_MONITORED_SERVER::ConnectionSettings& sett,
+                                               SERVER& server, MYSQL** ppConn);
 
 bool                 mon_connection_is_ok(mxs_connect_result_t connect_result);
 void                 mon_log_connect_error(MXS_MONITORED_SERVER* database, mxs_connect_result_t rval);
@@ -392,18 +472,6 @@ const char*          mon_get_event_name(mxs_monitor_event_t event);
  * @param value   New value for the parameter
  */
 void mon_alter_parameter(Monitor* monitor, const char* key, const char* value);
-
-/**
- * @brief Handle state change events
- *
- * This function should be called by all monitors at the end of each monitoring
- * cycle. This will log state changes and execute any scripts that should be executed.
- *
- * @param monitor Monitor object
- * @param script Script to execute or NULL for no script
- * @param events Enabled events
- */
-void mon_process_state_changes(Monitor* monitor, const char* script, uint64_t events);
 
 /**
  * @brief Hangup connections to failed servers
@@ -477,19 +545,17 @@ MXS_MONITORED_SERVER* mon_get_monitored_server(const Monitor* mon, SERVER* searc
 
 /**
  * Get an array of monitored servers. If a server defined in the config setting is not monitored by
- * the given monitor, that server is ignored and not inserted into the output array.
+ * the given monitor, the returned array will be empty.
  *
  * @param params Config parameters
  * @param key Setting name
  * @param mon Monitor which should monitor the servers
- * @param monitored_servers_out Where to save output array. The caller should free the array, but not the
- * elements. The output must contain NULL before calling this function.
- * @return Output array size.
+ * @param error_out Set to true if an error occurs
+ * @return Output array
  */
-int mon_config_get_servers(const MXS_CONFIG_PARAMETER* params,
-                           const char* key,
-                           const Monitor* mon,
-                           MXS_MONITORED_SERVER*** monitored_array_out);
+std::vector<MXS_MONITORED_SERVER*> mon_config_get_servers(const MXS_CONFIG_PARAMETER* params,
+                                                          const char* key, const Monitor* mon,
+                                                          bool* error_out);
 
 // Function for waiting one monitor interval
 void monitor_debug_wait();
@@ -683,7 +749,8 @@ protected:
     /**
      * @brief Called after tick returns
      *
-     * The default implementation will call @mon_process_state_changes.
+     * The default implementation will call @Monitor::detect_state_changes. Overriding functions
+     * should do the same before proceeding with their own processing.
      */
     virtual void process_state_changes();
 

@@ -87,7 +87,7 @@ Clustrix::SubState Clustrix::substate_from_string(const std::string& substate)
     }
 }
 
-bool Clustrix::is_part_of_the_quorum(const SERVER& server, MYSQL* pCon)
+bool Clustrix::is_part_of_the_quorum(const char* zName, const SERVER& server, MYSQL* pCon)
 {
     bool rv = false;
 
@@ -124,18 +124,20 @@ bool Clustrix::is_part_of_the_quorum(const SERVER& server, MYSQL* pCon)
                         break;
 
                     case Clustrix::Status::STATIC:
-                        MXS_NOTICE("Node %s:%d is not part of the quorum, switching to "
-                                   "other node for monitoring.", zAddress, port);
+                        MXS_NOTICE("%s: Node %s:%d is not part of the quorum, switching to "
+                                   "other node for monitoring.",
+                                   zName, zAddress, port);
                         break;
 
                     case Clustrix::Status::UNKNOWN:
-                        MXS_WARNING("Do not know how to interpret '%s'. Assuming node %s:%d "
-                                    "is not part of the quorum.", row[0], zAddress, port);
+                        MXS_WARNING("%s: Do not know how to interpret '%s'. Assuming node %s:%d "
+                                    "is not part of the quorum.",
+                                    zName, row[0], zAddress, port);
                     }
                 }
                 else
                 {
-                    MXS_WARNING("No status returned for '%s' on %s:%d.", zQuery, zAddress, port);
+                    MXS_WARNING("%s: No status returned for '%s' on %s:%d.", zName, zQuery, zAddress, port);
                 }
             }
 
@@ -143,34 +145,36 @@ bool Clustrix::is_part_of_the_quorum(const SERVER& server, MYSQL* pCon)
         }
         else
         {
-            MXS_WARNING("No result returned for '%s' on %s:%d.", zQuery, zAddress, port);
+            MXS_WARNING("%s: No result returned for '%s' on %s:%d.", zName, zQuery, zAddress, port);
         }
     }
     else
     {
-        MXS_ERROR("Could not execute '%s' on %s:%d: %s", zQuery, zAddress, port, mysql_error(pCon));
+        MXS_ERROR("%s: Could not execute '%s' on %s:%d: %s", zName, zQuery, zAddress, port, mysql_error(pCon));
     }
 
     return rv;
 }
 
-bool Clustrix::ping_or_connect_to_hub(const Monitor& mon, SERVER& server, MYSQL** ppCon)
+bool Clustrix::ping_or_connect_to_hub(const char* zName,
+                                      const MXS_MONITORED_SERVER::ConnectionSettings& settings,
+                                      SERVER& server,
+                                      MYSQL** ppCon)
 {
     bool connected = false;
-
-    mxs_connect_result_t rv = mon_ping_or_connect_to_db(mon, server, ppCon);
+    mxs_connect_result_t rv = mon_ping_or_connect_to_db(settings, server, ppCon);
 
     if (mon_connection_is_ok(rv))
     {
-        if (Clustrix::is_part_of_the_quorum(server, *ppCon))
+        if (Clustrix::is_part_of_the_quorum(zName, server, *ppCon))
         {
             connected = true;
         }
     }
     else
     {
-        MXS_ERROR("Could either not ping or create connection to %s:%d: %s",
-                  server.address, server.port, mysql_error(*ppCon));
+        MXS_ERROR("%s: Could either not ping or create connection to %s:%d: %s",
+                  zName, server.address, server.port, mysql_error(*ppCon));
     }
 
     return connected;

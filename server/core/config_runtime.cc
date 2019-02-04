@@ -588,11 +588,11 @@ bool do_alter_monitor(Monitor* monitor, const char* key, const char* value)
     bool success = true;
     if (strcmp(key, CN_USER) == 0)
     {
-        monitor_add_user(monitor, value, monitor->password);
+        monitor->set_user(value);
     }
     else if (strcmp(key, CN_PASSWORD) == 0)
     {
-        monitor_add_user(monitor, monitor->user, value);
+        monitor->set_password(value);
     }
     else if (strcmp(key, CN_MONITOR_INTERVAL) == 0)
     {
@@ -605,54 +605,42 @@ bool do_alter_monitor(Monitor* monitor, const char* key, const char* value)
     {
         if (auto ival = get_positive_int(value))
         {
-            monitor_set_network_timeout(monitor,
-                                        MONITOR_CONNECT_TIMEOUT,
-                                        ival,
-                                        CN_BACKEND_CONNECT_TIMEOUT);
+            monitor->set_network_timeout(MONITOR_CONNECT_TIMEOUT, ival, CN_BACKEND_CONNECT_TIMEOUT);
         }
     }
     else if (strcmp(key, CN_BACKEND_WRITE_TIMEOUT) == 0)
     {
         if (auto ival = get_positive_int(value))
         {
-            monitor_set_network_timeout(monitor,
-                                        MONITOR_WRITE_TIMEOUT,
-                                        ival,
-                                        CN_BACKEND_WRITE_TIMEOUT);
+            monitor->set_network_timeout(MONITOR_WRITE_TIMEOUT, ival, CN_BACKEND_WRITE_TIMEOUT);
         }
     }
     else if (strcmp(key, CN_BACKEND_READ_TIMEOUT) == 0)
     {
         if (auto ival = get_positive_int(value))
         {
-            monitor_set_network_timeout(monitor,
-                                        MONITOR_READ_TIMEOUT,
-                                        ival,
-                                        CN_BACKEND_READ_TIMEOUT);
+            monitor->set_network_timeout(MONITOR_READ_TIMEOUT, ival, CN_BACKEND_READ_TIMEOUT);
         }
     }
     else if (strcmp(key, CN_BACKEND_CONNECT_ATTEMPTS) == 0)
     {
         if (auto ival = get_positive_int(value))
         {
-            monitor_set_network_timeout(monitor,
-                                        MONITOR_CONNECT_ATTEMPTS,
-                                        ival,
-                                        CN_BACKEND_CONNECT_ATTEMPTS);
+            monitor->set_network_timeout(MONITOR_CONNECT_ATTEMPTS, ival, CN_BACKEND_CONNECT_ATTEMPTS);
         }
     }
     else if (strcmp(key, CN_JOURNAL_MAX_AGE) == 0)
     {
         if (auto ival = get_positive_int(value))
         {
-            monitor_set_journal_max_age(monitor, ival);
+            monitor->monitor_set_journal_max_age(ival);
         }
     }
     else if (strcmp(key, CN_SCRIPT_TIMEOUT) == 0)
     {
         if (auto ival = get_positive_int(value))
         {
-            monitor_set_script_timeout(monitor, ival);
+            monitor->set_script_timeout(ival);
         }
     }
     else if (strcmp(key, CN_DISK_SPACE_THRESHOLD) == 0)
@@ -687,7 +675,7 @@ bool runtime_alter_monitor(Monitor* monitor, const char* key, const char* value)
     }
     if (was_running)
     {
-        monitor_start(monitor, monitor->parameters);
+        MonitorManager::monitor_start(monitor, monitor->parameters);
     }
     return success;
 }
@@ -2257,7 +2245,7 @@ Monitor* runtime_create_monitor_from_json(json_t* json)
             }
             else
             {
-                monitor_start(rval, rval->parameters);
+                MonitorManager::monitor_start(rval, rval->parameters);
             }
         }
     }
@@ -2443,7 +2431,7 @@ bool runtime_alter_monitor_from_json(Monitor* monitor, json_t* new_json)
 
             if (restart)
             {
-                monitor_start(monitor, monitor->parameters);
+                MonitorManager::monitor_start(monitor, monitor->parameters);
             }
         }
     }

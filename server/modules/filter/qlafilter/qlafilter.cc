@@ -226,12 +226,12 @@ public:
 
 QlaInstance::QlaInstance(const char* name, MXS_CONFIG_PARAMETER* params)
     : name(name)
-    , log_mode_flags(config_get_enum(params, PARAM_LOG_TYPE, log_type_values))
-    , log_file_data_flags(config_get_enum(params, PARAM_LOG_DATA, log_data_values))
+    , log_mode_flags(params->get_enum(PARAM_LOG_TYPE, log_type_values))
+    , log_file_data_flags(params->get_enum(PARAM_LOG_DATA, log_data_values))
     , filebase(config_get_string(params, PARAM_FILEBASE))
     , unified_fp(NULL)
-    , flush_writes(config_get_bool(params, PARAM_FLUSH))
-    , append(config_get_bool(params, PARAM_APPEND))
+    , flush_writes(params->get_bool(PARAM_FLUSH))
+    , append(params->get_bool(PARAM_APPEND))
     , query_newline(config_get_string(params, PARAM_NEWLINE))
     , separator(config_get_string(params, PARAM_SEPARATOR))
     , write_warning_given(false)
@@ -468,7 +468,7 @@ static MXS_FILTER* createInstance(const char* name, MXS_CONFIG_PARAMETER* params
     pcre2_code* re_match = NULL;
     pcre2_code* re_exclude = NULL;
     uint32_t ovec_size = 0;
-    int cflags = config_get_enum(params, PARAM_OPTIONS, option_values);
+    int cflags = params->get_enum(PARAM_OPTIONS, option_values);
     pcre2_code** code_arr[] = {&re_match, &re_exclude};
     if (config_get_compiled_regexes(params,
                                     keys,

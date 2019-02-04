@@ -339,51 +339,49 @@ static MXS_ROUTER* createInstance(SERVICE* service, MXS_CONFIG_PARAMETER* params
     strcpy(inst->binlog_name, "");
     strcpy(inst->prevbinlog, "");
 
-    inst->initbinlog = config_get_integer(params, "file");
+    inst->initbinlog = params->get_integer("file");
 
-    inst->short_burst = config_get_integer(params, "shortburst");
-    inst->long_burst = config_get_integer(params, "longburst");
-    inst->burst_size = config_get_size(params, "burstsize");
+    inst->short_burst = params->get_integer("shortburst");
+    inst->long_burst = params->get_integer("longburst");
+    inst->burst_size = params->get_size("burstsize");
     inst->binlogdir = config_copy_string(params, "binlogdir");
-    inst->heartbeat = config_get_integer(params, "heartbeat");
-    inst->retry_interval = config_get_integer(params, "connect_retry");
-    inst->retry_limit = config_get_integer(params, "master_retry_count");
-    inst->ssl_cert_verification_depth = config_get_integer(params, "ssl_cert_verification_depth");
-    inst->mariadb10_compat = config_get_bool(params, "mariadb10-compatibility");
-    inst->maxwell_compat = config_get_bool(params, "maxwell-compatibility");
-    inst->trx_safe = config_get_bool(params, "transaction_safety");
+    inst->heartbeat = params->get_integer("heartbeat");
+    inst->retry_interval = params->get_integer("connect_retry");
+    inst->retry_limit = params->get_integer("master_retry_count");
+    inst->ssl_cert_verification_depth = params->get_integer("ssl_cert_verification_depth");
+    inst->mariadb10_compat = params->get_bool("mariadb10-compatibility");
+    inst->maxwell_compat = params->get_bool("maxwell-compatibility");
+    inst->trx_safe = params->get_bool("transaction_safety");
     inst->fileroot = config_copy_string(params, "filestem");
 
     /* Server id */
-    inst->serverid = config_get_integer(params, "server_id");
+    inst->serverid = params->get_integer("server_id");
 
     /* Identity options */
     inst->set_master_version = config_copy_string(params, "master_version");
     inst->set_master_hostname = config_copy_string(params, "master_hostname");
     inst->set_slave_hostname = config_copy_string(params, "slave_hostname");
-    inst->masterid = config_get_integer(params, "master_id");
+    inst->masterid = params->get_integer("master_id");
     inst->set_master_server_id = inst->masterid != 0;
     inst->master_uuid = config_copy_string(params, "master_uuid");
     inst->set_master_uuid = inst->master_uuid != NULL;
 
     /* Slave Heartbeat */
-    inst->send_slave_heartbeat = config_get_bool(params, "send_slave_heartbeat");
+    inst->send_slave_heartbeat = params->get_bool("send_slave_heartbeat");
 
     /* Semi-Sync support */
-    inst->request_semi_sync = config_get_bool(params, "semisync");
+    inst->request_semi_sync = params->get_bool("semisync");
     inst->master_semi_sync = 0;
 
     /* Enable MariaDB GTID tracking for slaves if MariaDB 10 compat is set */
     inst->mariadb10_gtid = inst->mariadb10_compat;
 
     /* Enable MariaDB GTID registration to master */
-    inst->mariadb10_master_gtid = config_get_bool(params, "mariadb10_master_gtid");
+    inst->mariadb10_master_gtid = params->get_bool("mariadb10_master_gtid");
 
     /* Binlog encryption */
-    inst->encryption.enabled = config_get_bool(params, "encrypt_binlog");
-    inst->encryption.encryption_algorithm = config_get_enum(params,
-                                                            "encryption_algorithm",
-                                                            enc_algo_values);
+    inst->encryption.enabled = params->get_bool("encrypt_binlog");
+    inst->encryption.encryption_algorithm = params->get_enum("encryption_algorithm", enc_algo_values);
     inst->encryption.key_management_filename = config_copy_string(params,
                                                                   "encryption_key_file");
 

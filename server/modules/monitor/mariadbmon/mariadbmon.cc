@@ -157,8 +157,8 @@ bool MariaDBMonitor::set_replication_credentials(const MXS_CONFIG_PARAMETER* par
     if (repl_user.empty() && repl_pw.empty())
     {
         // No replication credentials defined, use monitor credentials
-        repl_user = m_monitor->user;
-        repl_pw = m_monitor->password;
+        repl_user = m_settings.conn_settings.username;
+        repl_pw = m_settings.conn_settings.password;
     }
 
     if (!repl_user.empty() && !repl_pw.empty())
@@ -190,35 +190,41 @@ bool MariaDBMonitor::configure(const MXS_CONFIG_PARAMETER* params)
      * added, removed and modified. */
     reset_server_info();
 
-    m_detect_stale_master = config_get_bool(params, "detect_stale_master");
-    m_detect_stale_slave = config_get_bool(params, "detect_stale_slave");
-    m_ignore_external_masters = config_get_bool(params, "ignore_external_masters");
-    m_detect_standalone_master = config_get_bool(params, CN_DETECT_STANDALONE_MASTER);
-    m_assume_unique_hostnames = config_get_bool(params, CN_ASSUME_UNIQUE_HOSTNAMES);
-    m_failcount = config_get_integer(params, CN_FAILCOUNT);
-    m_failover_timeout = config_get_integer(params, CN_FAILOVER_TIMEOUT);
-    m_switchover_timeout = config_get_integer(params, CN_SWITCHOVER_TIMEOUT);
-    m_auto_failover = config_get_bool(params, CN_AUTO_FAILOVER);
-    m_auto_rejoin = config_get_bool(params, CN_AUTO_REJOIN);
-    m_enforce_read_only_slaves = config_get_bool(params, CN_ENFORCE_READONLY);
-    m_verify_master_failure = config_get_bool(params, CN_VERIFY_MASTER_FAILURE);
-    m_master_failure_timeout = config_get_integer(params, CN_MASTER_FAILURE_TIMEOUT);
+    m_detect_stale_master = params->get_bool("detect_stale_master");
+    m_detect_stale_slave = params->get_bool("detect_stale_slave");
+    m_ignore_external_masters = params->get_bool("ignore_external_masters");
+    m_detect_standalone_master = params->get_bool(CN_DETECT_STANDALONE_MASTER);
+    m_assume_unique_hostnames = params->get_bool(CN_ASSUME_UNIQUE_HOSTNAMES);
+    m_failcount = params->get_integer(CN_FAILCOUNT);
+    m_failover_timeout = params->get_integer(CN_FAILOVER_TIMEOUT);
+    m_switchover_timeout = params->get_integer(CN_SWITCHOVER_TIMEOUT);
+    m_auto_failover = params->get_bool(CN_AUTO_FAILOVER);
+    m_auto_rejoin = params->get_bool(CN_AUTO_REJOIN);
+    m_enforce_read_only_slaves = params->get_bool(CN_ENFORCE_READONLY);
+    m_verify_master_failure = params->get_bool(CN_VERIFY_MASTER_FAILURE);
+    m_master_failure_timeout = params->get_integer(CN_MASTER_FAILURE_TIMEOUT);
     m_promote_sql_file = config_get_string(params, CN_PROMOTION_SQL_FILE);
     m_demote_sql_file = config_get_string(params, CN_DEMOTION_SQL_FILE);
-    m_switchover_on_low_disk_space = config_get_bool(params, CN_SWITCHOVER_ON_LOW_DISK_SPACE);
-    m_maintenance_on_low_disk_space = config_get_bool(params, CN_MAINTENANCE_ON_LOW_DISK_SPACE);
-    m_handle_event_scheduler = config_get_bool(params, CN_HANDLE_EVENTS);
+    m_switchover_on_low_disk_space = params->get_bool(CN_SWITCHOVER_ON_LOW_DISK_SPACE);
+    m_maintenance_on_low_disk_space = params->get_bool(CN_MAINTENANCE_ON_LOW_DISK_SPACE);
+    m_handle_event_scheduler = params->get_bool(CN_HANDLE_EVENTS);
 
     m_excluded_servers.clear();
-    MXS_MONITORED_SERVER** excluded_array = NULL;
-    int n_excluded = mon_config_get_servers(params, CN_NO_PROMOTE_SERVERS, m_monitor, &excluded_array);
-    for (int i = 0; i < n_excluded; i++)
-    {
-        m_excluded_servers.push_back(get_server(excluded_array[i]));
-    }
-    MXS_FREE(excluded_array);
-
     bool settings_ok = true;
+    bool list_error = false;
+    auto excluded = mon_config_get_servers(params, CN_NO_PROMOTE_SERVERS, m_monitor, &list_error);
+    if (list_error)
+    {
+        settings_ok = false;
+    }
+    else
+    {
+        for (auto elem : excluded)
+        {
+            m_excluded_servers.push_back(get_server(elem));
+        }
+    }
+
     if (!check_sql_files())
     {
         settings_ok = false;
@@ -345,7 +351,7 @@ json_t* MariaDBMonitor::to_json() const
 void MariaDBMonitor::update_server(MariaDBServer* server)
 {
     MXS_MONITORED_SERVER* mon_srv = server->m_server_base;
-    mxs_connect_result_t conn_status = mon_ping_or_connect_to_db(m_monitor, mon_srv);
+    mxs_connect_result_t conn_status = mon_srv->ping_or_connect(m_settings.conn_settings);
     MYSQL* conn = mon_srv->con;     // mon_ping_or_connect_to_db() may have reallocated the MYSQL struct.
 
     if (mon_connection_is_ok(conn_status))

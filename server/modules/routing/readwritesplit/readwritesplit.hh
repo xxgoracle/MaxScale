@@ -134,33 +134,31 @@ struct Config
 {
     Config(MXS_CONFIG_PARAMETER* params)
         : slave_selection_criteria(
-            (select_criteria_t)config_get_enum(
-                params, "slave_selection_criteria", slave_selection_criteria_values))
+            (select_criteria_t)params->get_enum("slave_selection_criteria", slave_selection_criteria_values))
         , backend_select_fct(get_backend_select_function(slave_selection_criteria))
         , use_sql_variables_in(
-            (mxs_target_t)config_get_enum(
-                params, "use_sql_variables_in", use_sql_variables_in_values))
+            (mxs_target_t)params->get_enum("use_sql_variables_in", use_sql_variables_in_values))
         , master_failure_mode(
-            (enum failure_mode)config_get_enum(
-                params, "master_failure_mode", master_failure_mode_values))
-        , max_sescmd_history(config_get_integer(params, "max_sescmd_history"))
-        , disable_sescmd_history(config_get_bool(params, "disable_sescmd_history"))
-        , master_accept_reads(config_get_bool(params, "master_accept_reads"))
-        , strict_multi_stmt(config_get_bool(params, "strict_multi_stmt"))
-        , strict_sp_calls(config_get_bool(params, "strict_sp_calls"))
-        , retry_failed_reads(config_get_bool(params, "retry_failed_reads"))
-        , connection_keepalive(config_get_integer(params, "connection_keepalive"))
-        , max_slave_replication_lag(config_get_integer(params, "max_slave_replication_lag"))
+            (enum failure_mode)params->get_enum("master_failure_mode", master_failure_mode_values))
+        , max_sescmd_history(params->get_integer("max_sescmd_history"))
+        , prune_sescmd_history(params->get_bool("prune_sescmd_history"))
+        , disable_sescmd_history(params->get_bool("disable_sescmd_history"))
+        , master_accept_reads(params->get_bool("master_accept_reads"))
+        , strict_multi_stmt(params->get_bool("strict_multi_stmt"))
+        , strict_sp_calls(params->get_bool("strict_sp_calls"))
+        , retry_failed_reads(params->get_bool("retry_failed_reads"))
+        , connection_keepalive(params->get_integer("connection_keepalive"))
+        , max_slave_replication_lag(params->get_integer("max_slave_replication_lag"))
         , rw_max_slave_conn_percent(0)
         , max_slave_connections(0)
-        , causal_reads(config_get_bool(params, "causal_reads"))
+        , causal_reads(params->get_bool("causal_reads"))
         , causal_reads_timeout(config_get_string(params, "causal_reads_timeout"))
-        , master_reconnection(config_get_bool(params, "master_reconnection"))
-        , delayed_retry(config_get_bool(params, "delayed_retry"))
-        , delayed_retry_timeout(config_get_integer(params, "delayed_retry_timeout"))
-        , transaction_replay(config_get_bool(params, "transaction_replay"))
-        , trx_max_size(config_get_size(params, "transaction_replay_max_size"))
-        , optimistic_trx(config_get_bool(params, "optimistic_trx"))
+        , master_reconnection(params->get_bool("master_reconnection"))
+        , delayed_retry(params->get_bool("delayed_retry"))
+        , delayed_retry_timeout(params->get_integer("delayed_retry_timeout"))
+        , transaction_replay(params->get_bool("transaction_replay"))
+        , trx_max_size(params->get_size("transaction_replay_max_size"))
+        , optimistic_trx(params->get_bool("optimistic_trx"))
     {
         if (causal_reads)
         {
@@ -198,6 +196,7 @@ struct Config
                                          * master or all nodes */
     failure_mode master_failure_mode;   /**< Master server failure handling mode */
     uint64_t     max_sescmd_history;    /**< Maximum amount of session commands to store */
+    bool         prune_sescmd_history;  /**< Prune session command history */
     bool         disable_sescmd_history;/**< Disable session command history */
     bool         master_accept_reads;   /**< Use master for reads */
     bool         strict_multi_stmt;     /**< Force non-multistatement queries to be routed to

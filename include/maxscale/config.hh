@@ -24,6 +24,7 @@
 #include <openssl/sha.h>
 #include <sys/utsname.h>
 #include <time.h>
+#include <vector>
 
 #include <maxbase/jansson.h>
 #include <maxscale/modinfo.h>
@@ -215,31 +216,116 @@ extern const char CN_LOG_AUGMENTATION[];
 extern const char CN_LOG_TO_SHM[];
 
 /**
- * The config parameter
+ * Config parameter container. Typically includes all parameters of a single configuration file section
+ * such as a server or filter.
  */
-typedef struct config_parameter
+class MXS_CONFIG_PARAMETER
 {
+public:
+
+    /**
+     * Get value of key as string.
+     *
+     * @param key Parameter name
+     * @return Parameter value. Empty string if key not found.
+     */
+    std::string get_string(const std::string& key) const;
+
+    /**
+     * Get value of key as c-string. The pointer is valid as long as the underlying configuration
+     * is not changed.
+     *
+     * @param key Parameter name
+     * @return Parameter value. Empty string if key not found.
+     */
+    const char* get_c_str(const std::string& key) const;
+
+    /**
+     * Get an integer value. Should be used for both MXS_MODULE_PARAM_INT and MXS_MODULE_PARAM_COUNT
+     * parameter types.
+     *
+     * @param key Parameter name
+     * @return Parameter parsed to integer. 0 if key was not found.
+     */
+    int64_t get_integer(const std::string& key) const;
+
+    /**
+     * Get a enumeration value.
+     *
+     * @param key Parameter name
+     * @param enum_mapping Enum string->integer mapping
+     * @return The enumeration value converted to an int or -1 if the parameter was not found
+     *
+     * @note The enumeration values should not use -1 so that an undefined parameter is
+     * detected. If -1 is used, config_get_param() should be used to detect whether
+     * the parameter exists
+     */
+    int64_t get_enum(const std::string& key, const MXS_ENUM_VALUE* enum_mapping) const;
+
+    /**
+     * @brief Get a boolean value
+     *
+     * The existence of the parameter should be checked with config_get_param() before
+     * calling this function to determine whether the return value represents an existing
+     * value or a missing value.
+     *
+     * @param key Parameter name
+     * @return The value as a boolean or false if none was found
+     */
+    bool get_bool(const std::string& key) const;
+
+    /**
+     * @brief Get a size in bytes
+     *
+     * The value can have either one of the IEC binary prefixes or SI prefixes as
+     * a suffix. For example, the value 1Ki will be converted to 1024 bytes whereas
+     * 1k will be converted to 1000 bytes. Supported SI suffix values are k, m, g and t
+     * in both lower and upper case. Supported IEC binary suffix values are
+     * Ki, Mi, Gi and Ti both in upper and lower case.
+     *
+     * @param key Parameter name
+     * @return Number of bytes or 0 if no parameter was found
+     */
+    uint64_t get_size(const std::string& key) const;
+
+    /**
+     * @brief Get a service value
+     *
+     * @param key Parameter name
+     * @return Pointer to configured service
+     */
+    SERVICE* get_service(const std::string& key) const;
+
+    /**
+     * @brief Get a server value
+     *
+     * @param key Parameter name
+     * @return Pointer to configured server
+     */
+    SERVER* get_server(const std::string& key) const;
+
     char*                    name;          /**< The name of the parameter */
     char*                    value;         /**< The value of the parameter */
-    struct config_parameter* next;          /**< Next pointer in the linked list */
-} MXS_CONFIG_PARAMETER;
+    MXS_CONFIG_PARAMETER*    next;          /**< Next pointer in the linked list */
+};
 
 /**
  * The config context structure, used to build the configuration
  * data during the parse process
  */
-typedef struct config_context
+class CONFIG_CONTEXT
 {
+public:
     char*                  object;          /**< The name of the object being configured */
     MXS_CONFIG_PARAMETER*  parameters;      /**< The list of parameter values */
     bool                   was_persisted;   /**< True if this object was persisted */
-    struct config_context* next;            /**< Next pointer in the linked list */
-} CONFIG_CONTEXT;
+    CONFIG_CONTEXT*        next;            /**< Next pointer in the linked list */
+};
 
 /**
  * The gateway global configuration data
  */
-typedef struct
+struct MXS_CONFIG
 {
     bool    config_check;                               /**< Only check config */
     int     n_threads;                                  /**< Number of polling threads */
@@ -287,7 +373,7 @@ typedef struct
     char             peer_user[MAX_ADMIN_HOST_LEN];     /**< Username for maxscale-to-maxscale traffic */
     char             peer_password[MAX_ADMIN_HOST_LEN]; /**< Password for maxscale-to-maxscale traffic */
     mxb_log_target_t log_target;                        /**< Log type */
-} MXS_CONFIG;
+};
 
 /**
  * @brief Get global MaxScale configuration
@@ -333,48 +419,6 @@ bool config_param_is_valid(const MXS_MODULE_PARAM* params,
                            const CONFIG_CONTEXT* context);
 
 /**
- * @brief Get a boolean value
- *
- * The existence of the parameter should be checked with config_get_param() before
- * calling this function to determine whether the return value represents an existing
- * value or a missing value.
- *
- * @param params List of configuration parameters
- * @param key Parameter name
- *
- * @return The value as a boolean or false if none was found
- */
-bool config_get_bool(const MXS_CONFIG_PARAMETER* params, const char* key);
-
-/**
- * @brief Get an integer value
- *
- * This is used for both MXS_MODULE_PARAM_INT and MXS_MODULE_PARAM_COUNT.
- *
- * @param params List of configuration parameters
- * @param key Parameter name
- *
- * @return The integer value of the parameter or 0 if no parameter was found
- */
-int config_get_integer(const MXS_CONFIG_PARAMETER* params, const char* key);
-
-/**
- * @brief Get a size in bytes
- *
- * The value can have either one of the IEC binary prefixes or SI prefixes as
- * a suffix. For example, the value 1Ki will be converted to 1024 bytes whereas
- * 1k will be converted to 1000 bytes. Supported SI suffix values are k, m, g and t
- * in both lower and upper case. Supported IEC binary suffix values are
- * Ki, Mi, Gi and Ti both in upper and lower case.
- *
- * @param params List of configuration parameters
- * @param key Parameter name
- *
- * @return Number of bytes or 0 if no parameter was found
- */
-uint64_t config_get_size(const MXS_CONFIG_PARAMETER* params, const char* key);
-
-/**
  * @brief Get a string value
  *
  * @param params List of configuration parameters
@@ -385,54 +429,18 @@ uint64_t config_get_size(const MXS_CONFIG_PARAMETER* params, const char* key);
 const char* config_get_string(const MXS_CONFIG_PARAMETER* params, const char* key);
 
 /**
- * @brief Get a enumeration value
- *
- * @param params List of configuration parameters
- * @param key Parameter name
- * @param values All possible enumeration values
- *
- * @return The enumeration value converted to an int or -1 if the parameter was not found
- *
- * @note The enumeration values should not use -1 so that an undefined parameter is
- * detected. If -1 is used, config_get_param() should be used to detect whether
- * the parameter exists
- */
-int config_get_enum(const MXS_CONFIG_PARAMETER* params,
-                    const char* key,
-                    const MXS_ENUM_VALUE* values);
-
-/**
- * @brief Get a service value
- *
- * @param params List of configuration parameters
- * @param key Parameter name
- *
- * @return Pointer to configured service
- */
-SERVICE* config_get_service(const MXS_CONFIG_PARAMETER* params, const char* key);
-
-/**
- * @brief Get a server value
- *
- * @param params List of configuration parameters
- * @param key Parameter name
- *
- * @return Pointer to configured server
- */
-struct SERVER* config_get_server(const MXS_CONFIG_PARAMETER* params, const char* key);
-
-/**
  * @brief Get an array of servers. The caller should free the produced array,
  * but not the array elements.
  *
  * @param params List of configuration parameters
  * @param key Parameter name
- * @param output Where to save the output
- * @return How many servers were found, equal to output array size
+ * @param name_error_out If a server name was not found, it is written here. Only the first such name
+ * is written.
+ * @return Found servers. If even one server name was invalid, the array will be empty.
  */
-int config_get_server_list(const MXS_CONFIG_PARAMETER* params,
-                           const char* key,
-                           struct SERVER*** output);
+std::vector<SERVER*>
+config_get_server_list(const MXS_CONFIG_PARAMETER* params, const char* key,
+                       std::string* name_error_out = nullptr);
 
 /**
  * Get a compiled regular expression and the ovector size of the pattern. The
@@ -474,22 +482,14 @@ bool config_get_compiled_regexes(const MXS_CONFIG_PARAMETER* params,
                                  uint32_t options,
                                  uint32_t* out_ovec_size,
                                  pcre2_code** out_codes[]);
+
 /**
- * Parse a list of server names and write the results in an array of strings
- * with one server name in each. The output array and its elements should be
- * deallocated by the caller. The server names are not checked to be actual
- * configured servers.
+ * Break a comma-separated list into a string array. Removes whitespace from list items.
  *
- * The output array may contain more elements than the the value returned, but these
- * extra elements are null and in the end of the array. If no server names were
- * parsed or if an error occurs, nothing is written to the output parameter.
- *
- * @param servers A list of server names
- * @param output_array Where to save the output
- * @return How many servers were found and set into the array. 0 on error or if
- * none were found.
+ * @param list_string A list of items
+ * @return The array
  */
-int config_parse_server_list(const char* servers, char*** output_array);
+std::vector<std::string> config_break_list_string(const char* list_string);
 
 /**
  * @brief Get copy of parameter value if it is defined

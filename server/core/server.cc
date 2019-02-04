@@ -247,11 +247,11 @@ Server* Server::server_alloc(const char* name, MXS_CONFIG_PARAMETER* params)
                     sizeof(server->address));
     }
 
-    server->port = config_get_integer(params, CN_PORT);
-    server->extra_port = config_get_integer(params, CN_EXTRA_PORT);
-    server->m_settings.persistpoolmax = config_get_integer(params, CN_PERSISTPOOLMAX);
-    server->m_settings.persistmaxtime = config_get_integer(params, CN_PERSISTMAXTIME);
-    server->proxy_protocol = config_get_bool(params, CN_PROXY_PROTOCOL);
+    server->port = params->get_integer(CN_PORT);
+    server->extra_port = params->get_integer(CN_EXTRA_PORT);
+    server->m_settings.persistpoolmax = params->get_integer(CN_PERSISTPOOLMAX);
+    server->m_settings.persistmaxtime = params->get_integer(CN_PERSISTMAXTIME);
+    server->proxy_protocol = params->get_bool(CN_PROXY_PROTOCOL);
     server->is_active = true;
     server->m_auth_instance = auth_instance;
     server->server_ssl = ssl;
@@ -370,32 +370,15 @@ Server* Server::find_by_unique_name(const string& name)
     return rval;
 }
 
-int SERVER::server_find_by_unique_names(char** server_names, int size, SERVER*** output)
+std::vector<SERVER*> SERVER::server_find_by_unique_names(const std::vector<string>& server_names)
 {
-    mxb_assert(server_names && (size > 0));
-
-    SERVER** results = (SERVER**)MXS_CALLOC(size, sizeof(SERVER*));
-    if (!results)
+    std::vector<SERVER*> rval;
+    rval.reserve(server_names.size());
+    for (auto elem : server_names)
     {
-        return 0;
+        rval.push_back(Server::find_by_unique_name(elem));
     }
-
-    int found = 0;
-    for (int i = 0; i < size; i++)
-    {
-        results[i] = Server::find_by_unique_name(server_names[i]);
-        found += (results[i]) ? 1 : 0;
-    }
-
-    if (found)
-    {
-        *output = results;
-    }
-    else
-    {
-        MXS_FREE(results);
-    }
-    return found;
+    return rval;
 }
 
 void Server::printServer()

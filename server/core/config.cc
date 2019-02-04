@@ -360,7 +360,7 @@ const MXS_MODULE_PARAM config_monitor_params[] =
     {CN_PASSWORD,                  MXS_MODULE_PARAM_STRING, NULL,MXS_MODULE_OPT_REQUIRED },
     {"passwd",                     MXS_MODULE_PARAM_STRING},
 
-    {CN_SERVERS,                   MXS_MODULE_PARAM_STRING},
+    {CN_SERVERS,                   MXS_MODULE_PARAM_SERVERLIST},
     {CN_MONITOR_INTERVAL,          MXS_MODULE_PARAM_COUNT,  "2000"},
     {CN_BACKEND_CONNECT_TIMEOUT,   MXS_MODULE_PARAM_COUNT,  "3"},
     {CN_BACKEND_READ_TIMEOUT,      MXS_MODULE_PARAM_COUNT,  "1"},
@@ -1217,6 +1217,10 @@ bool config_load_global(const char* filename)
                     "cache. To enable it, add '%s' to the configuration file.",
                     CN_QUERY_CLASSIFIER_CACHE_SIZE);
     }
+    else if (gateway.qc_cache_properties.max_size == 0)
+    {
+        MXS_NOTICE("Query classifier cache is disabled");
+    }
     else
     {
         MXS_NOTICE("Using up to %s of memory for query classifier cache",
@@ -1273,6 +1277,34 @@ const MXS_MODULE* get_module(CONFIG_CONTEXT* obj, const char* param_name, const 
 {
     const char* module = config_get_value(obj->parameters, param_name);
     return module ? get_module(module, module_type) : NULL;
+}
+
+const char* get_missing_module_parameter_name(const CONFIG_CONTEXT* obj)
+{
+    std::string type = config_get_string(obj->parameters, CN_TYPE);
+
+    if (type == CN_SERVICE && !config_get_param(obj->parameters, CN_ROUTER))
+    {
+        return CN_ROUTER;
+    }
+    else if (type == CN_LISTENER && !config_get_param(obj->parameters, CN_PROTOCOL))
+    {
+        return CN_PROTOCOL;
+    }
+    else if (type == CN_SERVER && !config_get_param(obj->parameters, CN_PROTOCOL))
+    {
+        return CN_PROTOCOL;
+    }
+    else if (type == CN_MONITOR && !config_get_param(obj->parameters, CN_MODULE))
+    {
+        return CN_MODULE;
+    }
+    else if (type == CN_FILTER && !config_get_param(obj->parameters, CN_MODULE))
+    {
+        return CN_MODULE;
+    }
+
+    return nullptr;
 }
 
 std::pair<const MXS_MODULE_PARAM*, const MXS_MODULE*> get_module_details(const CONFIG_CONTEXT* obj)
@@ -1722,23 +1754,17 @@ MXS_CONFIG_PARAMETER* config_get_param(MXS_CONFIG_PARAMETER* params, const char*
     return NULL;
 }
 
-bool config_get_bool(const MXS_CONFIG_PARAMETER* params, const char* key)
+bool MXS_CONFIG_PARAMETER::get_bool(const std::string& key) const
 {
-    const char* value = config_get_value_string(params, key);
-    return *value ? config_truth_value(value) : false;
+    string param_value = get_string(key);
+    return param_value.empty() ? false : config_truth_value(param_value.c_str());
 }
 
-int config_get_integer(const MXS_CONFIG_PARAMETER* params, const char* key)
+uint64_t MXS_CONFIG_PARAMETER::get_size(const std::string& key) const
 {
-    const char* value = config_get_value_string(params, key);
-    return *value ? strtol(value, NULL, 10) : 0;
-}
-
-uint64_t config_get_size(const MXS_CONFIG_PARAMETER* params, const char* key)
-{
-    const char* value = config_get_value_string(params, key);
-    uint64_t intval;
-    MXB_AT_DEBUG(bool rval = ) get_suffixed_size(value, &intval);
+    string param_value = get_string(key);
+    uint64_t intval = 0;
+    MXB_AT_DEBUG(bool rval = ) get_suffixed_size(param_value.c_str(), &intval);
     mxb_assert(rval);
     return intval;
 }
@@ -1748,11 +1774,11 @@ const char* config_get_string(const MXS_CONFIG_PARAMETER* params, const char* ke
     return config_get_value_string(params, key);
 }
 
-int config_get_enum(const MXS_CONFIG_PARAMETER* params, const char* key, const MXS_ENUM_VALUE* enum_values)
+int64_t MXS_CONFIG_PARAMETER::get_enum(const std::string& key, const MXS_ENUM_VALUE* enum_mapping) const
 {
-    const char* value = config_get_value_string(params, key);
-    char tmp_val[strlen(value) + 1];
-    strcpy(tmp_val, value);
+    string param_value = get_string(key);
+    char tmp_val[param_value.length() + 1];
+    strcpy(tmp_val, param_value.c_str());
 
     int rv = 0;
     bool found = false;
@@ -1762,12 +1788,12 @@ int config_get_enum(const MXS_CONFIG_PARAMETER* params, const char* key, const M
 
     while (tok)
     {
-        for (int i = 0; enum_values[i].name; i++)
+        for (int i = 0; enum_mapping[i].name; i++)
         {
-            if (strcmp(enum_values[i].name, tok) == 0)
+            if (strcmp(enum_mapping[i].name, tok) == 0)
             {
                 found = true;
-                rv |= enum_values[i].enum_value;
+                rv |= enum_mapping[i].enum_value;
             }
         }
         tok = strtok_r(NULL, delim, &endptr);
@@ -1776,58 +1802,38 @@ int config_get_enum(const MXS_CONFIG_PARAMETER* params, const char* key, const M
     return found ? rv : -1;
 }
 
-SERVICE* config_get_service(const MXS_CONFIG_PARAMETER* params, const char* key)
+SERVICE* MXS_CONFIG_PARAMETER::get_service(const std::string& key) const
 {
-    const char* value = config_get_value_string(params, key);
-    return service_find(value);
+    string param_value = get_string(key);
+    return service_find(param_value.c_str());
 }
 
-SERVER* config_get_server(const MXS_CONFIG_PARAMETER* params, const char* key)
+SERVER* MXS_CONFIG_PARAMETER::get_server(const std::string& key) const
 {
-    const char* value = config_get_value_string(params, key);
-    return Server::find_by_unique_name(value);
+    string param_value = get_string(key);
+    return Server::find_by_unique_name(param_value.c_str());
 }
 
-int config_get_server_list(const MXS_CONFIG_PARAMETER* params,
-                           const char* key,
-                           SERVER***   output)
+std::vector<SERVER*> config_get_server_list(const MXS_CONFIG_PARAMETER* params, const char* key,
+                                            string* name_error_out)
 {
-    const char* value = config_get_value_string(params, key);
-    char** server_names = NULL;
-    int found = 0;
-    const int n_names = config_parse_server_list(value, &server_names);
-    if (n_names > 0)
+    const char* names_list = config_get_value_string(params, key);
+    auto server_names = config_break_list_string(names_list);
+    std::vector<SERVER*> server_arr = SERVER::server_find_by_unique_names(server_names);
+    for (size_t i = 0; i < server_arr.size(); i++)
     {
-        SERVER** servers;
-        found = SERVER::server_find_by_unique_names(server_names, n_names, &servers);
-        for (int i = 0; i < n_names; i++)
+        if (server_arr[i] == nullptr)
         {
-            MXS_FREE(server_names[i]);
-        }
-        MXS_FREE(server_names);
-
-        if (found)
-        {
-            /* Fill in the result array */
-            SERVER** result = (SERVER**)MXS_CALLOC(found, sizeof(SERVER*));
-            if (result)
+            if (name_error_out)
             {
-                int res_ind = 0;
-                for (int i = 0; i < n_names; i++)
-                {
-                    if (servers[i])
-                    {
-                        result[res_ind] = servers[i];
-                        res_ind++;
-                    }
-                }
-                *output = result;
-                mxb_assert(found == res_ind);
+                *name_error_out = server_names[i];
             }
-            MXS_FREE(servers);
+            // If even one server name was not found, the parameter is in error.
+            server_arr.clear();
+            break;
         }
     }
-    return found;
+    return server_arr;
 }
 
 char* config_copy_string(const MXS_CONFIG_PARAMETER* params, const char* key)
@@ -1898,6 +1904,22 @@ bool config_get_compiled_regexes(const MXS_CONFIG_PARAMETER* params,
         *out_ovec_size = max_ovec_size;
     }
     return rval;
+}
+
+string MXS_CONFIG_PARAMETER::get_string(const std::string& key) const
+{
+    return get_c_str(key);
+}
+
+const char* MXS_CONFIG_PARAMETER::get_c_str(const std::string& key) const
+{
+    return config_get_string(this, key.c_str());
+}
+
+int64_t MXS_CONFIG_PARAMETER::get_integer(const std::string& key) const
+{
+    string value = get_string(key);
+    return value.empty() ? 0 : strtoll(value.c_str(), NULL, 10);
 }
 
 MXS_CONFIG_PARAMETER* config_clone_param(const MXS_CONFIG_PARAMETER* param)
@@ -2682,7 +2704,7 @@ bool config_create_ssl(const char* name,
     SSL_LISTENER* ssl = NULL;
 
     // The enum values convert to bool
-    int value = config_get_enum(params, CN_SSL, ssl_values);
+    int value = params->get_enum(CN_SSL, ssl_values);
     mxb_assert(value != -1);
 
     if (value)
@@ -2730,12 +2752,12 @@ bool config_create_ssl(const char* name,
         ssl = (SSL_LISTENER*)MXS_CALLOC(1, sizeof(SSL_LISTENER));
         MXS_ABORT_IF_NULL(ssl);
 
-        int ssl_version = config_get_enum(params, CN_SSL_VERSION, ssl_version_values);
+        int ssl_version = params->get_enum(CN_SSL_VERSION, ssl_version_values);
 
         ssl->ssl_method_type = (ssl_method_type_t)ssl_version;
         ssl->ssl_init_done = false;
-        ssl->ssl_cert_verify_depth = config_get_integer(params, CN_SSL_CERT_VERIFY_DEPTH);
-        ssl->ssl_verify_peer_certificate = config_get_bool(params, CN_SSL_VERIFY_PEER_CERTIFICATE);
+        ssl->ssl_cert_verify_depth = params->get_integer(CN_SSL_CERT_VERIFY_DEPTH);
+        ssl->ssl_verify_peer_certificate = params->get_bool(CN_SSL_VERIFY_PEER_CERTIFICATE);
 
         listener_set_certificates(ssl, ssl_cert, ssl_key, ssl_ca_cert);
 
@@ -3024,6 +3046,15 @@ static bool check_config_objects(CONFIG_CONTEXT* context)
         if (!valid_object_type(type))
         {
             MXS_ERROR("Unknown module type for object '%s': %s", obj->object, type.c_str());
+            rval = false;
+            continue;
+        }
+
+        const char* no_module_defined = get_missing_module_parameter_name(obj);
+
+        if (no_module_defined)
+        {
+            MXS_ERROR("'%s' is missing the required parameter '%s'", obj->object, no_module_defined);
             rval = false;
             continue;
         }
@@ -3779,25 +3810,28 @@ int create_new_monitor(CONFIG_CONTEXT* obj, std::set<std::string>& monitored_ser
 {
     bool err = false;
 
-    // TODO: Use server list parameter type for this
-    for (auto& s : mxs::strtok(config_get_string(obj->parameters, CN_SERVERS), ","))
+    MXS_CONFIG_PARAMETER* params = obj->parameters;
+    // The config loader has already checked that the server list is mostly ok. However, it cannot
+    // check that the server names in the list actually ended up generated.
+    if (config_get_param(params, CN_SERVERS))
     {
-        fix_object_name(s);
-        auto server = Server::find_by_unique_name(s);
-
-        if (!server)
+        string name_not_found;
+        auto servers = config_get_server_list(params, CN_SERVERS, &name_not_found);
+        if (servers.empty())
         {
-            MXS_ERROR("Unable to find server '%s' that is configured in "
-                      "the monitor '%s'.",
-                      s.c_str(),
-                      obj->object);
             err = true;
+            mxb_assert(!name_not_found.empty());
+            MXS_ERROR("Unable to find server '%s' that is configured in monitor '%s'.",
+                      name_not_found.c_str(), obj->object);
         }
-        else if (monitored_servers.insert(s.c_str()).second == false)
+        for (auto server : servers)
         {
-            MXS_WARNING("Multiple monitors are monitoring server [%s]. "
-                        "This will cause undefined behavior.",
-                        s.c_str());
+            mxb_assert(server);
+            if (monitored_servers.insert(server->name()).second == false)
+            {
+                MXS_WARNING("Multiple monitors are monitoring server [%s]. "
+                            "This will cause undefined behavior.", server->name());
+            }
         }
     }
 
@@ -3877,7 +3911,7 @@ int create_new_listener(CONFIG_CONTEXT* obj)
     else
     {
         const char* address = config_get_string(obj->parameters, CN_ADDRESS);
-        Service* service = static_cast<Service*>(config_get_service(obj->parameters, CN_SERVICE));
+        Service* service = static_cast<Service*>(obj->parameters->get_service(CN_SERVICE));
         mxb_assert(service);
 
         // Remove this once maxadmin is removed
@@ -4318,22 +4352,19 @@ bool config_param_is_valid(const MXS_MODULE_PARAM* params,
             case MXS_MODULE_PARAM_SERVERLIST:
                 if (context)
                 {
-                    valid = true;
-                    char** server_names = NULL;
-                    int n_serv = config_parse_server_list(value, &server_names);
-                    if (n_serv > 0)
+                    auto server_names = config_break_list_string(value);
+                    if (!server_names.empty())
                     {
+                        valid = true;
                         /* Check that every server name in the list is found in the config. */
-                        for (int i = 0; i < n_serv; i++)
+                        for (auto elem : server_names)
                         {
-                            if (valid
-                                && !config_contains_type(context, server_names[i], CN_SERVER))
+                            if (!config_contains_type(context, elem.c_str(), CN_SERVER))
                             {
                                 valid = false;
+                                break;
                             }
-                            MXS_FREE(server_names[i]);
                         }
-                        MXS_FREE(server_names);
                     }
                     break;
                 }
@@ -4354,74 +4385,17 @@ bool config_param_is_valid(const MXS_MODULE_PARAM* params,
     return valid;
 }
 
-int config_parse_server_list(const char* servers, char*** output_array)
+std::vector<string> config_break_list_string(const char* list_string)
 {
-    mxb_assert(servers);
-
-    /* First, check the string for the maximum amount of servers it
-     * might contain by counting the commas. */
-    int out_arr_size = 1;
-    const char* pos = servers;
-    while ((pos = strchr(pos, ',')) != NULL)
+    mxb_assert(list_string);
+    string copy = list_string;
+    /* Parse the elements from the list. They are separated by ',' and are trimmed of whitespace. */
+    std::vector<string> tokenized = mxs::strtok(copy, ",");
+    for (auto& elem : tokenized)
     {
-        pos++;
-        out_arr_size++;
+        fix_object_name(elem);
     }
-    char** results = (char**)MXS_CALLOC(out_arr_size, sizeof(char*));
-    if (!results)
-    {
-        return 0;
-    }
-
-    /* Parse the server names from the list. They are separated by ',' and will
-     * be trimmed of whitespace. */
-    char srv_list_tmp[strlen(servers) + 1];
-    strcpy(srv_list_tmp, servers);
-    mxb::trim(srv_list_tmp);
-
-    bool error = false;
-    int output_ind = 0;
-    char* lasts;
-    char* s = strtok_r(srv_list_tmp, ",", &lasts);
-    while (s)
-    {
-        char srv_name_tmp[strlen(s) + 1];
-        strcpy(srv_name_tmp, s);
-        fix_object_name(srv_name_tmp);
-
-        if (strlen(srv_name_tmp) > 0)
-        {
-            results[output_ind] = MXS_STRDUP(srv_name_tmp);
-            if (!results[output_ind])
-            {
-                error = true;
-                break;
-            }
-            output_ind++;
-        }
-        s = strtok_r(NULL, ",", &lasts);
-    }
-
-    if (error)
-    {
-        int i = 0;
-        while (results[i])
-        {
-            MXS_FREE(results[i]);
-            i++;
-        }
-        output_ind = 0;
-    }
-
-    if (output_ind == 0)
-    {
-        MXS_FREE(results);
-    }
-    else
-    {
-        *output_array = results;
-    }
-    return output_ind;
+    return tokenized;
 }
 
 json_t* config_maxscale_to_json(const char* host)

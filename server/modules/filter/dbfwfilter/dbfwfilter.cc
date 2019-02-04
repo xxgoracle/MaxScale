@@ -1197,17 +1197,17 @@ int global_version = 1;
 }
 
 Dbfw::Dbfw(MXS_CONFIG_PARAMETER* params)
-    : m_action((enum fw_actions)config_get_enum(params, "action", action_values))
+    : m_action((enum fw_actions)params->get_enum("action", action_values))
     , m_log_match(0)
     , m_filename(config_get_string(params, "rules"))
     , m_version(atomic_add(&global_version, 1))
 {
-    if (config_get_bool(params, "log_match"))
+    if (params->get_bool("log_match"))
     {
         m_log_match |= FW_LOG_MATCH;
     }
 
-    if (config_get_bool(params, "log_no_match"))
+    if (params->get_bool("log_no_match"))
     {
         m_log_match |= FW_LOG_NO_MATCH;
     }

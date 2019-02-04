@@ -212,14 +212,14 @@ static MXS_FILTER* createInstance(const char* name, MXS_CONFIG_PARAMETER* params
     if (my_instance)
     {
         my_instance->sessions = 0;
-        my_instance->topN = config_get_integer(params, "count");
+        my_instance->topN = params->get_integer("count");
         my_instance->match = config_copy_string(params, "match");
         my_instance->exclude = config_copy_string(params, "exclude");
         my_instance->source = config_copy_string(params, "source");
         my_instance->user = config_copy_string(params, "user");
         my_instance->filebase = MXS_STRDUP_A(config_get_string(params, "filebase"));
 
-        int cflags = config_get_enum(params, "options", option_values);
+        int cflags = params->get_enum("options", option_values);
         bool error = false;
 
         if (my_instance->match

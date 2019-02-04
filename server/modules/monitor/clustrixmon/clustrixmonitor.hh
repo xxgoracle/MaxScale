@@ -64,6 +64,9 @@ public:
 
     bool configure(const MXS_CONFIG_PARAMETER* pParams) override;
 
+    bool softfail(SERVER* pServer, json_t** ppError);
+    bool unsoftfail(SERVER* pServer, json_t** ppError);
+
 private:
     ClustrixMonitor(const std::string& name, const std::string& module);
 
@@ -83,6 +86,20 @@ private:
     void make_health_check();
     void initiate_delayed_http_check();
     bool check_http(Call::action_t action);
+
+    bool perform_softfail(SERVER* pServer, json_t** ppError);
+    bool perform_unsoftfail(SERVER* pServer, json_t** ppError);
+
+    enum class Operation
+    {
+        SOFTFAIL,
+        UNSOFTFAIL,
+    };
+
+    bool perform_operation(Operation operation,
+                           SERVER* pServer,
+                           json_t** ppError);
+
 
     static long now()
     {

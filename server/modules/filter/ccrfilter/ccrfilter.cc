@@ -89,12 +89,12 @@ public:
         CCRFilter* new_instance = new(std::nothrow) CCRFilter;
         if (new_instance)
         {
-            new_instance->m_count = config_get_integer(params, "count");
-            new_instance->m_time = config_get_integer(params, "time");
+            new_instance->m_count = params->get_integer("count");
+            new_instance->m_time = params->get_integer("time");
             new_instance->m_match = config_get_string(params, PARAM_MATCH);
             new_instance->m_nomatch = config_get_string(params, PARAM_IGNORE);
 
-            int cflags = config_get_enum(params, "options", option_values);
+            int cflags = params->get_enum("options", option_values);
             const char* keys[] = {PARAM_MATCH, PARAM_IGNORE};
             pcre2_code** code_arr[] = {&new_instance->re, &new_instance->nore};
             if (!config_get_compiled_regexes(params, keys, sizeof(keys) / sizeof(char*),
