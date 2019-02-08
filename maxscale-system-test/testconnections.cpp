@@ -545,9 +545,10 @@ void TestConnections::print_env()
     galera->print_env();
 }
 
-const char * get_template_name(char * test_name)
+const char * get_template_name(char * test_name, char ** labels)
 {
     int i = 0;
+    *labels = NULL;
     while (cnf_templates[i].test_name && strcmp(cnf_templates[i].test_name, test_name) != 0)
     {
         i++;
@@ -555,6 +556,7 @@ const char * get_template_name(char * test_name)
 
     if (cnf_templates[i].test_name)
     {
+        *labels = (char *) cnf_templates[i].test_labels;
         return cnf_templates[i].test_template;
     }
 
@@ -662,7 +664,9 @@ void TestConnections::init_maxscales()
 
 void TestConnections::init_maxscale(int m)
 {
-    const char * template_name = get_template_name(test_name);
+    char * labels = NULL;
+    const char * template_name = get_template_name(test_name, &labels);
+    tprintf("Lables: %s\n", labels);
 
     process_template(m, template_name, maxscales->access_homedir[m]);
     maxscales->ssh_node_f(m, true,
