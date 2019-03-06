@@ -1397,7 +1397,10 @@ int TestConnections::check_maxscale_processes(int m, int expected)
 
     int exit_code;
     char* maxscale_num = maxscales->ssh_node_output(m, ps_cmd, false, &exit_code);
-
+tprintf("%s\n", maxscales->ssh_node_output(m, "ps ax | grep valgrind | grep maxscale | grep -v grep", false, &exit_code));
+tprintf("%s\n", maxscales->ssh_node_output(m, "ps ax | grep valgrind | grep maxscale ", false, &exit_code));
+tprintf("%s\n", maxscales->ssh_node_output(m, "ps ax | grep valgrind ", false, &exit_code));
+tprintf("%s\n", maxscales->ssh_node_output(m, "ps ax ", false, &exit_code));
     if ((maxscale_num == NULL) || (exit_code != 0))
     {
         return -1;
