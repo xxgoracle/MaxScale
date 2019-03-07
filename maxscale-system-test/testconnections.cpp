@@ -780,8 +780,11 @@ void TestConnections::init_maxscale(int m)
                           "%s"
                           "maxctrl api get maxscale/debug/monitor_wait",
                           maxscales->maxscale_cnf[m],
-                          maxscales->maxscale_log_dir[m],
-                          maxscale::start ? "service maxscale restart;" : "");
+                          maxscales->maxscale_log_dir[m]);
+    if (maxscales::start)
+    {
+        maxscales->restart_maxscale(m);
+    }
 }
 
 void TestConnections::copy_one_mariadb_log(int i, std::string filename)
