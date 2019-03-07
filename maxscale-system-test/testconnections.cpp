@@ -781,7 +781,7 @@ void TestConnections::init_maxscale(int m)
                           "maxctrl api get maxscale/debug/monitor_wait",
                           maxscales->maxscale_cnf[m],
                           maxscales->maxscale_log_dir[m]);
-    if (maxscales::start)
+    if (maxscale::start)
     {
         maxscales->restart_maxscale(m);
     }
