@@ -776,14 +776,15 @@ void TestConnections::init_maxscale(int m)
                           true,
                           "cp maxscale.cnf %s;"
                           "iptables -F INPUT;"
-                          "rm -rf %s/*.log /tmp/core* /dev/shm/* /var/lib/maxscale/maxscale.cnf.d/ /var/lib/maxscale/*;"
-                          "%s"
-                          "maxctrl api get maxscale/debug/monitor_wait",
+                          "rm -rf %s/*.log /tmp/core* /dev/shm/* /var/lib/maxscale/maxscale.cnf.d/ /var/lib/maxscale/*;",
                           maxscales->maxscale_cnf[m],
                           maxscales->maxscale_log_dir[m]);
     if (maxscale::start)
     {
         maxscales->restart_maxscale(m);
+        maxscales->ssh_node_f(m,
+                              true,
+                              "maxctrl api get maxscale/debug/monitor_wait");
     }
 }
 
