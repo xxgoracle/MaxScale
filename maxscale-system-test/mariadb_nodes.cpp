@@ -28,7 +28,7 @@ void Mariadb_nodes::require_gtid(bool value)
     g_require_gtid = value;
 }
 
-Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbose):
+Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbose, std::string *network_config):
     v51(false)
 {
     use_ipv6 = false;
@@ -37,6 +37,7 @@ Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbos
     memset(blocked, 0, sizeof(blocked));
     no_set_pos = false;
     this->verbose = verbose;
+    this->network_config = network_config;
     strcpy(test_dir, test_cwd);
     read_env();
     truncate_mariadb_logs();

@@ -105,7 +105,6 @@ char * Nodes::ssh_node_output(int node, const char *ssh, bool sudo, int *exit_co
     char *cmd = (char*)malloc(strlen(ssh) + 1024);
 
     generate_ssh_cmd(cmd, node, ssh, sudo);
-//tprintf("############ssh smd %s\n:", cmd);
     FILE *output = popen(cmd, "r");
     if (output == NULL)
     {
@@ -152,6 +151,7 @@ int Nodes::ssh_node(int node, const char *ssh, bool sudo)
                 "ssh -i %s -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s@%s%s",
                 sshkey[node], access_user[node], IP[node], verbose ? "" :  " > /dev/null");
     }
+printf("cmd=%s\n", cmd);
     int rc = 1;
     FILE *in = popen(cmd, "w");
 
@@ -274,7 +274,7 @@ int Nodes::read_basic_env()
 {
     char * env;
     char env_name[64];
-    sprintf(env_name, "%s_N", prefix);
+    /*sprintf(env_name, "%s_N", prefix);
     env = getenv(env_name);
     if (env != NULL)
     {
@@ -283,7 +283,7 @@ int Nodes::read_basic_env()
     else
     {
         N = 1;
-    }
+    }*/
 
     sprintf(env_name, "%s_user", prefix);
     env = getenv(env_name);
@@ -306,17 +306,19 @@ int Nodes::read_basic_env()
         sprintf(password, "skysql");
     }
 
+    N = get_N();
+
     if ((N > 0) && (N < 255))
     {
         for (int i = 0; i < N; i++)
         {
             //reading IPs
             sprintf(env_name, "%s_%03d_network", prefix, i);
-            env = getenv(env_name);
+            env = get_nc_item((char*) env_name);
             if (env == NULL)
             {
                 sprintf(env_name, "%s_network", prefix);
-                env = getenv(env_name);
+                env = get_nc_item((char*) env_name);
 
             }
             if (env != NULL)
@@ -326,11 +328,11 @@ int Nodes::read_basic_env()
 
             //reading private IPs
             sprintf(env_name, "%s_%03d_private_ip", prefix, i);
-            env = getenv(env_name);
+            env = get_nc_item((char*) env_name);
             if (env == NULL)
             {
                 sprintf(env_name, "%s_private_ip", prefix);
-                env = getenv(env_name);
+                env = get_nc_item((char*) env_name);
             }
             if (env != NULL)
             {
@@ -343,11 +345,11 @@ int Nodes::read_basic_env()
 
             //reading IPv6
             sprintf(env_name, "%s_%03d_network6", prefix, i);
-            env = getenv(env_name);
+            env = get_nc_item((char*) env_name);
             if (env == NULL)
             {
                 sprintf(env_name, "%s_network6", prefix);
-                env = getenv(env_name);
+                env = get_nc_item((char*) env_name);
             }
             if (env != NULL)
             {
@@ -359,11 +361,11 @@ int Nodes::read_basic_env()
             }
             //reading sshkey
             sprintf(env_name, "%s_%03d_keyfile", prefix, i);
-            env = getenv(env_name);
+            env = get_nc_item((char*) env_name);
             if (env == NULL)
             {
                 sprintf(env_name, "%s_keyfile", prefix);
-                env = getenv(env_name);
+                env = get_nc_item((char*) env_name);
             }
             if (env != NULL)
             {
@@ -371,11 +373,11 @@ int Nodes::read_basic_env()
             }
 
             sprintf(env_name, "%s_%03d_whoami", prefix, i);
-            env = getenv(env_name);
+            env = get_nc_item((char*) env_name);
             if (env == NULL)
             {
                 sprintf(env_name, "%s_whoami", prefix);
-                env = getenv(env_name);
+                env = get_nc_item((char*) env_name);
             }
 
             if (env != NULL)
@@ -413,11 +415,11 @@ int Nodes::read_basic_env()
             }
 
             sprintf(env_name, "%s_%03d_hostname", prefix, i);
-            env = getenv(env_name);
+            env = get_nc_item((char*) env_name);
             if (env == NULL)
             {
                 sprintf(env_name, "%s_hostname", prefix);
-                env = getenv(env_name);
+                env = get_nc_item((char*) env_name);
             }
 
             if (env != NULL)
@@ -471,4 +473,38 @@ int Nodes::read_basic_env()
 const char* Nodes::ip(int i) const
 {
     return use_ipv6 ?  IP6[i] : IP[i];
+}
+
+char * Nodes::get_nc_item(char * item_name)
+{
+    size_t start = network_config->find(item_name);
+    if (start == std::string::npos)
+    {
+        return NULL;
+    }
+    size_t end = network_config->find("\n", start);
+    size_t equial = network_config->find("=", start);
+    if (end == std::string::npos)
+    {
+        end = network_config->length();
+    }
+    if (equial == std::string::npos)
+    {
+        return NULL;
+    }
+    char * cstr = new char [end - equial + 1];
+    strcpy(cstr, network_config->substr(equial + 1 , end - equial - 1).c_str());
+    return(cstr);
+}
+
+int Nodes::get_N()
+{
+    int N = 0;
+    char item[strlen(prefix) + 13];
+    do {
+        sprintf(item, "%s_%03d_network", prefix, N);
+        N++;
+    } while (network_config->find(item) != std::string::npos);
+    printf("%s N=%d\n", prefix, N -1 );
+    return N - 1 ;
 }

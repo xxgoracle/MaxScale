@@ -84,6 +84,11 @@ public:
     char password[256];
 
     /**
+     * @brief network_config Content of MDBCI network_config file
+     */
+    std::string * network_config;
+
+    /**
      * @brief Verbose command output
      */
     bool verbose;
@@ -157,6 +162,19 @@ public:
      * @return 0 in case of success
      */
     int read_basic_env();
+
+    /**
+     * @brief get_nc_item Find variable in the MDBCI network_config file
+     * @param item_name Name of the variable
+     * @return value of variable
+     */
+    char *get_nc_item(char * item_name);
+
+    /**
+     * @brief get_N Calculate the number of nodes discribed in the _netoek_config file
+     * @return Number of nodes
+     */
+    int get_N();
 
 private:
     int check_node_ssh(int node);

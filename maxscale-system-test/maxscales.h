@@ -1,6 +1,7 @@
 #ifndef MAXSCALES_H
 #define MAXSCALES_H
 
+#include <string>
 #include "nodes.h"
 #include "mariadb_func.h"
 #include "mariadb_nodes.h"
@@ -15,7 +16,7 @@ public:
         READCONN_SLAVE
     };
 
-    Maxscales(const char *pref, const char *test_cwd, bool verbose);
+    Maxscales(const char *pref, const char *test_cwd, bool verbose, std::string *network_config);
     int read_env();
 
     /**

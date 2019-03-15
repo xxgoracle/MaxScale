@@ -97,6 +97,16 @@ public:
     Maxscales * maxscales;
 
     /**
+     * @brief mdbci_config_name Name of MDBCI VMs set
+     */
+    char * mdbci_config_name;
+
+    /**
+     * @brief mdbci_vm_path Path to directory with MDBCI VMs descriptions
+     */
+    char mdbci_vm_path[4096];
+
+    /**
      * @brief GetLogsCommand Command to copy log files from node virtual machines (should handle one parameter: IP address of virtual machine to kill)
      */
     char get_logs_command[4096];
@@ -123,6 +133,11 @@ public:
      * @return 0 if success
      */
     int copy_mariadb_logs(Mariadb_nodes *repl, char * prefix);
+
+    /**
+     * @brief network_config Content of MDBCI network_config file
+     */
+    std::string network_config;
 
     /**
      * @brief no_backend_log_copy if true logs from backends are not copied
@@ -170,6 +185,11 @@ public:
      * to use GTID to connect to Maxscale binlog router
      */
     bool binlog_slave_gtid;
+
+    /**
+     * @brief no_repl Do not check, restart and use Maxster/Slave setup;
+     */
+    bool no_repl;
 
     /**
      * @brief no_galera Do not check, restart and use Galera setup; all Galera tests will fail
@@ -228,6 +248,21 @@ public:
      */
     bool use_ipv6;
 
+    /**
+     * @brief template_name Name of maxscale.cnf template
+     */
+    const char * template_name;
+
+    /**
+     * @brief labels 'LABELS' string from CMakeLists.txt
+     */
+    char * labels;
+
+    /**
+     * @brief mdbci_labels labels to be passed to MDBCI
+     */
+    std::string mdbci_labels;
+
     /** Check whether all nodes are in a valid state */
     static void check_nodes(bool value);
 
@@ -250,6 +285,11 @@ public:
 
     /** Same as add_result() but inverted */
     void expect(bool result, const char *format, ...) __attribute__((format(printf, 3, 4)));
+
+    /**
+     * @brief read_mdbci_info Reads name of MDBCI config and tryes to load all network info
+     */
+    void read_mdbci_info();
 
     /**
      * @brief ReadEnv Reads all Maxscale and Master/Slave and Galera setups info from environmental variables
@@ -514,6 +554,11 @@ public:
     int start_maxscale(int m = 0);
     void process_template(const char *src, const char *dest = "/etc/maxscale.cnf");
 
+    /**
+     * @brief call_mdbci Execute MDBCI to bring up nodes
+     */
+    void call_mdbci();
+
 private:
     void report_result(const char *format, va_list argp);
 };
@@ -541,5 +586,13 @@ void * log_copy_thread(void *ptr );
 * @return String form comparison of status sets
 */
 std::string dump_status(const StringSet& current, const StringSet& expected);
+
+/**
+ * @brief get_template_name Returns the name of maxscale.cnf template to use for given test
+ * @param test_name Name of the test
+ * @param labels pointer to string for storing all test labels
+ * @return Name of maxscale.cnf file template
+ */
+const char *get_template_name(char * test_name, char ** labels);
 
 #endif // TESTCONNECTIONS_H

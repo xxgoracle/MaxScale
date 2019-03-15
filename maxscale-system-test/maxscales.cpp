@@ -1,12 +1,14 @@
 #include "maxscales.h"
 #include <sstream>
 #include <unordered_map>
+#include <string>
 
-Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose)
+Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose, std::string * network_config)
 {
     strcpy(prefix, pref);
     this->verbose = verbose;
     strcpy(test_dir, test_cwd);
+    this->network_config = network_config;
     read_env();
 }
 
