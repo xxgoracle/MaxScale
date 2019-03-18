@@ -43,17 +43,17 @@ done
 touch ${snapshot_lock_file}
 echo $JOB_NAME-$BUILD_NUMBER >> ${snapshot_lock_file}
 
-${mdbci_dir}/mdbci snapshot revert --path-to-nodes $name --snapshot-name $snapshot_name
+mdbci snapshot revert --path-to-nodes $name --snapshot-name $snapshot_name
 
 if [ $? != 0 ]; then
-	${mdbci_dir}/mdbci destroy $name
+	mdbci destroy $name
 	${MDBCI_VM_PATH}/scripts/clean_vms.sh $name
 
 	${script_dir}/create_config.sh
 	checkExitStatus $? "Error creating configuration" $snapshot_lock_file
 
 	echo "Creating snapshot from new config"
-	${mdbci_dir}/mdbci snapshot take --path-to-nodes $name --snapshot-name $snapshot_name
+	mdbci snapshot take --path-to-nodes $name --snapshot-name $snapshot_name
 fi
 
 . ${script_dir}/set_env.sh "$name"
@@ -66,11 +66,11 @@ fi
 
 for maxscale_vm_name in ${maxscales_vm}
 do
-    ${mdbci_dir}/mdbci sudo --command 'yum remove maxscale -y' $name/${maxscale_vm_name}
-    ${mdbci_dir}/mdbci sudo --command 'yum clean all' $name/${maxscale_vm_name}
+    mdbci sudo --command 'yum remove maxscale -y' $name/${maxscale_vm_name}
+    mdbci sudo --command 'yum clean all' $name/${maxscale_vm_name}
 
-    ${mdbci_dir}/mdbci setup_repo --product maxscale_ci --product-version ${target} $name/${maxscale_vm_name}
-    ${mdbci_dir}/mdbci install_product --product maxscale_ci $name/${maxscale_vm_name}
+    mdbci setup_repo --product maxscale_ci --product-version ${target} $name/${maxscale_vm_name}
+    mdbci install_product --product maxscale_ci $name/${maxscale_vm_name}
 
     checkExitStatus $? "Error installing Maxscale" $snapshot_lock_file
 done
@@ -80,7 +80,7 @@ cd ${script_dir}/..
 
 rm -rf build
 mkdir build && cd build
-cmake .. -DBUILDNAME=$JOB_NAME-$BUILD_NUMBER-$target
+cmake .. -DBUILDNAME=$JOB_NAME-$BUILD_NUMBER-$target -DBUILD_SYSTEM_TESTS=Y -DCMAKE_BUILD_TYPE=Debug
 make
 
 ./check_backend --restart-galera

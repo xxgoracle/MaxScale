@@ -3,6 +3,7 @@ set -x
 echo $*
 export MDBCI_VM_PATH=${MDBCI_VM_PATH:-$HOME/vms}
 export mdbci_dir=${mdbci_dir:-"$HOME/mdbci/"}
+export PATH=$PATH:${mdbci_dir}
 
 export config_name="$1"
 if [ -z $1 ] ; then
@@ -77,8 +78,8 @@ export sysbench_dir=$(dirname ${sb})
 
 export ssl=true
 
-export take_snapshot_command="${mdbci_dir}/mdbci snapshot take --path-to-nodes ${config_name} --snapshot-name "
-export revert_snapshot_command="${mdbci_dir}/mdbci snapshot revert --path-to-nodes ${config_name} --snapshot-name "
+export take_snapshot_command="mdbci snapshot take --path-to-nodes ${config_name} --snapshot-name "
+export revert_snapshot_command="$mdbci snapshot revert --path-to-nodes ${config_name} --snapshot-name "
 #export use_snapshots=yes
 
 set +x

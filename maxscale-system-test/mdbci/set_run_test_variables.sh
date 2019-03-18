@@ -15,6 +15,7 @@ export curr_date=`date '+%Y-%m-%d_%H-%M'`
 export name=${name:-$box-${curr_date}}
 
 export mdbci_dir=${mdbci_dir:-"$HOME/mdbci/"}
+export PATH=$PATH:${mdbci_dir}
 export ci_url=${ci_url:-"http://max-tst-01.mariadb.com/ci-repository/"}
 
 export product=${product:-"mariadb"}

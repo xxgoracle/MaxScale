@@ -16,7 +16,8 @@ public:
         READCONN_SLAVE
     };
 
-    Maxscales(const char *pref, const char *test_cwd, bool verbose, std::string *network_config);
+    Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind, std::string *network_config);
+
     int read_env();
 
     /**
@@ -272,6 +273,17 @@ public:
      * @param m Number of Maxscale node
      */
     void wait_for_monitor(int intervals = 1, int m = 0);
+
+    /**
+     * @brief use_valrind if true Maxscale will be executed under Valgrind
+     */
+    bool use_valgrind;
+
+    /**
+     * @brief valgring_log_num Counter for Maxscale restarts to avoid Valgrind log overwriting
+     */
+    int valgring_log_num;
+
 
 };
 

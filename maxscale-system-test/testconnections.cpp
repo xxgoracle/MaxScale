@@ -92,7 +92,8 @@ TestConnections::TestConnections(int argc, char *argv[]):
     no_galera(false),
     no_vm_revert(true),
     threads(4),
-    use_ipv6(false)
+    use_ipv6(false),
+    use_valgrind(false)
 {
     signal_set(SIGSEGV, sigfatal_handler);
     signal_set(SIGABRT, sigfatal_handler);
@@ -224,9 +225,9 @@ TestConnections::TestConnections(int argc, char *argv[]):
 
     char * labels_string = NULL;
     template_name = get_template_name(test_name, &labels_string);
-    tprintf("Lables: %s\n", labels_string);
+    tprintf("Labels: %s\n", labels_string);
     labels = strstr(labels_string, "LABELS;");
-    tprintf("Lables: %s\n", labels);
+    tprintf("Labels: %s\n", labels);
     if (!labels)
     {
         labels = (char* ) "LABELS;REPL_BACKEND";
@@ -234,14 +235,18 @@ TestConnections::TestConnections(int argc, char *argv[]):
 
     mdbci_labels = get_mdbci_lables(labels);
     printf("mdbci labels %s\n", mdbci_labels.c_str());
+    if (call_mdbci(""))
+    {
+        exit(MDBCI_FAUILT);
+    }
 
-    if (mdbci_labels.find(std::string("repl")) == std::string::npos)
+    if (mdbci_labels.find(std::string("REPL_BACKEND")) == std::string::npos)
     {
         no_repl = true;
         tprintf("No need to use Master/Slave");
     }
 
-    if (mdbci_labels.find(std::string("galera")) == std::string::npos)
+    if (mdbci_labels.find(std::string("GALERA_BACKEND")) == std::string::npos)
     {
         no_galera = true;
         tprintf("No need to use Galera");
@@ -261,7 +266,10 @@ TestConnections::TestConnections(int argc, char *argv[]):
         repl->revert_snapshot_command = revert_snapshot_command;
         if (repl->check_nodes())
         {
-            call_mdbci();
+            if (call_mdbci("--recreate"))
+            {
+                exit(MDBCI_FAUILT);
+            }
         }
     }
     else
@@ -278,7 +286,10 @@ TestConnections::TestConnections(int argc, char *argv[]):
         galera->revert_snapshot_command = revert_snapshot_command;
         if (galera->check_nodes())
         {
-            call_mdbci();
+            if (call_mdbci("--recreate"))
+            {
+                exit(MDBCI_FAUILT);
+            }
         }
     }
     else
@@ -286,13 +297,15 @@ TestConnections::TestConnections(int argc, char *argv[]):
         galera = NULL;
     }
 
-
-    maxscales = new Maxscales("maxscale", test_dir, verbose, &network_config);
+    maxscales = new Maxscales("maxscale", test_dir, verbose, use_valgrind, &network_config);
     if (maxscales->check_nodes() ||
-            ((maxscales->N < 2) && (mdbci_labels.find(std::string("maxscale2")) != std::string::npos))
+            ((maxscales->N < 2) && (mdbci_labels.find(std::string("SECOND_MAXSCALE")) != std::string::npos))
             )
     {
-        call_mdbci();
+        if (call_mdbci("--recreate"))
+        {
+            exit(MDBCI_FAUILT);
+        }
     }
 
     maxscales->use_ipv6 = use_ipv6;
@@ -410,6 +423,16 @@ TestConnections::~TestConnections()
         //galera->disable_ssl();
     }
 
+    if (use_valgrind)
+    {
+        // stop all Maxscales to get proper Valgrind logs
+        for (int i = 0; i < maxscales->N; i++)
+        {
+            stop_maxscale(i);
+        }
+        sleep(15); // sleep to let logs be written do disks
+    }
+
     copy_all_logs();
 
     /* Temporary disable snapshot revert due to Galera failures
@@ -495,6 +518,16 @@ void TestConnections::read_mdbci_info()
         sprintf(mdbci_vm_path, "%s/vms/", getenv("HOME"));
     }
 
+    env = getenv("template");
+    if (env != NULL)
+    {
+        sprintf(mdbci_template, "%s", env);
+    }
+    else
+    {
+        sprintf(mdbci_template, "%s/vms/", getenv("default"));
+    }
+
     mdbci_config_name = getenv("mdbci_config_name");
     if (mdbci_config_name != NULL)
     {
@@ -519,7 +552,6 @@ void TestConnections::read_mdbci_info()
 
 void TestConnections::read_env()
 {
-
     char *env;
 
     read_mdbci_info();
@@ -630,6 +662,12 @@ void TestConnections::read_env()
     if ((env != NULL) && ((strcasecmp(env, "no") == 0) || (strcasecmp(env, "false") == 0) ))
     {
         no_vm_revert = false;
+    }
+
+    env = getenv("use_valgrind");
+    if ((env != NULL) && ((strcasecmp(env, "yes") == 0) || (strcasecmp(env, "true") == 0) ))
+    {
+        use_valgrind = true;
     }
 }
 
@@ -786,22 +824,18 @@ void TestConnections::init_maxscale(int m)
                           "chmod a+x %s;"
                           "%s"
                           "iptables -F INPUT;"
-                          "rm -f %s/maxscale.log;"
-                          "rm -f %s/maxscale1.log;"
-                          "rm -rf /tmp/core* /dev/shm/* /var/lib/maxscale/maxscale.cnf.d/ /var/lib/maxscale/*;"
-                          "%s",
+                          "rm -f %s/*;"
+                          "rm -rf /tmp/core* /dev/shm/* /var/lib/maxscale/maxscale.cnf.d/ /var/lib/maxscale/*",
                           maxscales->access_homedir[m],
                           maxscales->access_homedir[m],
                           maxscales->access_homedir[m],
                           maxscale::start ? "killall -9 maxscale;" : "",
-                          maxscales->maxscale_log_dir[m],
-                          maxscales->maxscale_log_dir[m],
-                          maxscale::start ? "service maxscale restart" : "");
-
+                          maxscales->maxscale_log_dir[m]);
     fflush(stdout);
-
     if (maxscale::start)
     {
+        maxscales->restart_maxscale(m);
+        fflush(stdout);
         int waits;
 
         for (waits = 0; waits < 15; waits++)
@@ -826,9 +860,16 @@ int TestConnections::copy_mariadb_logs(Mariadb_nodes * repl, char * prefix)
     int local_result = 0;
     char * mariadb_log;
     FILE * f;
-    int i;
+    int i, j;
     int exit_code;
     char str[4096];
+
+    const int log_retrive_command_num = 3;
+    const char * log_retrive_command[log_retrive_command_num] = {
+        "cat /var/lib/mysql/*.err",
+        "cat /var/log/syslog | grep mysql",
+        "cat /var/log/messages | grep mysql"
+    };
 
     if (repl == NULL) return local_result;
 
@@ -838,20 +879,23 @@ int TestConnections::copy_mariadb_logs(Mariadb_nodes * repl, char * prefix)
     {
         if (strcmp(repl->IP[i], "127.0.0.1") != 0) // Do not copy MariaDB logs in case of local backend
         {
-            mariadb_log = repl->ssh_node_output(i, (char *) "cat /var/lib/mysql/*.err", true, &exit_code);
-            sprintf(str, "LOGS/%s/%s%d_mariadb_log", test_name, prefix, i);
-            f = fopen(str, "w");
-            if (f != NULL)
+            for (j = 0; j < log_retrive_command_num; j++)
             {
-                fwrite(mariadb_log, sizeof(char), strlen(mariadb_log), f);
-                fclose(f);
+                mariadb_log = repl->ssh_node_output(i, log_retrive_command[j], true, &exit_code);
+                sprintf(str, "LOGS/%s/%s%d_mariadb_log_%d", test_name, prefix, i, j);
+                f = fopen(str, "w");
+                if (f != NULL)
+                {
+                    fwrite(mariadb_log, sizeof(char), strlen(mariadb_log), f);
+                    fclose(f);
+                }
+                else
+                {
+                    printf("Error writing MariaDB log");
+                    local_result = 1;
+                }
+                free(mariadb_log);
             }
-            else
-            {
-                printf("Error writing MariaDB log");
-                local_result = 1;
-            }
-            free(mariadb_log);
         }
     }
     return local_result;
@@ -1157,9 +1201,9 @@ bool TestConnections::replicate_from_master(int m)
     repl->execute_query_all_nodes("STOP SLAVE");
 
     /** Clean up MaxScale directories */
-    maxscales->ssh_node(m, "service maxscale stop", true);
+    maxscales->stop_maxscale(m);
     prepare_binlog(m);
-    maxscales->ssh_node(m, "service maxscale start", true);
+    maxscales->start_maxscale(m);
 
     char log_file[256] = "";
     char log_pos[256] = "4";
@@ -1411,7 +1455,16 @@ int TestConnections::find_connected_slave1(int m)
 int TestConnections::check_maxscale_processes(int m, int expected)
 {
     int exit_code;
-    char* maxscale_num = maxscales->ssh_node_output(m, "ps -C maxscale | grep maxscale | wc -l", false,
+    const char * ps_cmd;
+    if (use_valgrind)
+    {
+        ps_cmd = "ps ax | grep valgrind | grep maxscale | grep -v grep | wc -l";
+    }
+    else
+    {
+        ps_cmd = "ps -C maxscale | grep maxscale | wc -l";
+    }
+    char* maxscale_num = maxscales->ssh_node_output(m, ps_cmd, false,
                          &exit_code);
     if ((maxscale_num == NULL) || (exit_code != 0))
     {
@@ -1425,9 +1478,9 @@ int TestConnections::check_maxscale_processes(int m, int expected)
 
     if (atoi(maxscale_num) != expected)
     {
-        tprintf("%s maxscale processes detected, trying agin in 5 seconds\n", maxscale_num);
+        tprintf("%s maxscale processes detected, trying again in 5 seconds\n", maxscale_num);
         sleep(5);
-        maxscale_num = maxscales->ssh_node_output(m, "ps -C maxscale | grep maxscale | wc -l", false, &exit_code);
+        maxscale_num = maxscales->ssh_node_output(m, ps_cmd, false, &exit_code);
         if (atoi(maxscale_num) != expected)
         {
             add_result(1, "Number of MaxScale processes is not %d, it is %s\n", expected, maxscale_num);
@@ -1439,7 +1492,7 @@ int TestConnections::check_maxscale_processes(int m, int expected)
 
 int TestConnections::stop_maxscale(int m)
 {
-    int res = maxscales->ssh_node(m, "service maxscale stop", true);
+    int res = maxscales->stop_maxscale(m);
     check_maxscale_processes(m, 0);
     fflush(stdout);
     return res;
@@ -1447,7 +1500,7 @@ int TestConnections::stop_maxscale(int m)
 
 int TestConnections::start_maxscale(int m)
 {
-    int res = maxscales->ssh_node(m, "service maxscale start", true);
+    int res = maxscales->start_maxscale(m);
     check_maxscale_processes(m, 1);
     fflush(stdout);
     return res;
@@ -1473,7 +1526,6 @@ int TestConnections::check_maxscale_alive(int m)
     maxscales->close_maxscale_connections(m);
     add_result(global_result - gr, "Maxscale is not alive\n");
     stop_timeout();
-
     check_maxscale_processes(m, 1);
 
     return global_result - gr;
@@ -2038,14 +2090,14 @@ void TestConnections::check_current_connections(int m, int value)
 
 int TestConnections::take_snapshot(char * snapshot_name)
 {
-    char str[4096];
+    char str[strlen(take_snapshot_command) + strlen(snapshot_name) + 2];
     sprintf(str, "%s %s", take_snapshot_command, snapshot_name);
     return system(str);
 }
 
 int TestConnections::revert_snapshot(char * snapshot_name)
 {
-    char str[4096];
+    char str[strlen(revert_snapshot_command) + strlen(snapshot_name) + 2];
     sprintf(str, "%s %s", revert_snapshot_command, snapshot_name);
     return system(str);
 }
@@ -2060,9 +2112,51 @@ bool TestConnections::test_bad_config(int m, const char *config)
     return maxscales->ssh_node_f(m, true, "cp maxscale.cnf /etc/maxscale.cnf; service maxscale stop; "
                                  "maxscale -U maxscale -lstdout &> /dev/null && sleep 1 && pkill -9 maxscale") == 0;
 }
-void TestConnections::call_mdbci()
+int TestConnections::call_mdbci(const char * options)
 {
-    system((std::string("mdbci up --labels ") + mdbci_labels).c_str());
+    struct stat buf;
+    if (stat(
+                (mdbci_vm_path + std::string("/") + mdbci_config_name).c_str(),
+                &buf)
+            )
+    {
+        if (system((std::string("mdbci mdbci --override --template ") +
+                    std::string(mdbci_template) +
+                    std::string(mdbci_vm_path) +
+                    std::string("/") +
+                    std::string(mdbci_config_name) +
+                    std::string(".json generate ") +
+                    std::string(mdbci_config_name)).c_str() ))
+        {
+            tprintf("MDBCI failed to generate virtual machines description");
+            return 1;
+        }
+    }
+
+    if (system((std::string("mdbci up ") +
+                std::string(mdbci_config_name) +
+                std::string(" --labels ") +
+                mdbci_labels +
+                std::string(" ") +
+                std::string(options)).c_str() ))
+    {
+        tprintf("MDBCI failed to bring up virtual machines");
+        return 1;
+    }
+    read_env();
+    if (repl)
+    {
+        repl->read_basic_env();
+    }
+    if (galera)
+    {
+        galera->read_basic_env();
+    }
+    if (maxscales)
+    {
+        maxscales->read_basic_env();
+    }
+    return 0;
 }
 
 std::string dump_status(const StringSet& current, const StringSet& expected)

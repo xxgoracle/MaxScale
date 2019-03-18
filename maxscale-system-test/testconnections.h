@@ -12,6 +12,8 @@
 
 typedef std::set<std::string> StringSet;
 
+#define MDBCI_FAUILT 200
+
 /**
  * @brief Class contains references to Master/Slave and Galera test setups
  * Test setup should consist of two setups: one Master/Slave and one Galera.
@@ -105,6 +107,11 @@ public:
      * @brief mdbci_vm_path Path to directory with MDBCI VMs descriptions
      */
     char mdbci_vm_path[4096];
+
+    /**
+     * @brief mdbci_temlate Name of mdbci VMs tempate file
+     */
+    char mdbci_template[1024];
 
     /**
      * @brief GetLogsCommand Command to copy log files from node virtual machines (should handle one parameter: IP address of virtual machine to kill)
@@ -517,8 +524,6 @@ public:
      */
     int list_dirs(int m = 0);
 
-
-
     /**
      * @brief make_snapshot Makes a snapshot for all running VMs
      * @param snapshot_name name of created snapshot
@@ -556,8 +561,14 @@ public:
 
     /**
      * @brief call_mdbci Execute MDBCI to bring up nodes
+     * @return 0 if success
      */
-    void call_mdbci();
+    int call_mdbci(const char *options);
+
+    /**
+     * @brief use_valrind if true Maxscale will be executed under Valgrind
+     */
+    bool use_valgrind;
 
 private:
     void report_result(const char *format, va_list argp);

@@ -50,9 +50,14 @@ module.exports = function() {
 
         // No password given, ask it from the command line
         if (argv.p == '') {
-            argv.p = readlineSync.question('Enter password: ', {
-                hideEchoBack: true
-            })
+            if (process.stdin.isTTY) {
+                argv.p = readlineSync.question('Enter password: ', {
+                    hideEchoBack: true
+                })
+            } else {
+                var line = fs.readFileSync(0)
+                argv.p = line.toString().trim()
+            }
         }
 
         // Split the hostnames, separated by commas
@@ -245,7 +250,7 @@ module.exports = function() {
             base = 'https://'
         }
 
-        return base + argv.u + ':' + argv.p + '@' + host + '/v1/' + endpoint
+        return base + host + '/v1/' + endpoint
     }
 
     this.OK = function() {
@@ -283,6 +288,7 @@ module.exports = function() {
     this.doAsyncRequest = function(host, resource, cb, obj) {
         args = obj || {}
         args.uri = getUri(host, this.argv.secure, resource)
+        args.auth = {user: argv.u, pass: argv.p}
         args.json = true
         args.timeout = this.argv.timeout
         setTlsCerts(args)

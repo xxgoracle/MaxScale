@@ -176,6 +176,21 @@ public:
      */
     int get_N();
 
+    /**
+     * @brief start_vm Start virtual machine
+     * @param node Node number
+     * @return 0 in case of success
+     */
+    int start_vm(int node);
+
+    /**
+     * @brief stop_vm Stop virtual machine
+     * @param node Node number
+     * @return 0 in case of success
+     */
+    int stop_vm(int node);
+
+
 private:
     int check_node_ssh(int node);
 

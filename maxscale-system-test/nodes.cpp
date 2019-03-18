@@ -151,7 +151,7 @@ int Nodes::ssh_node(int node, const char *ssh, bool sudo)
                 "ssh -i %s -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s@%s%s",
                 sshkey[node], access_user[node], IP[node], verbose ? "" :  " > /dev/null");
     }
-printf("cmd=%s\n", cmd);
+    //printf("cmd=%s\n", cmd);
     int rc = 1;
     FILE *in = popen(cmd, "w");
 
@@ -494,6 +494,7 @@ char * Nodes::get_nc_item(char * item_name)
     }
     char * cstr = new char [end - equial + 1];
     strcpy(cstr, network_config->substr(equial + 1 , end - equial - 1).c_str());
+printf("%s='%s'\n", item_name, cstr);
     return(cstr);
 }
 
@@ -505,6 +506,16 @@ int Nodes::get_N()
         sprintf(item, "%s_%03d_network", prefix, N);
         N++;
     } while (network_config->find(item) != std::string::npos);
-    printf("%s N=%d\n", prefix, N -1 );
+printf("%s N=%d\n", prefix, N -1 );
     return N - 1 ;
+}
+
+int Nodes::start_vm(int node)
+{
+    return(system(start_vm_command[node]));
+}
+
+int Nodes::stop_vm(int node)
+{
+    return(system(stop_vm_command[node]));
 }

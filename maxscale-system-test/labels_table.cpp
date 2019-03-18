@@ -5,7 +5,7 @@
 
 std::string get_mdbci_lables(char * labels_string)
 {
-    std::string mdbci_labels("maxscale");
+    std::string mdbci_labels("MAXSCALE");
 
     for (size_t i = 0; i < sizeof(labels_table) / sizeof(labels_table_t); i++)
     {
