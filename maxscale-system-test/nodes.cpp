@@ -203,8 +203,6 @@ int  Nodes::ssh_node_f(int node, bool sudo, const char* format, ...)
     int result = ssh_node(node, sys, sudo);
     free(sys);
     return (result);
-
-
 }
 
 int Nodes::copy_to_node(int i, const char* src, const char* dest)

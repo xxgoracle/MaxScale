@@ -2114,7 +2114,6 @@ int TestConnections::process_mdbci_template()
                                   std::string(" > ") +
                                   vm_path +
                                   std::string(".json");
-    verbose=true;
     if (verbose)
     {
         std::cout << sys << std::endl;

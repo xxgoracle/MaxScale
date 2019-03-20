@@ -7,13 +7,22 @@ char * readenv(const char * name, const char *format, ...)
     char * env = getenv(name);
     if (!env)
     {
-        va_list argp;
-        va_start(argp, format);
-        //int i = snprintf(NULL, 0, format, argp);
-        env = (char *) malloc(4096); //TODO calculate needed memory
-        vprintf(format, argp);
-        vsprintf(env, format, argp);
-        va_end(argp);
+        va_list valist;
+
+        va_start(valist, format);
+        int message_len = vsnprintf(NULL, 0, format, valist);
+        va_end(valist);
+
+        if (message_len < 0)
+        {
+            return NULL;
+        }
+
+        env = (char*)malloc(message_len + 1);
+
+        va_start(valist, format);
+        vsnprintf(env, message_len + 1, format, valist);
+        va_end(valist);
         setenv(name, env, 1);
     }
     return env;
