@@ -55,20 +55,20 @@ public:
     /**
      * @brief Unix socket to connecto to MariaDB
      */
-    char socket[256][1024];
+    char * socket[256];
     /**
      * @brief 'socket=$socket' line
      */
-    char socket_cmd[256][1024];
+    char * socket_cmd[256];
 
     /**
      * @brief   User name to access backend nodes
      */
-    char user_name[256];
+    char * user_name;
     /**
      * @brief   Password to access backend nodes
      */
-    char password[256];
+    char * password;
     /**
      * @brief master index of node which was last configured to be Master
      */
@@ -77,18 +77,18 @@ public:
     /**
      * @brief start_db_command Command to start DB server
      */
-    char start_db_command[256][4096];
+    char * start_db_command[256];
 
     /**
      * @brief stop_db_command Command to start DB server
      */
-    char stop_db_command[256][4096];
+    char * stop_db_command[256];
 
     /**
      * @brief cleanup_db_command Command to remove all
      * data files and re-install DB with mysql_install_db
      */
-    char cleanup_db_command[256][4096];
+    char * cleanup_db_command[256];
 
     /**
      * @brief ssl if true ssl will be used

@@ -7,9 +7,6 @@ export script_dir="$(dirname $(readlink -f $0))"
 
 . ${script_dir}/set_run_test_variables.sh
 
-export provider=`mdbci show provider $box --silent 2> /dev/null`
-export backend_box=${backend_box:-"centos_7_"$provider}
-
 if [ "$product" == "mysql" ] ; then
   export cnf_path=${script_dir}/cnf/mysql56
 fi

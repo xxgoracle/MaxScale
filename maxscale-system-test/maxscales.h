@@ -6,6 +6,11 @@
 #include "mariadb_func.h"
 #include "mariadb_nodes.h"
 
+#define DEFAULT_MAXSCALE_CNF "/etc/maxscale.cnf"
+#define DEFAULT_MAXSCALE_LOG_DIR "/var/log/maxscale/"
+#define DEFAULT_MAXSCALE_BINLOG_DIR "/var/lib/maxscale/Binlog_Service/"
+#define DEFAULT_MAXADMIN_PASSWORD "mariadb"
+
 class Maxscales: public Nodes
 {
 public:
@@ -78,28 +83,27 @@ public:
     /**
      * @brief maxadmin_Password Password to access Maxadmin tool
      */
-    char maxadmin_password[256][256];
+    char * maxadmin_password[256];
 
     /**
       * @brief maxscale_cnf full name of Maxscale configuration file
       */
-    char maxscale_cnf[256][4096];
+    char * maxscale_cnf[256];
 
     /**
       * @brief maxscale_log_dir name of log files directory
       */
-    char maxscale_log_dir[256][4096];
+    char * maxscale_log_dir[256];
 
     /**
       * @brief maxscale_lbinog_dir name of binlog files (for binlog router) directory
       */
-    char maxscale_binlog_dir[256][4096];
+    char * maxscale_binlog_dir[256];
 
     /**
      * @brief N_ports Default number of routers
      */
     int N_ports[256];
-
 
     /**
     * @brief test_dir path to test application
@@ -283,7 +287,6 @@ public:
      * @brief valgring_log_num Counter for Maxscale restarts to avoid Valgrind log overwriting
      */
     int valgring_log_num;
-
 
 };
 

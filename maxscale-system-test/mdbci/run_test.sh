@@ -58,19 +58,23 @@ export script_dir="$(dirname $(readlink -f $0))"
 rm -rf LOGS
 
 export target=`echo $target | sed "s/?//g"`
-export name=`echo $name | sed "s/?//g"`
+export mdbci_config_name=`echo {mdbci_config_name} | sed "s/?//g"`
+
+export provider=`mdbci show provider $box --silent 2> /dev/null`
+export backend_box=${backend_box:-"centos_7_"$provider}
+
+mdbci destroy ${mdbci_config_name}
 
 . ${script_dir}/configure_log_dir.sh
 
-${script_dir}/create_config.sh
-res=$?
+#${script_dir}/create_config.sh
+#res=$?
 
 ulimit -c unlimited
 if [ $res == 0 ] ; then
-    . ${script_dir}/set_env.sh $name
     cd ${script_dir}/..
     mkdir build && cd build
-    cmake .. -DBUILDNAME=$name -DCMAKE_BUILD_TYPE=Debug
+    cmake .. -DBUILDNAME={mdbci_config_name} -DCMAKE_BUILD_TYPE=Debug
     make
 set -x
     echo ${test_set} | grep "NAME#"
@@ -89,11 +93,11 @@ set -x
         if [ $? != 0 ]; then
             echo "Backend broken!"
             if [ "${do_not_destroy_vm}" != "yes" ] ; then
-                mdbci destroy $name
+                mdbci destroy ${mdbci_config_name}
             fi
             exit 1
         fi
-        mdbci snapshot take --path-to-nodes $name --snapshot-name clean
+        mdbci snapshot take --path-to-nodes ${mdbci_config_name} --snapshot-name clean
         ctest -VV -D Nightly ${test_set}
     fi
     cp core.* ${logs_publish_dir}
@@ -102,12 +106,12 @@ set -x
 else
   echo "Failed to create VMs, exiting"
   if [ "${do_not_destroy_vm}" != "yes" ] ; then
-	mdbci destroy $name
+	mdbci destroy ${mdbci_config_name}
   fi
   exit 1
 fi
 
 if [ "${do_not_destroy_vm}" != "yes" ] ; then
-	mdbci destroy $name
+	mdbci destroy ${mdbci_config_name}
 	echo "clean up done!"
 fi

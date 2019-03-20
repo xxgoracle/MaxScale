@@ -106,27 +106,32 @@ public:
     /**
      * @brief mdbci_vm_path Path to directory with MDBCI VMs descriptions
      */
-    char mdbci_vm_path[4096];
+    char * mdbci_vm_path;
 
     /**
      * @brief mdbci_temlate Name of mdbci VMs tempate file
      */
-    char mdbci_template[1024];
+    char * mdbci_template;
+
+    /**
+     * @brief target Name of Maxscale repository in the CI
+     */
+    char * target;
 
     /**
      * @brief GetLogsCommand Command to copy log files from node virtual machines (should handle one parameter: IP address of virtual machine to kill)
      */
-    char get_logs_command[4096];
+    char * get_logs_command;
 
     /**
      * @brief make_snapshot_command Command line to create a snapshot of all VMs
      */
-    char take_snapshot_command[4096];
+    char * take_snapshot_command;
 
     /**
      * @brief revert_snapshot_command Command line to revert a snapshot of all VMs
      */
-    char revert_snapshot_command[4096];
+    char * revert_snapshot_command;
 
     /**
      * @brief use_snapshots if TRUE every test is trying to revert snapshot before running the test
@@ -269,6 +274,19 @@ public:
      * @brief mdbci_labels labels to be passed to MDBCI
      */
     std::string mdbci_labels;
+
+    /**
+    * @brief vm_path Path to the VM Vagrant directory
+    */
+    std::string vm_path;
+
+    /**
+     * @brief reinstall_maxscale Flag that is set when 'reinstall_maxscale'
+     * option is provided;
+     * if true Maxscale will be removed and re-installed on all nodes
+     * Used for 'run_test_snapshot'
+     */
+    bool reinstall_maxscale;
 
     /** Check whether all nodes are in a valid state */
     static void check_nodes(bool value);
@@ -560,6 +578,13 @@ public:
     void process_template(const char *src, const char *dest = "/etc/maxscale.cnf");
 
     /**
+     * @brief process_mdbci_template Read template file from maxscale-system-test/mdbci/templates
+     * and replace all placeholders with acutal values
+     * @return 0 in case of success
+     */
+    int process_mdbci_template();
+
+    /**
      * @brief call_mdbci Execute MDBCI to bring up nodes
      * @return 0 if success
      */
@@ -569,6 +594,13 @@ public:
      * @brief use_valrind if true Maxscale will be executed under Valgrind
      */
     bool use_valgrind;
+
+    /**
+     * @brief resinstall_maxscales Remove Maxscale form all nodes and installs new ones
+     * (to be used for run_test_snapshot)
+     * @return 0 in case of success
+     */
+    int reinstall_maxscales();
 
 private:
     void report_result(const char *format, va_list argp);
@@ -605,5 +637,13 @@ std::string dump_status(const StringSet& current, const StringSet& expected);
  * @return Name of maxscale.cnf file template
  */
 const char *get_template_name(char * test_name, char ** labels);
+
+/**
+ * @brief readenv_and_set_default Read enviromental variable and set default values if
+ * variable is not defined
+ * @param name Name of the environmental variable
+ * @param defaultenv Default values to be set
+ * @return Envaronmental variable value
+ */
 
 #endif // TESTCONNECTIONS_H
