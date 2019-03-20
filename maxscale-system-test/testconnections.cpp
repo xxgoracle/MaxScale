@@ -316,6 +316,12 @@ TestConnections::TestConnections(int argc, char *argv[]):
         }
     }
 
+    std::string src = std::string(test_dir) + "/mdbci/add_core_cnf.sh";
+    maxscales->copy_to_node(0, src.c_str(), maxscales->access_homedir[0]);
+    maxscales->ssh_node_f(0, true, "%s/add_core_cnf.sh %s", maxscales->access_homedir[0],
+            verbose ? "verbose" : "");
+
+
     maxscales->use_ipv6 = use_ipv6;
     maxscales->ssl = ssl;
 
@@ -370,14 +376,7 @@ TestConnections::TestConnections(int argc, char *argv[]):
         galera->start_replication();
     }
 
-    bool snapshot_reverted = false;
-
-    if (use_snapshots)
-    {
-        snapshot_reverted = revert_snapshot((char *) "clean");
-    }
-
-    if (!snapshot_reverted && maxscale::check_nodes)
+    if (maxscale::check_nodes)
     {
         if (!no_repl)
         {
