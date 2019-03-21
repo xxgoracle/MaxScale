@@ -106,6 +106,10 @@ TestConnections::TestConnections(int argc, char *argv[]):
 #endif
     gettimeofday(&start_time, NULL);
 
+    repl = NULL;
+    galera = NULL;
+    maxscales = NULL;
+
     read_env();
 
     bool maxscale_init = true;
