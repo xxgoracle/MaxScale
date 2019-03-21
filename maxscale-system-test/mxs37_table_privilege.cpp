@@ -28,7 +28,14 @@ int main(int argc, char *argv[])
     execute_query(Test->maxscales->conn_rwsplit[0], "GRANT SELECT ON test.t1 TO 'table_privilege'@'%%'");
 
     Test->stop_timeout();
-    Test->repl->sync_slaves();
+    if (repl)
+    {
+        Test->repl->sync_slaves();
+    }
+    else
+    {
+        sleep(10);
+    }
 
     Test->tprintf("Trying to connect using this user\n");
     Test->set_timeout(20);

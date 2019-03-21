@@ -408,7 +408,7 @@ add_test_executable(binary_ps_cursor.cpp binary_ps_cursor replication LABELS rea
 add_test_executable(mxs321.cpp mxs321 replication LABELS maxscale REPL_BACKEND)
 
 # Crash with Galera and backend restart when persistant cfonnections are in use
-add_test_derived(mxs361 pers_02 mxs361 mxs361 LABELS maxscale GALERA_BACKEND)
+add_test_derived(mxs361 pers_02 mxs361 mxs361 LABELS maxscale REPL_BACKEND)
 
 # Load huge file with 'LOAD DATA LOCAL INFILE'
 add_test_executable(mxs365.cpp mxs365 replication LABELS readwritesplit REPL_BACKEND)
@@ -747,13 +747,13 @@ add_test_executable(rwsplit_read_only_trx.cpp rwsplit_read_only_trx rwsplit_read
 add_test_executable(schemarouter_duplicate_db.cpp schemarouter_duplicate_db schemarouter_duplicate_db LABELS schemarouter REPL_BACKEND)
 
 # Test of external script execution
-add_test_executable(script.cpp script script LABELS maxscale REPL_BACKEND)
+add_test_executable(script.cpp script script LABELS maxscale REPL_BACKEND GALERA_BACKEND)
 
 # Test 10.3 SEQUENCE objects
-add_test_executable(sequence.cpp sequence replication LABELS LIGHT)
+add_test_executable(sequence.cpp sequence replication LABELS LIGHT REPL_BACKEND)
 
 # Test 10.1 compound statements
-add_test_executable(compound_statement.cpp compound_statement replication LABELS LIGHT)
+add_test_executable(compound_statement.cpp compound_statement replication LABELS LIGHT REPL_BACKEND)
 
 # Check if 'weightby' parameter works
 add_test_executable(server_weight.cpp server_weight galera.weight LABELS readwritesplit readconnroute LIGHT GALERA_BACKEND)
@@ -774,7 +774,7 @@ add_test_executable(short_sessions.cpp short_sessions replication LABELS readwri
 add_test_derived(short_sessions_ssl short_sessions ssl LABELS readwritesplit readconnroute REPL_BACKEND)
 
 # Regression case for crash if maxadmin 'show monitors' command is issued, but no monitor is not running
-add_test_executable(show_monitor_crash.cpp show_monitor_crash show_monitor_crash LABELS maxscale)
+add_test_executable(show_monitor_crash.cpp show_monitor_crash show_monitor_crash LABELS maxscale REPL_BACKEND)
 
 # Check how Maxscale works in case of one slave failure, only one slave is configured
 add_test_executable(slave_failover.cpp slave_failover replication.one_slave LABELS readwritesplit REPL_BACKEND)
