@@ -138,6 +138,8 @@ void Mariadb_nodes::read_env()
             {
                 socket_cmd[i] = (char *) " ";
             }
+            sprintf(env_name, "%s_%03d_socket_cmd", prefix, i);
+            setenv(env_name, socket_cmd[i], 1);
 
             //reading start_db_command
             sprintf(env_name, "%s_%03d_start_db_command", prefix, i);

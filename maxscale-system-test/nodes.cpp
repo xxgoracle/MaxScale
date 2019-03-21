@@ -307,6 +307,7 @@ int Nodes::read_basic_env()
             {
                 IP_private[i] = IP[i];
             }
+            setenv(env_name, IP_private[i], 1);
 
             //reading IPv6
             sprintf(env_name, "%s_%03d_network6", prefix, i);
@@ -315,6 +316,7 @@ int Nodes::read_basic_env()
             {
                 IP6[i] = IP[i];
             }
+            setenv(env_name, IP6[i], 1);
 
             //reading sshkey
             sprintf(env_name, "%s_%03d_keyfile", prefix, i);
@@ -327,9 +329,10 @@ int Nodes::read_basic_env()
             {
                 access_user[i] = (char *) "vagrant";
             }
+            setenv(env_name, access_user[i], 1);
 
             sprintf(env_name, "%s_%03d_access_sudo", prefix, i);
-            access_sudo[i] = readenv(env_name, " ");
+            access_sudo[i] = readenv(env_name, " sudo ");
 
             if (strcmp(access_user[i], "root") == 0)
             {
@@ -347,12 +350,15 @@ int Nodes::read_basic_env()
             {
                 hostname[i] = IP[i];
             }
+            setenv(env_name, hostname[i], 1);
 
             sprintf(env_name, "%s_%03d_start_vm_command", prefix, i);
             start_vm_command[i] = readenv(env_name, "curr_dir=`pwd`; cd %s/%s;vagrant resume %s_%03d ; cd $curr_dir", getenv("MDBCI_VM_PATH"), getenv("name"), prefix, i);
+            setenv(env_name, start_vm_command[i], 1);
 
             sprintf(env_name, "%s_%03d_stop_vm_command", prefix, i);
             stop_vm_command[i] = readenv(env_name, "curr_dir=`pwd`; cd %s/%s;vagrant suspend %s_%03d ; cd $curr_dir", getenv("MDBCI_VM_PATH"), getenv("name"), prefix, i);
+            setenv(env_name, stop_vm_command[i], 1);
         }
     }
 
@@ -383,6 +389,7 @@ char * Nodes::get_nc_item(char * item_name)
     }
     char * cstr = new char [end - equial + 1];
     strcpy(cstr, network_config->substr(equial + 1 , end - equial - 1).c_str());
+    setenv(item_name, cstr, 1);
     return(cstr);
 }
 
@@ -394,6 +401,8 @@ int Nodes::get_N()
         sprintf(item, "%s_%03d_network", prefix, N);
         N++;
     } while (network_config->find(item) != std::string::npos);
+    sprintf(item, "%s_N", prefix);
+    setenv(item, std::to_string(N).c_str(), 1);
     return N - 1 ;
 }
 
