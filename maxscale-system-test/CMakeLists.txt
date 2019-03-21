@@ -181,7 +181,7 @@ add_test_executable(bug658.cpp bug658 replication LABELS readwritesplit readconn
 add_test_executable(bug662.cpp bug662 bug662 LABELS readwritesplit readconnroute maxscale REPL_BACKEND)
 
 # Bad TEE filter configuration
-add_test_executable(bug664.cpp bug664 bug664 LABELS MySQLAuth MySQLProtocol)
+add_test_executable(bug664.cpp bug664 bug664 LABELS MySQLAuth MySQLProtocol REPL_BACKEND)
 
 # TEE fileter: execute long sequence of queries ans session commands in the loop
 #add_test_executable(bug670.cpp bug670 bug670 LABELS tee REPL_BACKEND)
@@ -408,7 +408,7 @@ add_test_executable(binary_ps_cursor.cpp binary_ps_cursor replication LABELS rea
 add_test_executable(mxs321.cpp mxs321 replication LABELS maxscale REPL_BACKEND)
 
 # Crash with Galera and backend restart when persistant cfonnections are in use
-add_test_derived(mxs361 pers_02 mxs361 mxs361 LABELS maxscale REPL_BACKEND)
+add_test_derived(mxs361 pers_02 mxs361 mxs361 LABELS maxscale REPL_BACKEND GALERA_BACKEND)
 
 # Load huge file with 'LOAD DATA LOCAL INFILE'
 add_test_executable(mxs365.cpp mxs365 replication LABELS readwritesplit REPL_BACKEND)
@@ -534,7 +534,7 @@ add_test_executable(mxs951_utfmb4.cpp mxs951_utfmb4 replication LABELS REPL_BACK
 add_test_executable(mxs957.cpp mxs957 replication LABELS readwritesplit REPL_BACKEND)
 
 # Proxy protocol test
-add_test_executable(proxy_protocol.cpp proxy_protocol proxy_protocol LABELS MySQLAuth MySQLProtocol)
+add_test_executable(proxy_protocol.cpp proxy_protocol proxy_protocol LABELS MySQLAuth MySQLProtocol REPL_BACKEND)
 
 # Regression case for the bug "Defunct processes after maxscale have executed script during failover"
 add_test_executable(mxs1045.cpp mxs1045 mxs1045 LABELS maxscale REPL_BACKEND)

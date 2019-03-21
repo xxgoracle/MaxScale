@@ -897,11 +897,9 @@ int TestConnections::copy_all_logs_periodic()
 int TestConnections::prepare_binlog(int m)
 {
     char version_str[1024] = "";
-
     repl->connect();
     find_field(repl->nodes[0], "SELECT @@version", "@@version", version_str);
     tprintf("Master server version '%s'", version_str);
-
     if (*version_str &&
             strstr(version_str, "10.0") == NULL &&
             strstr(version_str, "10.1") == NULL &&
@@ -911,11 +909,9 @@ int TestConnections::prepare_binlog(int m)
                                          "sed -i \"s/,mariadb10-compatibility=1//\" %s",
                                          maxscales->maxscale_cnf[m]), "Error editing maxscale.cnf");
     }
-
     tprintf("Removing all binlog data from Maxscale node");
     add_result(maxscales->ssh_node_f(m, true, "rm -rf %s", maxscales->maxscale_binlog_dir[m]),
                "Removing binlog data failed");
-
     tprintf("Creating binlog dir");
     add_result(maxscales->ssh_node_f(m, true, "mkdir -p %s", maxscales->maxscale_binlog_dir[m]),
                "Creating binlog data dir failed");
@@ -980,9 +976,7 @@ int TestConnections::start_binlog(int m)
         execute_query(repl->nodes[i], "reset slave all");
         execute_query(repl->nodes[i], "reset master");
     }
-
     prepare_binlog(m);
-
     tprintf("Testing binlog when MariaDB is started with '%s' option\n", cmd_opt);
 
     tprintf("ls binlog data dir on Maxscale node\n");
@@ -1015,7 +1009,6 @@ int TestConnections::start_binlog(int m)
         tprintf("Configure first backend slave node to be slave of real master\n");
         repl->set_slave(repl->nodes[1], repl->IP[0],  repl->port[0], log_file, log_pos);
     }
-
     tprintf("Starting back Maxscale\n");
     add_result(maxscales->start_maxscale(m), "Maxscale start failed\n");
 

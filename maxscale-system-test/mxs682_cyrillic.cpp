@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     test.maxscales->disconnect();
 
     test.stop_timeout();
-    if (repl)
+    if (test.repl)
     {
         test.repl->connect();
         test.repl->sync_slaves();
