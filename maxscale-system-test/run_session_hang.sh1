@@ -30,7 +30,7 @@ fi
 
 sleep 15
 
-echo "show databases;" |  mysql -u$node_user -p$node_password -h$${maxscale_000_network} -P 4006 $ssl_options
+echo "show databases;" |  mysql -u$node_user -p$node_password -h${maxscale_000_network} -P 4006 $ssl_options
 if [ $? -ne 0 ]
 then
     res=1
@@ -45,7 +45,5 @@ then
 else
     echo "Test PASSED"
 fi
-
-$src_dir/copy_logs.sh run_session_hang
 
 exit $res

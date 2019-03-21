@@ -24,6 +24,5 @@ echo "checking if Maxscale is alive"
 echo "show databases;" | mysql -u$node_user -p$node_password -h ${maxscale_000_network} -P 4006 $ssl_options
 res=$?
 
-$src_dir/copy_logs.sh bug567
 exit $res
 

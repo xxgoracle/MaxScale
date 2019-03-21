@@ -15,5 +15,4 @@ res=$?
 
 ssh -i ${maxscale_000_keyfile} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $maxscale_000_access_user@${maxscale_000_network} "sudo rm -f /tmp/maxadmin.sock"
 
-
 exit $res
