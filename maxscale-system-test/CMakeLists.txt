@@ -377,7 +377,7 @@ add_test_script(maxinfo.py maxinfo.py maxinfo LABELS maxinfo LIGHT REPL_BACKEND)
 add_test_executable(maxscale_process_user.cpp maxscale_process_user replication LABELS maxscale LIGHT REPL_BACKEND)
 
 # Test of multi master monitor
-add_test_executable(mm.cpp mm mm LABELS mmmon BREAKS_REPL)
+add_test_executable(mm.cpp mm mm LABELS mmmon BREAKS_REPL REPL_BACKEND)
 
 # MySQL Monitor with Multi-master configurations
 add_test_executable(mm_mysqlmon.cpp mm_mysqlmon mm_mysqlmon LABELS mysqlmon REPL_BACKEND BREAKS_REPL)
@@ -762,10 +762,10 @@ add_test_executable(server_weight.cpp server_weight galera.weight LABELS readwri
 add_test_executable(session_limits.cpp session_limits session_limits LABELS readwritesplit REPL_BACKEND)
 
 # Test of schema router
-add_test_executable(sharding.cpp sharding sharding LABELS schemarouter BREAKS_REPL)
+add_test_executable(sharding.cpp sharding sharding LABELS schemarouter BREAKS_REPL REPL_BACKEND)
 
 # MXS-1160: LOAD DATA LOCAL INFILE with schemarouter
-add_test_executable(sharding_load_data.cpp sharding_load_data sharding LABELS schemarouter BREAKS_REPL)
+add_test_executable(sharding_load_data.cpp sharding_load_data sharding LABELS schemarouter BREAKS_REPL REPL_BACKEND)
 
 # Do short sessions (open conn, short query, close conn) in the loop
 add_test_executable(short_sessions.cpp short_sessions replication LABELS readwritesplit readconnroute REPL_BACKEND)
@@ -819,32 +819,32 @@ add_test_executable(test_hints.cpp test_hints hints2 LABELS hintfilter LIGHT REP
 # add_test_executable(test_maxctrl.cpp test_maxctrl maxctrl LABELS REPL_BACKEND)
 
 # Binlogrouter tests, these heavily alter the replication so they are run last
-add_test_executable(avro.cpp avro avro LABELS avrorouter binlogrouter LIGHT BREAKS_REPL)
-add_test_executable(avro_alter.cpp avro_alter avro LABELS avrorouter binlogrouter LIGHT BREAKS_REPL)
+add_test_executable(avro.cpp avro avro LABELS avrorouter binlogrouter LIGHT BREAKS_REPL REPL_BACKEND)
+add_test_executable(avro_alter.cpp avro_alter avro LABELS avrorouter binlogrouter LIGHT BREAKS_REPL REPL_BACKEND)
 
 # Test avrorouter file compression
-#add_test_script(avro_compression avro avro_compression LABELS avrorouter binlogrouter LIGHT BREAKS_REPL)
+#add_test_script(avro_compression avro avro_compression LABELS avrorouter binlogrouter LIGHT BREAKS_REPL REPL_BACKEND)
 
 # In the binlog router setup stop Master and promote one of the Slaves to be new Master
-add_test_executable(binlog_change_master.cpp binlog_change_master setup_binlog_tx_safe LABELS binlogrouter BREAKS_REPL)
+add_test_executable(binlog_change_master.cpp binlog_change_master setup_binlog_tx_safe LABELS binlogrouter BREAKS_REPL REPL_BACKEND)
 
 # In the binlog router setup stop Master and promote one of the Slaves to be new Master (use GTID)
-add_test_executable(binlog_change_master.cpp binlog_change_master_gtid setup_binlog_tx_safe_gtid LABELS binlogrouter BREAKS_REPL)
+add_test_executable(binlog_change_master.cpp binlog_change_master_gtid setup_binlog_tx_safe_gtid LABELS binlogrouter BREAKS_REPL REPL_BACKEND)
 
 # trying to start binlog setup with incomplete Maxscale.cnf
-add_test_executable(binlog_incompl.cpp binlog_incompl binlog_incompl LABELS binlogrouter BREAKS_REPL)
+add_test_executable(binlog_incompl.cpp binlog_incompl binlog_incompl LABELS binlogrouter BREAKS_REPL REPL_BACKEND)
 
 # configure binlog router setup, execute queries and transactions, check data; install semysync plugin, router options semisync=1,transaction_safety=1
-add_test_executable(binlog_semisync.cpp binlog_semisync setup_binlog_semisync LABELS binlogrouter HEAVY BREAKS_REPL)
+add_test_executable(binlog_semisync.cpp binlog_semisync setup_binlog_semisync LABELS binlogrouter HEAVY BREAKS_REPL REPL_BACKEND)
 
 # configure binlog router setup, execute queries and transactions, check data; install semysync plugin, router options semisync=0,transaction_safety=0
-add_test_derived(binlog_semisync_txs0_ss0 binlog_semisync setup_binlog_semisync_txs0_ss0 LABELS binlogrouter HEAVY BREAKS_REPL)
+add_test_derived(binlog_semisync_txs0_ss0 binlog_semisync setup_binlog_semisync_txs0_ss0 LABELS binlogrouter HEAVY BREAKS_REPL REPL_BACKEND)
 
 # configure binlog router setup, execute queries and transactions, check data; install semysync plugin, router options semisync=0,transaction_safety=1
-add_test_derived(binlog_semisync_txs0_ss1 binlog_semisync setup_binlog_semisync_txs0_ss1 LABELS binlogrouter HEAVY BREAKS_REPL)
+add_test_derived(binlog_semisync_txs0_ss1 binlog_semisync setup_binlog_semisync_txs0_ss1 LABELS binlogrouter HEAVY BREAKS_REPL REPL_BACKEND)
 
 # configure binlog router setup, execute queries and transactions, check data; install semysync plugin, router options semisync=1,transaction_safety=0
-add_test_derived(binlog_semisync_txs1_ss0 binlog_semisync setup_binlog_semisync_txs1_ss0 LABELS binlogrouter HEAVY BREAKS_REPL)
+add_test_derived(binlog_semisync_txs1_ss0 binlog_semisync setup_binlog_semisync_txs1_ss0 LABELS binlogrouter HEAVY BREAKS_REPL REPL_BACKEND)
 
 set_tests_properties(binlog_semisync PROPERTIES TIMEOUT 3600)
 set_tests_properties(binlog_semisync_txs0_ss0 PROPERTIES TIMEOUT 3600)
@@ -855,38 +855,38 @@ set_tests_properties(binlog_semisync_txs1_ss0 PROPERTIES TIMEOUT 3600)
 # The encryption tests don't work as they require the file key management plugin
 #
 # Binlog encription test (aes_cbr encryption)
-#add_test_executable(mxs1073_binlog_enc.cpp mxs1073_binlog_enc binlog_enc_aes_cbc LABELS binlogrouter 10.1 BREAKS_REPL)
+#add_test_executable(mxs1073_binlog_enc.cpp mxs1073_binlog_enc binlog_enc_aes_cbc LABELS binlogrouter 10.1 BREAKS_REPL REPL_BACKEND)
 # Binlog encription test (aes_ctr encryption)
-#add_test_script(mxs1073_binlog_enc_aes_ctr mxs1073_binlog_enc binlog_enc_aes_ctr LABELS binlogrouter 10.1 BREAKS_REPL)
+#add_test_script(mxs1073_binlog_enc_aes_ctr mxs1073_binlog_enc binlog_enc_aes_ctr LABELS binlogrouter 10.1 BREAKS_REPL REPL_BACKEND)
 
 # Test of CDC protocol (avro listener)
-add_test_executable(cdc_client.cpp cdc_client avro LABELS avrorouter binlogrouter BREAKS_REPL)
+add_test_executable(cdc_client.cpp cdc_client avro LABELS avrorouter binlogrouter BREAKS_REPL REPL_BACKEND)
 
 # Tries INSERTs with size close to 0x0ffffff * N (with binlog backend)
-add_test_executable(different_size_binlog.cpp different_size_binlog setup_binlog LABELS binlogrouter HEAVY BREAKS_REPL)
+add_test_executable(different_size_binlog.cpp different_size_binlog setup_binlog LABELS binlogrouter HEAVY BREAKS_REPL REPL_BACKEND)
 
 # Try to configure binlog router to use wrong password for Master and check 'slave status' on binlog
-add_test_executable(mxs781_binlog_wrong_passwrd.cpp mxs781_binlog_wrong_passwrd setup_binlog LABELS binlogrouter BREAKS_REPL)
+add_test_executable(mxs781_binlog_wrong_passwrd.cpp mxs781_binlog_wrong_passwrd setup_binlog LABELS binlogrouter BREAKS_REPL REPL_BACKEND)
 
 # Regression case for crash if long host name is used for binlog router (in 'change master to ...')
-add_test_executable(mxs813_long_hostname.cpp mxs813_long_hostname setup_binlog LABELS binlogrouter BREAKS_REPL)
+add_test_executable(mxs813_long_hostname.cpp mxs813_long_hostname setup_binlog LABELS binlogrouter BREAKS_REPL REPL_BACKEND)
 
 # Test that masking filter can handle multi-statements.
 add_test_executable(mxs1719.cpp mxs1719 mxs1719 LABELS masking REPL_BACKEND)
 
 # configure binlog router setup, execute queries and transactions, check data;
-add_test_executable(setup_binlog.cpp setup_binlog setup_binlog LABELS binlogrouter BREAKS_REPL)
+add_test_executable(setup_binlog.cpp setup_binlog setup_binlog LABELS binlogrouter BREAKS_REPL REPL_BACKEND)
 
 # configure binlog router setup, execute queries and transactions, check data;
-add_test_executable(setup_binlog_gtid.cpp setup_binlog_gtid setup_binlog_gtid LABELS binlogrouter BREAKS_REPL)
+add_test_executable(setup_binlog_gtid.cpp setup_binlog_gtid setup_binlog_gtid LABELS binlogrouter BREAKS_REPL REPL_BACKEND)
 
 # configure binlog router setup, execute queries and transactions, check data; install semysync plugin, backends started with --binlog-checksum=CRC32 option
 # disabled because it is included into setup_binlog test, separate test was created for debugging
-# add_test_executable(setup_binlog_crc_32.cpp setup_binlog_crc_32 setup_binlog LABELS binlogrouter BREAKS_REPL)
+# add_test_executable(setup_binlog_crc_32.cpp setup_binlog_crc_32 setup_binlog LABELS binlogrouter BREAKS_REPL REPL_BACKEND)
 
 # configure binlog router setup, execute queries and transactions, check data; install semysync plugin, backends started with --binlog-checksum=NONE option
 # disabled because it is included into setup_binlog test, separate test was created for debugging
-# add_test_executable(setup_binlog_crc_none.cpp setup_binlog_crc_none setup_binlog LABELS binlogrouter LIGHT BREAKS_REPL)
+# add_test_executable(setup_binlog_crc_none.cpp setup_binlog_crc_none setup_binlog LABELS binlogrouter LIGHT BREAKS_REPL REPL_BACKEND)
 
 
 # Creates KDC and tries authrization via GSSAPI (both client and backend)

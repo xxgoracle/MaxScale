@@ -9,11 +9,11 @@ export src_dir=`dirname $rp`
 export test_dir=`pwd`
 export test_name=`basename $rp`
 
-scp -i ${maxscale_000_network} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r $src_dir/test_ctrl_c/* $maxscale_000_access_user@${maxscale_000_network}:./
-ssh -i ${maxscale_000_network} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $maxscale_000_access_user@${maxscale_000_network} "export maxscale_000_access_sudo=$maxscale_000_access_sudo; ./test_ctrl_c.sh"
+scp -i ${maxscale_000_keyfile} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r $src_dir/test_ctrl_c/* $maxscale_000_access_user@${maxscale_000_network}:./
+ssh -i ${maxscale_000_keyfile} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $maxscale_000_access_user@${maxscale_000_network} "export maxscale_000_access_sudo=$maxscale_000_access_sudo; ./test_ctrl_c.sh"
 res=$?
 
-ssh -i ${maxscale_000_network} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $maxscale_000_access_user@${maxscale_000_network} "sudo rm -f /tmp/maxadmin.sock"
+ssh -i ${maxscale_000_keyfile} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $maxscale_000_access_user@${maxscale_000_network} "sudo rm -f /tmp/maxadmin.sock"
 
 
 exit $res
