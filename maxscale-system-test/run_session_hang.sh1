@@ -35,11 +35,4 @@ fi
 echo "Waiting for jobs"
 wait
 
-if [ $res -eq 1 ]
-then
-    echo "Test FAILED"
-else
-    echo "Test PASSED"
-fi
-
 exit $res

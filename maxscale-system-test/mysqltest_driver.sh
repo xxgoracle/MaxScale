@@ -42,10 +42,8 @@ res=0
 [ -d log_$1 ] && rm -r log_$1
 mkdir log_$1
 
-echo
-
 # Run the test
-for t in `$2/t/*.test|xargs -L 1 basename`
+for t in `ls $2/t/*.test|xargs -L 1 basename`
 do
     printf "$t:"
     test_name=${t%%.test}
@@ -53,8 +51,8 @@ do
               --user=$user --password=$password \
               --logdir=log_$1 \
               --test-file=$2/t/$test_name.test \
-              --result-file=$2/r/$test_name.result \
-              --silent
+              --result-file=$2/r/$test_name.result #\
+#              --silent
 
     if [ $? -eq 0 ]
     then

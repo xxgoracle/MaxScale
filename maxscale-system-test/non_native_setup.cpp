@@ -14,7 +14,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
+    if (argc < 3)
     {
         return 1;
     }
@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
             std::string(argv[1]);
 
     printf("sys=%s\n", sys.c_str());
+    fflush(stdout);
     Test->add_result(system(sys.c_str()), "Test %s FAILED!", argv[1]);
 
     int rval = Test->global_result;

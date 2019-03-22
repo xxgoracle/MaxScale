@@ -319,7 +319,7 @@ add_test_executable(galera_priority.cpp galera_priority galera_priority LABELS g
 add_test_executable(kill_master.cpp kill_master replication LABELS readwritesplit LIGHT REPL_BACKEND)
 
 # Test insertstream filter
-add_test_script(insertstream insertstream.sh insertstream LABELS insertstream REPL_BACKEND)
+add_test_script(insertstream.sh insertstream.sh insertstream LABELS insertstream REPL_BACKEND)
 
 # Check load balancing
 add_test_executable(load_balancing.cpp load_balancing load LABELS readwritesplit LIGHT REPL_BACKEND)
@@ -356,10 +356,10 @@ add_test_executable(mxs1323_stress.cpp mxs1323_stress mxs1323 LABELS readwritesp
 add_test_executable(lots_of_rows.cpp lots_of_rows galera LABELS readwritesplit HEAVY GALERA_BACKEND)
 
 # A set of MariaDB server tests executed against Maxscale RWSplit
-add_test_script(mariadb_tests_hartmut mariadb_tests_hartmut.sh replication LABELS readwritesplit REPL_BACKEND)
+add_test_script(mariadb_tests_hartmut.sh mariadb_tests_hartmut.sh replication LABELS readwritesplit REPL_BACKEND)
 
 # A set of MariaDB server tests executed against Maxscale RWSplit (Galera backend)
-add_test_script(mariadb_tests_hartmut_galera mariadb_tests_hartmut.sh galera_hartmut LABELS readwritesplit GALERA_BACKEND)
+add_test_script(mariadb_tests_hartmut_galera.sh mariadb_tests_hartmut.sh galera_hartmut LABELS readwritesplit GALERA_BACKEND)
 
 # Creates a number of connections > max_connections setting
 add_test_executable(max_connections.cpp max_connections replication LABELS MySQLAuth MySQLProtocol UNSTABLE HEAVY REPL_BACKEND)
@@ -595,7 +595,7 @@ add_test_executable(mxs1543.cpp mxs1543 avro LABELS REPL_BACKEND)
 
  # MXS-1585: Crash in MaxScale 2.1.12
  # https://jira.mariadb.org/browse/MXS-1585
-add_test_executable(mxs1585.cpp mxs1585 mxs1585 LABELS REPL_BACKEND)
+add_test_executable(mxs1585.cpp mxs1585 mxs1585 LABELS GALERA_BACKEND)
 
  # MXS-1643: Too many monitor events are triggered
  # https://jira.mariadb.org/browse/MXS-1643
