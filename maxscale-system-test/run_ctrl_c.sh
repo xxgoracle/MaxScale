@@ -7,12 +7,12 @@
 rp=`realpath $0`
 export src_dir=`dirname $rp`
 export test_dir=`pwd`
-export test_name=`basename $rp`
+export script_name=`basename $rp`
 
-if [ $maxscale_IP == "127.0.0.1" ] ; then
+if [ ${maxscale_000_network} == "127.0.0.1" ] ; then
 	echo local test is not supported
 	exit 0
 fi
 
-$test_dir/non_native_setup $test_name
+$test_dir/non_native_setup $1 ${script_name}
 

@@ -343,7 +343,7 @@ add_test_derived(load_balancing_pers10 load_balancing load_pers10 LABELS readwri
 add_test_executable(longblob.cpp longblob longblob LABELS readwritesplit readconnroute UNSTABLE HEAVY REPL_BACKEND)
 
 # Test with extremely big blob inserting/selecting with > 16 mb data blocks
-add_test_executable(mxs1110_16mb.cpp mxs1110_16mb longblob_filters LABELS readwritesplit readconnroute HEAVY REPL_BACKEND)
+add_test_executable(mxs1110_16mb.cpp mxs1110_16mb longblob_filters LABELS readwritesplit readconnroute HEAVY REPL_BACKEND GALERA_BACKEND)
 
 # Schemarouter implicit database detection
 add_test_executable(mxs1310_implicit_db.cpp mxs1310_implicit_db mxs1310_implicit_db LABELS schemarouter REPL_BACKEND)
@@ -469,7 +469,7 @@ add_test_executable(mxs729_maxadmin.cpp mxs729_maxadmin replication LABELS MaxAd
 add_test_script(mxs791.sh mxs791.sh replication LABELS UNSTABLE HEAVY REPL_BACKEND)
 
 # Simple connect test in bash, checks that defined in cmd line DB is selected (Galera backend)
-add_test_script(mxs791_galera.sh mxs791_galera.sh galera LABELS UNSTABLE HEAVY GALERA_BACKEND)
+add_test_script(mxs791_galera.sh mxs791.sh galera LABELS UNSTABLE HEAVY GALERA_BACKEND)
 
 # Checks "Current no. of conns" maxadmin output after long blob inserting
 add_test_executable(mxs812_1.cpp mxs812_1 longblob LABELS readwritesplit REPL_BACKEND)

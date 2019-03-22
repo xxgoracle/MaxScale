@@ -64,7 +64,7 @@ endfunction()
 # also suitable for symlinks
 function(add_test_script name script template labels)
   add_template(${name} ${template} "${ARGV}")
-  add_test(NAME ${name} COMMAND ${CMAKE_SOURCE_DIR}/${script} ${name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  add_test(NAME ${name} COMMAND ${CMAKE_SOURCE_DIR}/${script} ${name} ${script} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
   list(REMOVE_AT ARGV 0 1 2)
 

@@ -7,11 +7,6 @@
 ## - repeat for RWSplit, ReadConn
 
 
-rp=`realpath $0`
-export src_dir=`dirname $rp`
-export test_dir=`pwd`
-export test_name=`basename $rp`
-
 export ssl_options="--ssl-cert=$src_dir/ssl-cert/client-cert.pem --ssl-key=$src_dir/ssl-cert/client-key.pem"
 
 #echo "Waiting for 15 seconds"

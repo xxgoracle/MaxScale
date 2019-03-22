@@ -29,8 +29,9 @@ int main(int argc, char *argv[])
     std::string sys =
             std::string(test_dir) +
             std::string("/") +
-            std::string(argv[1]) +
-            std::string("1");
+            std::string(argv[2]) +
+            std::string("1 ") +
+            std::string(argv[1]);
 
     printf("sys=%s\n", sys.c_str());
     Test->add_result(system(sys.c_str()), "Test %s FAILED!", argv[1]);

@@ -5,10 +5,6 @@
 ## - try to remove everythign from /dev/shm/$maxscale_pid
 ## check if Maxscale is alive
 
-rp=`realpath $0`
-export src_dir=`dirname $rp`
-export test_dir=`pwd`
-export test_name=`basename $rp`
 export ssl_options="--ssl-cert=$src_dir/ssl-cert/client-cert.pem --ssl-key=$src_dir/ssl-cert/client-key.pem"
 
 #pid=`ssh -i $maxscale_sshkey -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${maxscale_000_whoami}@${maxscale_000_network} "pgrep maxscale"`

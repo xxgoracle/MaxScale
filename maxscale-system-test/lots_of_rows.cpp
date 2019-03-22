@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
 
     Test->tprintf("done, syncing slaves");
     Test->stop_timeout();
-    Test->repl->sync_slaves();
+    //Test->repl->sync_slaves();
+    sleep(10);
     Test->tprintf("Trying SELECT");
     Test->set_timeout(60);
     Test->try_query(Test->maxscales->conn_rwsplit[0], (char *) "SELECT * FROM t1");
