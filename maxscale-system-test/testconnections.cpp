@@ -217,13 +217,9 @@ TestConnections::TestConnections(int argc, char *argv[]):
         }
     }
 
-    if (optind < argc)
+    if (!strcmp(test_name, "non_native_setup"))
     {
-        test_name = argv[optind];
-    }
-    else
-    {
-        test_name = basename(argv[0]);
+        test_name = argv[1];
     }
     printf("optind %d, test_name=%s\n", optind, test_name);
 
