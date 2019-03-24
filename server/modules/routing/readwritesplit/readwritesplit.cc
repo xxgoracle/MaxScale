@@ -521,8 +521,10 @@ static bool route_stored_query(RWSplitSession *rses)
         }
         else
         {
-            /** Routing was stopped, we need to wait for a response before retrying */
-            rses->query_queue = gwbuf_append(temp_storage, rses->query_queue);
+            /** Routing was stopped, we need to wait for a response before retrying.
+             * temp_storage holds the tail end of the queue and query_queue contains the query we attempted
+             * to route. Append temp_storage to query_queue to keep the order of the queries correct. */
+            rses->query_queue = gwbuf_append(rses->query_queue, temp_storage);
             break;
         }
     }
@@ -916,6 +918,7 @@ static void closeSession(MXS_ROUTER *instance, MXS_ROUTER_SESSION *router_sessio
     {
         router_cli_ses->rses_closed = true;
         close_all_connections(router_cli_ses->backends);
+        gwbuf_free(router_cli_ses->query_queue);
 
         if (MXS_LOG_PRIORITY_IS_ENABLED(LOG_INFO) &&
             router_cli_ses->sescmd_list.size())
