@@ -221,6 +221,11 @@ TestConnections::TestConnections(int argc, char *argv[]):
     {
         test_name = argv[1];
     }
+    else
+    {
+        test_name = basename(argv[0]);
+    }
+
     printf("optind %d, test_name=%s\n", optind, test_name);
 
     char * labels_string = NULL;
