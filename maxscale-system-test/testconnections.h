@@ -276,6 +276,11 @@ public:
     std::string mdbci_labels;
 
     /**
+     * @brief configured_labels List of lables for which nodes are configured
+     */
+    std::string configured_labels;
+
+    /**
     * @brief vm_path Path to the VM Vagrant directory
     */
     std::string vm_path;

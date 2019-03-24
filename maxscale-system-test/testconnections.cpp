@@ -217,13 +217,10 @@ TestConnections::TestConnections(int argc, char *argv[]):
         }
     }
 
+    test_name = basename(argv[0]);
     if (!strcmp(test_name, "non_native_setup"))
     {
         test_name = argv[1];
-    }
-    else
-    {
-        test_name = basename(argv[0]);
     }
 
     printf("optind %d, test_name=%s\n", optind, test_name);
@@ -239,9 +236,36 @@ TestConnections::TestConnections(int argc, char *argv[]):
     }
 
     mdbci_labels = get_mdbci_lables(labels);
-    if (call_mdbci(""))
+
+    std::string delimiter = std::string (",");
+    size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+    std::string label;
+    std::string mdbci_labels_c = mdbci_labels + delimiter;
+
+    bool mdbci_call_needed = false;
+
+    while ((pos_end = mdbci_labels_c.find (delimiter, pos_start)) != std::string::npos)
     {
-        exit(MDBCI_FAUILT);
+           label = mdbci_labels_c.substr (pos_start, pos_end - pos_start);
+           pos_start = pos_end + delim_len;
+           if (configured_labels.find(label, 0) == std::string::npos)
+           {
+               mdbci_call_needed = true;
+               tprintf("Machines with label '%s' are not running, MDBCI UP call is needed", label.c_str());
+           }
+           else
+           {
+               tprintf("Machines with label '%s' are running, MDBCI UP call is not needed", label.c_str());
+           }
+       }
+
+    if (mdbci_call_needed)
+    {
+        if (call_mdbci(""))
+        {
+            exit(MDBCI_FAUILT);
+        }
+
     }
 
     if (mdbci_labels.find(std::string("REPL_BACKEND")) == std::string::npos)
@@ -519,7 +543,6 @@ void TestConnections::expect(bool result, const char *format, ...)
 
 void TestConnections::read_mdbci_info()
 {
-    std::string nc_file_name;
     mdbci_vm_path = readenv("MDBCI_VM_PATH", "%s/vms/", getenv("HOME"));
 
     if (system((std::string("mkdir -p ") +
@@ -535,12 +558,17 @@ void TestConnections::read_mdbci_info()
     vm_path = std::string(mdbci_vm_path) + std::string(mdbci_config_name);
     if (mdbci_config_name != NULL)
     {
-        nc_file_name = vm_path + "_network_config";
         std::ifstream nc_file;
-        nc_file.open(nc_file_name);
+        nc_file.open(vm_path + "_network_config");
         std::stringstream strStream;
         strStream << nc_file.rdbuf();
         network_config = strStream.str();
+        nc_file.close();
+
+        nc_file.open(vm_path + "_configured_labels");
+        std::stringstream strStream1;
+        strStream1 << nc_file.rdbuf();
+        configured_labels = strStream1.str();
         nc_file.close();
     }
     else
