@@ -18,7 +18,6 @@ function run_test
     echo $test_name
     logdir=log_$test_name
     mkdir -p $logdir
-
     mysqltest --host=${maxscale_000_network} --port=$port \
               --user=$user --password=$password \
               --logdir=$logdir \
@@ -38,14 +37,13 @@ function run_test
     return $rc
 }
 
-
-export dir="$src_dir/cache/$expected_name"
+export dir="$src_dir/cache/$1"
 
 source=$src_dir/cache/$1/cache_rules.json
 target=${maxscale_000_whoami}@${maxscale_000_network}:/home/${maxscale_000_whoami}/cache_rules.json
 
 if [ ${maxscale_000_network} != "127.0.0.1" ] ; then
-   scp -i $maxscale_keyfile -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $source $target
+   scp -i ${maxscale_000_keyfile} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $source $target
 else
    cp $source /home/${maxscale_000_whoami}/cache_rules.json
 fi
