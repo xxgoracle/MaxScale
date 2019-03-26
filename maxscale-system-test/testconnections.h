@@ -12,7 +12,8 @@
 
 typedef std::set<std::string> StringSet;
 
-#define MDBCI_FAUILT 200
+#define MDBCI_FAUILT 200 // Exit code for the case when failure caused by MDBCI non-zero exit
+#define BROKEN_VM_FAUILT 201 // Exit code for the case when failure caused by screwed VMs
 
 /**
  * @brief Class contains references to Master/Slave and Galera test setups
@@ -288,7 +289,7 @@ public:
     /**
      * @brief reinstall_maxscale Flag that is set when 'reinstall_maxscale'
      * option is provided;
-     * if true Maxscale will be removed and re-installed on all nodes
+     * if true Maxscale will be removed and re-installed on all Maxscale nodes
      * Used for 'run_test_snapshot'
      */
     bool reinstall_maxscale;
@@ -641,7 +642,7 @@ std::string dump_status(const StringSet& current, const StringSet& expected);
  * @param labels pointer to string for storing all test labels
  * @return Name of maxscale.cnf file template
  */
-const char *get_template_name(char * test_name, char ** labels);
+const char *get_template_name(char * test_name, char **labels);
 
 /**
  * @brief readenv_and_set_default Read enviromental variable and set default values if

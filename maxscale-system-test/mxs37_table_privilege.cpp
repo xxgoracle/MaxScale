@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        sleep(10);
+        Test->galera->sync_slaves();
     }
 
     Test->tprintf("Trying to connect using this user\n");

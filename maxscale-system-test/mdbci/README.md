@@ -57,13 +57,13 @@ VMs will not be destroyed after the tests.
 The name of test run (and name of VMs set) is generated based on ```box``` parameter
 and current date/time
 
-Only needed VMs will be started. Every test has labels like ```REPL_BACKEND```, 
+Only needed VMs will be started. Every test has labels like ```REPL_BACKEND```,
 ```GALERA_BACKEND```
 
 Test can be executed directly by calling its executable from command line or ```ctest```
 Every test checks running VMs, brings up VMs if they are not running, checks backend.
 If backend is broken test tries to fix it. If attempt to fix backend failed test tries
-to execute ```mdbci``` with ```--recreate``` option. In this case ```mdbci``` kills all VMs and 
+to execute ```mdbci``` with ```--recreate``` option. In this case ```mdbci``` kills all VMs and
 brings up new ones
 
 ### Basic run_test.sh parameters

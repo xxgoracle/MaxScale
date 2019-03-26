@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-
     std::string sys =
         std::string(test_dir) +
         std::string("/") +
@@ -30,17 +29,11 @@ int main(int argc, char *argv[])
     int local_argc = argc - 1;
     char** local_argv = &argv[1];
 
-    TestConnections * Test = new TestConnections(local_argc, local_argv);
-    (void)Test;
+    TestConnections test(local_argc, local_argv);
     sleep(3);
-
     setenv("src_dir", test_dir, 1);
 
-    printf("sys=%s\n", sys.c_str());
-    fflush(stdout);
-    Test->add_result(system(sys.c_str()), "Test %s FAILED!", argv[1]);
+    test.add_result(system(sys.c_str()), "Test %s FAILED!", argv[1]);
 
-    int rval = Test->global_result;
-    delete Test;
-    return rval;
+    return Test.global_result;
 }
