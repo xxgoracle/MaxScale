@@ -19,12 +19,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int local_argc = argc - 1;
-    char** local_argv = &argv[1];
-
-    TestConnections * Test = new TestConnections(local_argc, local_argv);
-    (void)Test;
-    sleep(3);
 
     std::string sys =
             std::string(test_dir) +
@@ -32,6 +26,14 @@ int main(int argc, char *argv[])
             std::string(argv[2]) +
             std::string("1 ") +
             std::string(argv[1]);
+
+    int local_argc = argc - 1;
+    char** local_argv = &argv[1];
+
+    TestConnections * Test = new TestConnections(local_argc, local_argv);
+    (void)Test;
+    sleep(3);
+
 
     printf("sys=%s\n", sys.c_str());
     fflush(stdout);
