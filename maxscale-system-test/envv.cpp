@@ -50,11 +50,12 @@ bool readenv_bool(const char * name, bool def)
     if (env)
     {
         return ((strcasecmp(env, "yes") == 0) ||
+                (strcasecmp(env, "y") == 0) ||
                 (strcasecmp(env, "true") == 0));
     }
     else
     {
-        setenv(name, def ? "true":"false", 1);
+        setenv(name, def ? "true" : "false", 1);
         return def;
     }
 }
