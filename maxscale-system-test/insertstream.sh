@@ -1,9 +1,4 @@
 #!/bin/bash
 
-rp=`realpath $0`
-export src_dir=`dirname $rp`
-export test_dir=`pwd`
-export script_name=`basename $rp`
 
-$test_dir/non_native_setup $1 ${script_name}
-
+$src_dir/mysqltest_driver.sh insertstream $src_dir/insertstream 4006

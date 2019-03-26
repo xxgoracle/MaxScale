@@ -4,10 +4,18 @@
 #
 # TODO: Don't test correctness of routing with mysqltest
 #
-rp=`realpath $0`
-export src_dir=`dirname $rp`
-export test_dir=`pwd`
-export script_name=`basename $rp`
 
-$test_dir/non_native_setup $1 ${script_name}
+# TODO: Don't copy this and "unmangle" the test instead
+cp -r $src_dir/Hartmut_tests/maxscale-mysqltest ./Hartmut_tests/maxscale-mysqltest/
+
+master_id=`echo "SELECT @@server_id" | mysql -u$node_user -p$node_password -h $node_000_network $ssl_options -P $node_000_port | tail -n1`
+echo "--disable_query_log" > Hartmut_tests/maxscale-mysqltest/testconf.inc
+echo "SET @TMASTER_ID=$master_id;" >> Hartmut_tests/maxscale-mysqltest/testconf.inc
+echo "--enable_query_log" >> Hartmut_tests/maxscale-mysqltest/testconf.inc
+
+echo "--disable_query_log" > testconf.inc
+echo "SET @TMASTER_ID=$master_id;" >> testconf.inc
+echo "--enable_query_log" >> testconf.inc
+
+$src_dir/mysqltest_driver.sh "$1" "$PWD/Hartmut_tests/maxscale-mysqltest" 4006
 

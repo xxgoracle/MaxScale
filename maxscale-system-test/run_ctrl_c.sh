@@ -3,16 +3,11 @@
 ###
 ## @file run_ctrl_c.sh
 ## check that Maxscale is reacting correctly on ctrc+c signal and termination does not take ages
+set -x
+scp -i ${maxscale_000_keyfile} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r $src_dir/test_ctrl_c/* ${maxscale_000_whoami}@${maxscale_000_network}:./
+ssh -i ${maxscale_000_keyfile} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${maxscale_000_whoami}@${maxscale_000_network} "export maxscale_000_access_sudo=${maxscale_000_access_sudo}; ./test_ctrl_c.sh"
+res=$?
 
-rp=`realpath $0`
-export src_dir=`dirname $rp`
-export test_dir=`pwd`
-export script_name=`basename $rp`
+ssh -i ${maxscale_000_keyfile} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${maxscale_000_whoami}@${maxscale_000_network} "sudo rm -f /tmp/maxadmin.sock"
 
-if [ ${maxscale_000_network} == "127.0.0.1" ] ; then
-	echo local test is not supported
-	exit 0
-fi
-
-$test_dir/non_native_setup $1 ${script_name}
-
+exit $res

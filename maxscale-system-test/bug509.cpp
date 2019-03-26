@@ -77,8 +77,7 @@ int main(int argc, char *argv[])
 
     Test->stop_timeout();
 
-    //Test->galera->sync_slaves();
-    sleep(10);
+    Test->galera->sync_slaves();
 
     Test->tprintf("Trying \n");
     char last_insert_id1[1024];

@@ -12,10 +12,7 @@ int main(int argc, char *argv[])
     TestConnections * Test = new TestConnections(argc, argv);
 
     // Reset server settings by replacing the config files
-    if (Test->repl)
-    {
-        Test->repl->reset_server_settings();
-    }
+    Test->repl->reset_server_settings();
 
     Test->set_timeout(10);
 
@@ -25,21 +22,15 @@ int main(int argc, char *argv[])
 
     Test->add_result(Test->test_maxscale_connections(0, true, true, true), "Can't connect to backend\n");
 
-    if ((Test->galera != NULL) && (Test->galera->N != 0))
+    Test->tprintf("Connecting to Maxscale router with Galera backend\n");
+    MYSQL * g_conn = open_conn(4016 , Test->maxscales->IP[0], Test->maxscales->user_name, Test->maxscales->password, Test->ssl);
+    if (g_conn != NULL )
     {
-        Test->tprintf("Connecting to Maxscale router with Galera backend\n");
-        MYSQL * g_conn = open_conn(4016 , Test->maxscales->IP[0], Test->maxscales->user_name, Test->maxscales->password, Test->ssl);
-        if (g_conn != NULL )
-        {
-            Test->tprintf("Testing connection\n");
-            Test->add_result(Test->try_query(g_conn, (char *) "SELECT 1"),
-                             (char *) "Error executing query against RWSplit Galera\n");
-        }
+        Test->tprintf("Testing connection\n");
+        Test->add_result(Test->try_query(g_conn, (char *) "SELECT 1"),
+                         (char *) "Error executing query against RWSplit Galera\n");
     }
-    else
-    {
-        Test->tprintf("Galera is not in use\n");
-    }
+
     Test->tprintf("Closing connections\n");
     Test->maxscales->close_maxscale_connections(0);
     Test->check_maxscale_alive(0);
