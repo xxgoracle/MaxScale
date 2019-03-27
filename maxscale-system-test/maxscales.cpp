@@ -38,16 +38,16 @@ int Maxscales::read_env()
         for (int i = 0; i < N; i++)
         {
             sprintf(env_name, "%s_%03d_cnf", prefix, i);
-            maxscale_cnf[i] = (readenv(env_name, DEFAULT_MAXSCALE_CNF)).c_str();
+            maxscale_cnf[i] = readenv(env_name, DEFAULT_MAXSCALE_CNF);
 
             sprintf(env_name, "%s_%03d_log_dir", prefix, i);
-            maxscale_log_dir[i] = (readenv(env_name, DEFAULT_MAXSCALE_LOG_DIR)).c_str();
+            maxscale_log_dir[i] = readenv(env_name, DEFAULT_MAXSCALE_LOG_DIR);
 
             sprintf(env_name, "%s_%03d_binlog_dir", prefix, i);
-            maxscale_binlog_dir[i] = (readenv(env_name, DEFAULT_MAXSCALE_BINLOG_DIR)).c_str();
+            maxscale_binlog_dir[i] = readenv(env_name, DEFAULT_MAXSCALE_BINLOG_DIR);
 
             sprintf(env_name, "%s_%03d_maxadmin_password", prefix, i);
-            maxadmin_password[i] = (readenv(env_name, DEFAULT_MAXADMIN_PASSWORD)).c_str();
+            maxadmin_password[i] = readenv(env_name, DEFAULT_MAXADMIN_PASSWORD);
 
             rwsplit_port[i] = 4006;
             readconn_master_port[i] = 4008;

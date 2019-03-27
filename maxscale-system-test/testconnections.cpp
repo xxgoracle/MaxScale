@@ -545,30 +545,36 @@ void TestConnections::read_mdbci_info()
     mdbci_vm_path = readenv("MDBCI_VM_PATH", "%s/vms/", getenv("HOME"));
 
     if (system((std::string("mkdir -p ") +
-                mdbci_vm_path).c_str()))
+                std::string(mdbci_vm_path)).c_str()))
     {
-        tprintf("Unable to create MDBCI VMs direcory '%s', exiting", mdbci_vm_path.c_str());
+        tprintf("Unable to create MDBCI VMs direcory '%s', exiting", mdbci_vm_path);
         exit(MDBCI_FAUILT);
     }
     mdbci_template = readenv("template", "default");
     target = readenv("target", "develop");
 
     mdbci_config_name = readenv("mdbci_config_name", "local");
-    vm_path = mdbci_vm_path + mdbci_config_name;
+    vm_path = std::string(mdbci_vm_path) + std::string(mdbci_config_name);
+    if (mdbci_config_name != NULL)
+    {
+        std::ifstream nc_file;
+        nc_file.open(vm_path + "_network_config");
+        std::stringstream strStream;
+        strStream << nc_file.rdbuf();
+        network_config = strStream.str();
+        nc_file.close();
 
-    std::ifstream nc_file;
-    nc_file.open(vm_path + "_network_config");
-    std::stringstream strStream;
-    strStream << nc_file.rdbuf();
-    network_config = strStream.str();
-    nc_file.close();
-
-    nc_file.open(vm_path + "_configured_labels");
-    std::stringstream strStream1;
-    strStream1 << nc_file.rdbuf();
-    configured_labels = strStream1.str();
-    nc_file.close();
-
+        nc_file.open(vm_path + "_configured_labels");
+        std::stringstream strStream1;
+        strStream1 << nc_file.rdbuf();
+        configured_labels = strStream1.str();
+        nc_file.close();
+    }
+    else
+    {
+        tprintf("The name of MDBCI configuration is not defined, exiting!");
+        exit(1);
+    }
     if (verbose)
     {
         tprintf(network_config.c_str());
@@ -603,12 +609,10 @@ void TestConnections::read_env()
     smoke = readenv_bool("smoke", false);
     threads = readenv_int("threads", 4);
     use_snapshots = readenv_bool("use_snapshots", false);
-    take_snapshot_command = (readenv("take_snapshot_command",
-                                     "mdbci snapshot take --path-to-nodes %s --snapshot-name ",
-                                     mdbci_config_name.c_str())).c_str();
-    revert_snapshot_command = (readenv("revert_snapshot_command",
-                                       "mdbci snapshot revert --path-to-nodes %s --snapshot-name ",
-                                       mdbci_config_name.c_str())).c_str();
+    take_snapshot_command = readenv("take_snapshot_command",
+                                    "mdbci snapshot take --path-to-nodes %s --snapshot-name ", mdbci_config_name);
+    revert_snapshot_command = readenv("revert_snapshot_command",
+                                      "mdbci snapshot revert --path-to-nodes %s --snapshot-name ", mdbci_config_name);
     no_vm_revert = readenv_bool("no_vm_revert", true);
     use_valgrind = readenv_bool("use_valgrind", false);
 }
@@ -2113,15 +2117,15 @@ int TestConnections::call_mdbci(const char * options)
 
 int TestConnections::process_mdbci_template()
 {
-    std::string product = readenv("product", "mariadb");
-    std::string box = readenv("box", "centos_7_libvirt");
-    std::string __attribute__((unused)) backend_box = readenv("backend_box", "%s", box.c_str());
-    std::string version = readenv("version", "10.3");
-    std::string __attribute__((unused)) target = readenv("target", "develop");
-    std::string __attribute__((unused)) vm_memory = readenv("vm_memory", "2048");
-    std::string __attribute__((unused)) galera_version = readenv("galera_version", "%s", version.c_str());
+    char * product = readenv("product", "mariadb");
+    char * box = readenv("box", "centos_7_libvirt");
+    char * __attribute__((unused)) backend_box = readenv("backend_box", "%s", box);
+    char * version = readenv("version", "10.3");
+    char * __attribute__((unused)) target = readenv("target", "develop");
+    char * __attribute__((unused)) vm_memory = readenv("vm_memory", "2048");
+    char * __attribute__((unused)) galera_version = readenv("galera_version", "%s", version);
 
-    if (product.find("mysql") == 0 )
+    if (strcmp(product, "mysql") == 0 )
     {
         setenv("cnf_path",
                (vm_path + std::string("/cnf/mysql56/")).c_str(),
@@ -2174,10 +2178,10 @@ std::string dump_status(const StringSet& current, const StringSet& expected)
 }
 int TestConnections::reinstall_maxscales()
 {
-    char sys[target.length() +
-                             mdbci_config_name.length() +
-                             strlen(maxscales->prefix) +
-                             70];
+    char sys[strlen(target) +
+                            strlen(mdbci_config_name) +
+                            strlen(maxscales->prefix) +
+                            70];
     for (int i = 0; i < maxscales->N; i++)
     {
         printf("Installing Maxscale on node %d\n", i);
@@ -2186,13 +2190,13 @@ int TestConnections::reinstall_maxscales()
         maxscales->ssh_node(i, "yum clean all", true);
 
         sprintf(sys, "mdbci setup_repo --product maxscale_ci --product-version %s %s/%s_%03d",
-                target.c_str(), mdbci_config_name.c_str(), maxscales->prefix, i);
+                target, mdbci_config_name, maxscales->prefix, i);
         if (system(sys))
         {
             return 1;
         }
         sprintf(sys, "mdbci install_product --product maxscale_ci --product-version %s %s/%s_%03d",
-                target.c_str(), mdbci_config_name.c_str(), maxscales->prefix, i);
+                target, mdbci_config_name, maxscales->prefix, i);
         if (system(sys))
         {
             return 1;

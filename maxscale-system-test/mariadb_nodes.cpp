@@ -110,10 +110,10 @@ void Mariadb_nodes::read_env()
     read_basic_env();
 
     sprintf(env_name, "%s_user", prefix);
-    user_name = (readenv(env_name, "skysql")).c_str();
+    user_name = readenv(env_name, "skysql");
 
     sprintf(env_name, "%s_password", prefix);
-    password = (readenv(env_name, "skysql")).c_str();
+    password = readenv(env_name, "skysql");
 
     ssl = false;
     sprintf(env_name, "%s_ssl", prefix);
@@ -129,7 +129,7 @@ void Mariadb_nodes::read_env()
 
             //reading sockets
             sprintf(env_name, "%s_%03d_socket", prefix, i);
-            socket[i] = (readenv(env_name, " ")).c_str();
+            socket[i] = readenv(env_name, " ");
             if (strcmp(socket[i], " "))
             {
                 socket_cmd[i] = (char *) malloc(strlen(socket[i]) + 10);
@@ -144,15 +144,15 @@ void Mariadb_nodes::read_env()
 
             //reading start_db_command
             sprintf(env_name, "%s_%03d_start_db_command", prefix, i);
-            start_db_command[i] = (readenv(env_name, (char *) "service mysql start")).c_str();
+            start_db_command[i] = readenv(env_name, (char *) "service mysql start");
 
             //reading stop_db_command
             sprintf(env_name, "%s_%03d_stop_db_command", prefix, i);
-            stop_db_command[i] = (readenv(env_name, (char *) "service mysql stop")).c_str();
+            stop_db_command[i] = readenv(env_name, (char *) "service mysql stop");
 
             //reading cleanup_db_command
             sprintf(env_name, "%s_%03d_cleanup_db_command", prefix, i);
-            cleanup_db_command[i] = (readenv(env_name, (char *) "rm -rf /var/lib/mysql/*; killall -9 mysqld")).c_str();
+            cleanup_db_command[i] = readenv(env_name, (char *) "rm -rf /var/lib/mysql/*; killall -9 mysqld");
         }
     }
 }
@@ -179,9 +179,9 @@ int Mariadb_nodes::find_master()
     while ((found == 0) && (i < N))
     {
         if (find_field(
-                    nodes[i], (char *) "show slave status;",
-                    (char *) "Master_Host", &str[0]
-                ) == 0 )
+                nodes[i], (char *) "show slave status;",
+                (char *) "Master_Host", &str[0]
+            ) == 0 )
         {
             found = 1;
             strcpy(master_IP, str);
@@ -664,7 +664,7 @@ static bool multi_source_replication(MYSQL *conn, int node)
     MYSQL_RES *res;
 
     if (mysql_query(conn, "SHOW ALL SLAVES STATUS") == 0 &&
-            (res = mysql_store_result(conn)))
+        (res = mysql_store_result(conn)))
     {
         if (mysql_num_rows(res) == 1)
         {

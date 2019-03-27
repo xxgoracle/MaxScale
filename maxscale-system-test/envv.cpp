@@ -2,9 +2,8 @@
 #include <string>
 #include "envv.h"
 
-std::string readenv(const char * name, const char *format, ...)
+char * readenv(const char * name, const char *format, ...)
 {
-    std::string env_str;
     char * env = getenv(name);
     if (!env)
     {
@@ -25,14 +24,8 @@ std::string readenv(const char * name, const char *format, ...)
         vsnprintf(env, message_len + 1, format, valist);
         va_end(valist);
         setenv(name, env, 1);
-        env_str = std::string(env);
-        free(env);
     }
-    else
-    {
-        env_str = std::string(env);
-    }
-    return env_str;
+    return env;
 }
 
 int readenv_int(const char * name, int def)

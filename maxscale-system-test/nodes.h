@@ -54,7 +54,7 @@ public:
     /**
      * @brief access_sudo empty if sudo is not needed or "sudo " if sudo is needed.
      */
-    const char * access_sudo[256];
+    char * access_sudo[256];
 
     /**
      * @brief access_homedir home directory of access_user
@@ -66,21 +66,21 @@ public:
     /**
      * @brief stop_vm_command Command to suspend VM
      */
-    const char * stop_vm_command[256];
+    char * stop_vm_command[256];
     /**
 
      * @brief start_vm_command Command to resume VM
      */
-    const char * start_vm_command[256];
+    char * start_vm_command[256];
 
     /**
      * @brief   User name to access backend nodes
      */
-    const char * user_name;
+    char * user_name;
     /**
      * @brief   Password to access backend nodes
      */
-    const char * password;
+    char * password;
 
     /**
      * @brief network_config Content of MDBCI network_config file

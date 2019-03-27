@@ -273,10 +273,10 @@ int Nodes::read_basic_env()
     char env_name[64];
 
     sprintf(env_name, "%s_user", prefix);
-    user_name = (readenv(env_name, "skysql")).c_str();
+    user_name = readenv(env_name, "skysql");
 
     sprintf(env_name, "%s_password", prefix);
-    password = (readenv(env_name, "skysql")).c_str();
+    password = readenv(env_name, "skysql");
 
     N = get_N();
 
@@ -320,7 +320,7 @@ int Nodes::read_basic_env()
             setenv(env_name, access_user[i], 1);
 
             sprintf(env_name, "%s_%03d_access_sudo", prefix, i);
-            access_sudo[i] = (readenv(env_name, " sudo ")).c_str();
+            access_sudo[i] = readenv(env_name, " sudo ");
 
             if (strcmp(access_user[i], "root") == 0)
             {
@@ -341,13 +341,13 @@ int Nodes::read_basic_env()
             setenv(env_name, hostname[i], 1);
 
             sprintf(env_name, "%s_%03d_start_vm_command", prefix, i);
-            start_vm_command[i] = (readenv(env_name, "curr_dir=`pwd`; cd %s/%s;vagrant resume %s_%03d ; cd $curr_dir",
-                                           getenv("MDBCI_VM_PATH"), getenv("name"), prefix, i)).c_str();
+            start_vm_command[i] = readenv(env_name, "curr_dir=`pwd`; cd %s/%s;vagrant resume %s_%03d ; cd $curr_dir",
+                                          getenv("MDBCI_VM_PATH"), getenv("name"), prefix, i);
             setenv(env_name, start_vm_command[i], 1);
 
             sprintf(env_name, "%s_%03d_stop_vm_command", prefix, i);
-            stop_vm_command[i] = (readenv(env_name, "curr_dir=`pwd`; cd %s/%s;vagrant suspend %s_%03d ; cd $curr_dir",
-                                          getenv("MDBCI_VM_PATH"), getenv("name"), prefix, i)).c_str();
+            stop_vm_command[i] = readenv(env_name, "curr_dir=`pwd`; cd %s/%s;vagrant suspend %s_%03d ; cd $curr_dir",
+                                         getenv("MDBCI_VM_PATH"), getenv("name"), prefix, i);
             setenv(env_name, stop_vm_command[i], 1);
         }
     }
@@ -379,7 +379,7 @@ char * Nodes::get_nc_item(char * item_name)
     }
 
     char * cstr = new char [end - equal + 1];
-    strcpy(cstr, network_config->substr(equal + 1, end - equal - 1).c_str());
+    strcpy(cstr, network_config.substr(equal + 1, end - equal - 1).c_str());
     setenv(item_name, cstr, 1);
 
     return (cstr);
