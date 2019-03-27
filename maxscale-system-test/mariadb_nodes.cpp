@@ -30,7 +30,7 @@ void Mariadb_nodes::require_gtid(bool value)
 }
 
 Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbose,
-                             std::string *network_config):
+                             std::string network_config):
     v51(false)
 {
     use_ipv6 = false;

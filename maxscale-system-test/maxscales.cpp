@@ -6,7 +6,7 @@
 #include "envv.h"
 
 Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind,
-                     std::string * network_config)
+                     std::string network_config)
 {
     strcpy(prefix, pref);
     this->verbose = verbose;

@@ -362,22 +362,22 @@ const char* Nodes::ip(int i) const
 
 std::string Nodes::get_nc_item(char * item_name)
 {
-    size_t start = network_config->find(item_name);
+    size_t start = network_config.find(item_name);
     if (start == std::string::npos)
     {
         return NULL;
     }
-    size_t end = network_config->find("\n", start);
-    size_t equal = network_config->find("=", start);
+    size_t end = network_config.find("\n", start);
+    size_t equal = network_config.find("=", start);
     if (end == std::string::npos)
     {
-        end = network_config->length();
+        end = network_config.length();
     }
     if (equal == std::string::npos)
     {
         return NULL;
     }
-    std::string cstr =  network_config->substr(equal + 1, end - equal - 1);
+    std::string cstr =  network_config.substr(equal + 1, end - equal - 1);
     setenv(item_name, cstr.c_str(), 1);
     return (cstr);
 }
@@ -391,7 +391,7 @@ int Nodes::get_N()
         sprintf(item, "%s_%03d_network", prefix, N);
         N++;
     }
-    while (network_config->find(item) != std::string::npos);
+    while (network_config.find(item) != std::string::npos);
     sprintf(item, "%s_N", prefix);
     setenv(item, std::to_string(N).c_str(), 1);
     return N - 1 ;

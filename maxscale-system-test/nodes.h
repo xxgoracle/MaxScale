@@ -85,7 +85,7 @@ public:
     /**
      * @brief network_config Content of MDBCI network_config file
      */
-    std::string * network_config;
+    std::string network_config;
 
     /**
      * @brief Verbose command output
