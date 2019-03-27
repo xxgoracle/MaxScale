@@ -153,19 +153,19 @@ TestConnections::TestConnections(int argc, char *argv[]):
             break;
 
         case 'h':
+        {
+            printf("Options:\n");
+
+            struct option *o = long_options;
+
+            while (o->name)
             {
-                printf("Options:\n");
-
-                struct option *o = long_options;
-
-                while (o->name)
-                {
-                    printf("-%c, --%s\n", o->val, o->name);
-                    ++o;
-                }
-                exit(0);
+                printf("-%c, --%s\n", o->val, o->name);
+                ++o;
             }
-            break;
+            exit(0);
+        }
+        break;
 
         case 's':
             printf("Maxscale won't be started\n");
@@ -324,7 +324,7 @@ TestConnections::TestConnections(int argc, char *argv[]):
 
     maxscales = new Maxscales("maxscale", test_dir, verbose, use_valgrind, network_config);
     if (maxscales->check_nodes() ||
-        ((maxscales->N < 2) && (mdbci_labels.find(std::string("SECOND_MAXSCALE")) != std::string::npos))
+            ((maxscales->N < 2) && (mdbci_labels.find(std::string("SECOND_MAXSCALE")) != std::string::npos))
        )
     {
         if (call_mdbci("--recreate"))
@@ -932,9 +932,9 @@ int TestConnections::prepare_binlog(int m)
     find_field(repl->nodes[0], "SELECT @@version", "@@version", version_str);
     tprintf("Master server version '%s'", version_str);
     if (*version_str &&
-        strstr(version_str, "10.0") == NULL &&
-        strstr(version_str, "10.1") == NULL &&
-        strstr(version_str, "10.2") == NULL)
+            strstr(version_str, "10.0") == NULL &&
+            strstr(version_str, "10.1") == NULL &&
+            strstr(version_str, "10.2") == NULL)
     {
         add_result(maxscales->ssh_node_f(m, true,
                                          "sed -i \"s/,mariadb10-compatibility=1//\" %s",
@@ -1153,8 +1153,8 @@ bool TestConnections::replicate_from_master(int m)
     conn = open_conn_no_db(maxscales->binlog_port[m], maxscales->IP[m], repl->user_name, repl->password, ssl);
 
     if (find_field(repl->nodes[0], "show master status", "File", log_file) ||
-        repl->set_slave(conn, repl->IP[0], repl->port[0], log_file, log_pos) ||
-        execute_query(conn, "start slave"))
+            repl->set_slave(conn, repl->IP[0], repl->port[0], log_file, log_pos) ||
+            execute_query(conn, "start slave"))
     {
         rval = false;
     }
@@ -1404,7 +1404,7 @@ int TestConnections::check_maxscale_processes(int m, int expected)
         ps_cmd = "ps -C maxscale | grep maxscale | wc -l";
     }
     char* maxscale_num = maxscales->ssh_node_output(m, ps_cmd, false,
-                                                    &exit_code);
+                         &exit_code);
     if ((maxscale_num == NULL) || (exit_code != 0))
     {
         return -1;
@@ -2057,8 +2057,8 @@ int TestConnections::call_mdbci(const char * options)
 {
     struct stat buf;
     if (stat(
-            (mdbci_vm_path + std::string("/") + mdbci_config_name).c_str(),
-            &buf)
+                (mdbci_vm_path + std::string("/") + mdbci_config_name).c_str(),
+                &buf)
        )
     {
         if (process_mdbci_template())
