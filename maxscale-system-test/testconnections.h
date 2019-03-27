@@ -268,7 +268,7 @@ public:
     /**
      * @brief labels 'LABELS' string from CMakeLists.txt
      */
-    char * labels;
+    const char * labels;
 
     /**
      * @brief mdbci_labels labels to be passed to MDBCI
@@ -641,7 +641,7 @@ std::string dump_status(const StringSet& current, const StringSet& expected);
  * @param labels pointer to string for storing all test labels
  * @return Name of maxscale.cnf file template
  */
-const char *get_template_name(char * test_name, char **labels);
+const char *get_template_name(char * test_name, const char **labels);
 
 /**
  * @brief readenv_and_set_default Read enviromental variable and set default values if

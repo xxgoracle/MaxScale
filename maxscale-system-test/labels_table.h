@@ -26,4 +26,4 @@ const labels_table_t labels_table [] __attribute__((unused)) =
  * @param labels_string All lables from CMakeLists.txt
  * @return Labels string in the 'mdbci up' --labels parameter format
  */
-std::string get_mdbci_lables(char * labels_string);
+std::string get_mdbci_lables(const char * labels_string);

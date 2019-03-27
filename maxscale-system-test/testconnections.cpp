@@ -223,7 +223,7 @@ TestConnections::TestConnections(int argc, char *argv[]):
         test_name = argv[1];
     }
 
-    char * labels_string = NULL;
+    const char * labels_string = NULL;
     template_name = get_template_name(test_name, &labels_string);
     labels = strstr(labels_string, "LABELS;");
     if (!labels)
@@ -625,7 +625,7 @@ void TestConnections::print_env()
     galera->print_env();
 }
 
-const char * get_template_name(char * test_name, char ** labels)
+const char * get_template_name(char * test_name, const char ** labels)
 {
     int i = 0;
     *labels = NULL;
