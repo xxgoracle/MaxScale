@@ -32,7 +32,7 @@ int create_tcp_socket()
     return sock;
 }
 
-char *get_ip(char *host)
+char *get_ip(const char *host)
 {
     struct hostent *hent;
     int iplen = 16; //XXX.XXX.XXX.XXX
@@ -51,7 +51,7 @@ char *get_ip(char *host)
     return ip;
 }
 
-char *build_get_query(char *host, const char *page)
+char *build_get_query(const char *host, const char *page)
 {
     char *query;
     const char *getpage = page;

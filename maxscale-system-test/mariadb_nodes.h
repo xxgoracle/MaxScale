@@ -280,7 +280,7 @@ public:
      * @param log_pos initial position
      * @return 0 if everything is ok
      */
-    int set_slave(MYSQL * conn, char master_host[], int master_port, char log_file[], char log_pos[]);
+    int set_slave(MYSQL * conn, const char master_host[], int master_port, char log_file[], char log_pos[]);
 
     /**
      * @brief Creates 'repl' user on all nodes
