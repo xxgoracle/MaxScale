@@ -5,7 +5,8 @@
 
 #include "envv.h"
 
-Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind, std::string * network_config)
+Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind,
+                     std::string * network_config)
 {
     strcpy(prefix, pref);
     this->verbose = verbose;
@@ -37,16 +38,16 @@ int Maxscales::read_env()
         for (int i = 0; i < N; i++)
         {
             sprintf(env_name, "%s_%03d_cnf", prefix, i);
-            maxscale_cnf[i] = readenv(env_name, DEFAULT_MAXSCALE_CNF);
+            maxscale_cnf[i] = (readenv(env_name, DEFAULT_MAXSCALE_CNF)).c_str();
 
             sprintf(env_name, "%s_%03d_log_dir", prefix, i);
-            maxscale_log_dir[i] = readenv(env_name, DEFAULT_MAXSCALE_LOG_DIR);
+            maxscale_log_dir[i] = (readenv(env_name, DEFAULT_MAXSCALE_LOG_DIR)).c_str();
 
             sprintf(env_name, "%s_%03d_binlog_dir", prefix, i);
-            maxscale_binlog_dir[i] = readenv(env_name, DEFAULT_MAXSCALE_BINLOG_DIR);
+            maxscale_binlog_dir[i] = (readenv(env_name, DEFAULT_MAXSCALE_BINLOG_DIR)).c_str();
 
             sprintf(env_name, "%s_%03d_maxadmin_password", prefix, i);
-            maxadmin_password[i] = readenv(env_name, DEFAULT_MAXADMIN_PASSWORD);
+            maxadmin_password[i] = (readenv(env_name, DEFAULT_MAXADMIN_PASSWORD)).c_str();
 
             rwsplit_port[i] = 4006;
             readconn_master_port[i] = 4008;
@@ -177,7 +178,7 @@ int Maxscales::restart_maxscale(int m)
     }
     else
     {
-        res =ssh_node(m, "service maxscale restart", true);
+        res = ssh_node(m, "service maxscale restart", true);
     }
     fflush(stdout);
     return res;
@@ -189,9 +190,9 @@ int Maxscales::start_maxscale(int m)
     if (use_valgrind)
     {
         res = ssh_node_f(m, false,
-                   "sudo --user=maxscale valgrind --leak-check=full --show-leak-kinds=all "
-                   "--log-file=/%s/valgrind%02d.log --trace-children=yes "
-                   "--track-origins=yes /usr/bin/maxscale", maxscale_log_dir[m], valgring_log_num);
+                         "sudo --user=maxscale valgrind --leak-check=full --show-leak-kinds=all "
+                         "--log-file=/%s/valgrind%02d.log --trace-children=yes "
+                         "--track-origins=yes /usr/bin/maxscale", maxscale_log_dir[m], valgring_log_num);
         valgring_log_num++;
     }
     else
@@ -434,7 +435,8 @@ void Maxscales::wait_for_monitor(int intervals, int m)
     auto get_ticks = [&](std::string name)
     {
         int rc;
-        char* ticks = ssh_node_output_f(m, false, &rc,  "maxctrl api get monitors/%s data.attributes.ticks", name.c_str());
+        char* ticks = ssh_node_output_f(m, false, &rc,  "maxctrl api get monitors/%s data.attributes.ticks",
+                                        name.c_str());
         char* ptr;
         int rval = strtol(ticks, &ptr, 10);
 
@@ -464,7 +466,7 @@ void Maxscales::wait_for_monitor(int intervals, int m)
         ticks[name] = get_ticks(name);
     }
 
-    for (auto a: ticks)
+    for (auto a : ticks)
     {
         // Wait a maximum of 60 seconds for a single monitor interval
         for (int i = 0; i < 60; i++)

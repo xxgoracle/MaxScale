@@ -10,7 +10,7 @@
  * @param format Default value
  * @return Enviromental variable value
  */
-char * readenv(const char * name, const char *format, ...);
+std::string readenv(const char * name, const char *format, ...);
 
 /**
  * @brief readenv_int Read integer value of enviromental variable, if empty - set dafault

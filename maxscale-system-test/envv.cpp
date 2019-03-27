@@ -2,7 +2,7 @@
 #include <string>
 #include "envv.h"
 
-char * readenv(const char * name, const char *format, ...)
+std::string readenv(const char * name, const char *format, ...)
 {
     char * env = getenv(name);
     if (!env)
@@ -25,7 +25,9 @@ char * readenv(const char * name, const char *format, ...)
         va_end(valist);
         setenv(name, env, 1);
     }
-    return env;
+    std::string env_str = std::string(env);
+    free(env);
+    return env_str;
 }
 
 int readenv_int(const char * name, int def)

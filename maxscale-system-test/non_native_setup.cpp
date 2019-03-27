@@ -35,5 +35,5 @@ int main(int argc, char *argv[])
 
     test.add_result(system(sys.c_str()), "Test %s FAILED!", argv[1]);
 
-    return Test.global_result;
+    return test.global_result;
 }

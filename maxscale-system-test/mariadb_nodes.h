@@ -54,7 +54,7 @@ public:
     /**
      * @brief Unix socket to connecto to MariaDB
      */
-    char * socket[256];
+    const char * socket[256];
     /**
      * @brief 'socket=$socket' line
      */
@@ -63,11 +63,11 @@ public:
     /**
      * @brief   User name to access backend nodes
      */
-    char * user_name;
+    const char * user_name;
     /**
      * @brief   Password to access backend nodes
      */
-    char * password;
+    const char * password;
     /**
      * @brief master index of node which was last configured to be Master
      */
@@ -76,18 +76,18 @@ public:
     /**
      * @brief start_db_command Command to start DB server
      */
-    char * start_db_command[256];
+    const char * start_db_command[256];
 
     /**
      * @brief stop_db_command Command to start DB server
      */
-    char * stop_db_command[256];
+    const char * stop_db_command[256];
 
     /**
      * @brief cleanup_db_command Command to remove all
      * data files and re-install DB with mysql_install_db
      */
-    char * cleanup_db_command[256];
+    const char * cleanup_db_command[256];
 
     /**
      * @brief ssl if true ssl will be used
@@ -142,12 +142,12 @@ public:
     /**
      * @brief make_snapshot_command Command line to create a snapshot of all VMs
      */
-    char * take_snapshot_command;
+    const char * take_snapshot_command;
 
     /**
      * @brief revert_snapshot_command Command line to revert a snapshot of all VMs
      */
-    char * revert_snapshot_command;
+    const char * revert_snapshot_command;
 
     int connect(int i);
     int connect();

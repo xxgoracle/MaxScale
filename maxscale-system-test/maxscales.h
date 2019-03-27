@@ -83,22 +83,22 @@ public:
     /**
      * @brief maxadmin_Password Password to access Maxadmin tool
      */
-    char * maxadmin_password[256];
+    const char * maxadmin_password[256];
 
     /**
       * @brief maxscale_cnf full name of Maxscale configuration file
       */
-    char * maxscale_cnf[256];
+    const char * maxscale_cnf[256];
 
     /**
       * @brief maxscale_log_dir name of log files directory
       */
-    char * maxscale_log_dir[256];
+    const char * maxscale_log_dir[256];
 
     /**
       * @brief maxscale_lbinog_dir name of binlog files (for binlog router) directory
       */
-    char * maxscale_binlog_dir[256];
+    const char * maxscale_binlog_dir[256];
 
     /**
      * @brief N_ports Default number of routers

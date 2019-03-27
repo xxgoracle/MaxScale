@@ -101,22 +101,22 @@ public:
     /**
      * @brief mdbci_config_name Name of MDBCI VMs set
      */
-    char * mdbci_config_name;
+    std::string mdbci_config_name;
 
     /**
      * @brief mdbci_vm_path Path to directory with MDBCI VMs descriptions
      */
-    char * mdbci_vm_path;
+    std::string mdbci_vm_path;
 
     /**
      * @brief mdbci_temlate Name of mdbci VMs tempate file
      */
-    char * mdbci_template;
+    std::string mdbci_template;
 
     /**
      * @brief target Name of Maxscale repository in the CI
      */
-    char * target;
+    std::string target;
 
     /**
      * @brief GetLogsCommand Command to copy log files from node virtual machines (should handle one parameter: IP address of virtual machine to kill)
@@ -126,12 +126,12 @@ public:
     /**
      * @brief make_snapshot_command Command line to create a snapshot of all VMs
      */
-    char * take_snapshot_command;
+    const char * take_snapshot_command;
 
     /**
      * @brief revert_snapshot_command Command line to revert a snapshot of all VMs
      */
-    char * revert_snapshot_command;
+    const char * revert_snapshot_command;
 
     /**
      * @brief use_snapshots if TRUE every test is trying to revert snapshot before running the test

@@ -29,7 +29,8 @@ void Mariadb_nodes::require_gtid(bool value)
     g_require_gtid = value;
 }
 
-Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbose, std::string *network_config):
+Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbose,
+                             std::string *network_config):
     v51(false)
 {
     use_ipv6 = false;
@@ -109,10 +110,10 @@ void Mariadb_nodes::read_env()
     read_basic_env();
 
     sprintf(env_name, "%s_user", prefix);
-    user_name = readenv(env_name, "skysql");
+    user_name = (readenv(env_name, "skysql")).c_str();
 
     sprintf(env_name, "%s_password", prefix);
-    password = readenv(env_name, "skysql");
+    password = (readenv(env_name, "skysql")).c_str();
 
     ssl = false;
     sprintf(env_name, "%s_ssl", prefix);
@@ -128,7 +129,7 @@ void Mariadb_nodes::read_env()
 
             //reading sockets
             sprintf(env_name, "%s_%03d_socket", prefix, i);
-            socket[i] = readenv(env_name, " ");
+            socket[i] = (readenv(env_name, " ")).c_str();
             if (strcmp(socket[i], " "))
             {
                 socket_cmd[i] = (char *) malloc(strlen(socket[i]) + 10);
@@ -143,15 +144,15 @@ void Mariadb_nodes::read_env()
 
             //reading start_db_command
             sprintf(env_name, "%s_%03d_start_db_command", prefix, i);
-            start_db_command[i] = readenv(env_name, (char *) "service mysql start");
+            start_db_command[i] = (readenv(env_name, (char *) "service mysql start")).c_str();
 
             //reading stop_db_command
             sprintf(env_name, "%s_%03d_stop_db_command", prefix, i);
-            stop_db_command[i] = readenv(env_name, (char *) "service mysql stop");
+            stop_db_command[i] = (readenv(env_name, (char *) "service mysql stop")).c_str();
 
             //reading cleanup_db_command
             sprintf(env_name, "%s_%03d_cleanup_db_command", prefix, i);
-            cleanup_db_command[i] = readenv(env_name, (char *) "rm -rf /var/lib/mysql/*; killall -9 mysqld");
+            cleanup_db_command[i] = (readenv(env_name, (char *) "rm -rf /var/lib/mysql/*; killall -9 mysqld")).c_str();
         }
     }
 }
@@ -178,9 +179,9 @@ int Mariadb_nodes::find_master()
     while ((found == 0) && (i < N))
     {
         if (find_field(
-                    nodes[i], (char *) "show slave status;",
-                    (char *) "Master_Host", &str[0]
-                ) == 0 )
+                nodes[i], (char *) "show slave status;",
+                (char *) "Master_Host", &str[0]
+            ) == 0 )
         {
             found = 1;
             strcpy(master_IP, str);
@@ -663,7 +664,7 @@ static bool multi_source_replication(MYSQL *conn, int node)
     MYSQL_RES *res;
 
     if (mysql_query(conn, "SHOW ALL SLAVES STATUS") == 0 &&
-            (res = mysql_store_result(conn)))
+        (res = mysql_store_result(conn)))
     {
         if (mysql_num_rows(res) == 1)
         {
