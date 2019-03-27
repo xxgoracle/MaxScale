@@ -1,5 +1,4 @@
-#ifndef MARIADB_NODES_H
-#define MARIADB_NODES_H
+#pragma once
 
 /**
  * @file mariadb_nodes.h - backend nodes routines
@@ -486,4 +485,3 @@ public:
     //}
 };
 
-#endif // MARIADB_NODES_H

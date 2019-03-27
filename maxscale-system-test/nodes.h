@@ -1,5 +1,4 @@
-#ifndef NODES_H
-#define NODES_H
+#pragma once
 
 #include <errno.h>
 #include <string>
@@ -195,5 +194,3 @@ private:
     int check_node_ssh(int node);
 
 };
-
-#endif // NODES_H

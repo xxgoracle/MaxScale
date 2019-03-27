@@ -1,5 +1,4 @@
-#ifndef ENVV_H
-#define ENVV_H
+#pragma once
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -29,5 +28,3 @@ int readenv_int(const char * name, int def);
  * @return Enviromental variable value converted to bool
  */
 bool readenv_bool(const char * name, bool def);
-
-#endif // ENVV_H

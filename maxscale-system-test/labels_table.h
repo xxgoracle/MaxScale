@@ -1,5 +1,4 @@
-#ifndef LABELS_TABLE_H
-#define LABELS_TABLE_H
+#pragma once
 
 #include <string>
 
@@ -28,5 +27,3 @@ const labels_table_t labels_table [] __attribute__((unused)) =
  * @return Labels string in the 'mdbci up' --labels parameter format
  */
 std::string get_mdbci_lables(char * labels_string);
-
-#endif // LABELS_TABLE_H

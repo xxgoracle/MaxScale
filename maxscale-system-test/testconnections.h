@@ -1,5 +1,4 @@
-#ifndef TESTCONNECTIONS_H
-#define TESTCONNECTIONS_H
+#pragma once
 
 #include "mariadb_nodes.h"
 #include "maxscales.h"
@@ -651,5 +650,3 @@ const char *get_template_name(char * test_name, char **labels);
  * @param defaultenv Default values to be set
  * @return Envaronmental variable value
  */
-
-#endif // TESTCONNECTIONS_H

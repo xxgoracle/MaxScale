@@ -1,5 +1,4 @@
-#ifndef MAXSCALES_H
-#define MAXSCALES_H
+#pragma once
 
 #include <string>
 #include "nodes.h"
@@ -21,7 +20,8 @@ public:
         READCONN_SLAVE
     };
 
-    Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind, std::string *network_config);
+    Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind,
+              std::string *network_config);
 
     int read_env();
 
@@ -289,5 +289,3 @@ public:
     int valgring_log_num;
 
 };
-
-#endif // MAXSCALES_H
