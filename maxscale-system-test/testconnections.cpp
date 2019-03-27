@@ -683,7 +683,7 @@ void TestConnections::process_template(int m, const char *template_name, const c
     system(str);
 
     Mariadb_nodes * mdn[2];
-    const char * IPcnf;
+    char * IPcnf;
     mdn[0] = repl;
     mdn[1] = galera;
     int i, j;

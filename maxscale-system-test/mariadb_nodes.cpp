@@ -875,7 +875,7 @@ int Galera_nodes::check_galera()
     return res1;
 }
 
-int Mariadb_nodes::set_slave(MYSQL * conn, const char master_host[], int master_port, char log_file[],
+int Mariadb_nodes::set_slave(MYSQL * conn, char master_host[], int master_port, char log_file[],
                              char log_pos[])
 {
     char str[1024];

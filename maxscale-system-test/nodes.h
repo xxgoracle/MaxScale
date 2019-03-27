@@ -14,16 +14,16 @@ class Nodes
 public:
     Nodes();
 
-    const char * IP[256];
+    char * IP[256];
     /**
      * @brief  private IP address strings for every backend node (for AWS)
      */
 
-    const char * IP_private[256];
+    char * IP_private[256];
     /**
      * @brief  IP address strings for every backend node (IPv6)
      */
-    const char * IP6[256];
+    char * IP6[256];
 
     /**
      * @brief use_ipv6 If true IPv6 addresses will be used to connect Maxscale and backed
@@ -34,7 +34,7 @@ public:
     /**
      * @brief  Path to ssh key for every backend node
      */
-    const char * sshkey[256];
+    char * sshkey[256];
 
     /**
      * @brief Number of backend nodes
@@ -49,7 +49,7 @@ public:
     /**
      * @brief access_user Unix users name to access nodes via ssh
      */
-    const char * access_user[256];
+    char * access_user[256];
 
     /**
      * @brief access_sudo empty if sudo is not needed or "sudo " if sudo is needed.
@@ -61,7 +61,7 @@ public:
      */
     char * access_homedir[256];
 
-    const char * hostname[256];
+    char * hostname[256];
 
     /**
      * @brief stop_vm_command Command to suspend VM
@@ -167,7 +167,7 @@ public:
      * @param item_name Name of the variable
      * @return value of variable
      */
-    std::string get_nc_item(char * item_name);
+    char *get_nc_item(char * item_name);
 
     /**
      * @brief get_N Calculate the number of nodes discribed in the _netoek_config file

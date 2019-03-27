@@ -286,11 +286,11 @@ int Nodes::read_basic_env()
         {
             //reading IPs
             sprintf(env_name, "%s_%03d_network", prefix, i);
-            IP[i] = (get_nc_item((char*) env_name)).c_str();
+            IP[i] = get_nc_item((char*) env_name);
 
             //reading private IPs
             sprintf(env_name, "%s_%03d_private_ip", prefix, i);
-            IP_private[i] = (get_nc_item((char*) env_name)).c_str();
+            IP_private[i] = get_nc_item((char*) env_name);
             if (IP_private[i] == NULL)
             {
                 IP_private[i] = IP[i];
@@ -299,7 +299,7 @@ int Nodes::read_basic_env()
 
             //reading IPv6
             sprintf(env_name, "%s_%03d_network6", prefix, i);
-            IP6[i] = (get_nc_item((char*) env_name)).c_str();
+            IP6[i] = get_nc_item((char*) env_name);
             if (IP6[i] == NULL)
             {
                 IP6[i] = IP[i];
@@ -308,11 +308,11 @@ int Nodes::read_basic_env()
 
             //reading sshkey
             sprintf(env_name, "%s_%03d_keyfile", prefix, i);
-            sshkey[i] = (get_nc_item((char*) env_name)).c_str();
+            sshkey[i] = get_nc_item((char*) env_name);
 
 
             sprintf(env_name, "%s_%03d_whoami", prefix, i);
-            access_user[i] = (get_nc_item((char*) env_name)).c_str();
+            access_user[i] = get_nc_item((char*) env_name);
             if (access_user[i] == NULL)
             {
                 access_user[i] = (char *) "vagrant";
@@ -333,7 +333,7 @@ int Nodes::read_basic_env()
             }
 
             sprintf(env_name, "%s_%03d_hostname", prefix, i);
-            hostname[i] = (get_nc_item((char*) env_name)).c_str();
+            hostname[i] = get_nc_item((char*) env_name);
             if (hostname[i] == NULL)
             {
                 hostname[i] = IP[i];
@@ -360,7 +360,7 @@ const char* Nodes::ip(int i) const
     return use_ipv6 ?  IP6[i] : IP[i];
 }
 
-std::string Nodes::get_nc_item(char * item_name)
+char * Nodes::get_nc_item(char * item_name)
 {
     size_t start = network_config.find(item_name);
     if (start == std::string::npos)
@@ -377,8 +377,11 @@ std::string Nodes::get_nc_item(char * item_name)
     {
         return NULL;
     }
-    std::string cstr =  network_config.substr(equal + 1, end - equal - 1);
-    setenv(item_name, cstr.c_str(), 1);
+
+    char * cstr = new char [end - equal + 1];
+    strcpy(cstr, network_config->substr(equal + 1, end - equal - 1).c_str());
+    setenv(item_name, cstr, 1);
+
     return (cstr);
 }
 
