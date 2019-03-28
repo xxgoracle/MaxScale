@@ -302,7 +302,7 @@ TestConnections::TestConnections(int argc, char *argv[]):
         repl = NULL;
     }
 
-    if (no_galera)
+    if (!no_galera)
     {
         galera = new Galera_nodes("galera", test_dir, verbose, network_config);
         //galera->use_ipv6 = use_ipv6;
