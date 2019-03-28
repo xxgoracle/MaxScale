@@ -352,7 +352,7 @@ public:
      * Only works with master-slave replication and should not be used with Galera clusters.
      * The function expects that the first node, @c nodes[0], is the master.
      */
-    virtual void sync_slaves(int node = 0);
+     virtual void sync_slaves(int node = 0);
 
     /**
      * @brief Close all connections to this node
@@ -472,16 +472,15 @@ public:
         return check_galera();
     }
 
-    virtual void sync_slaves()
-    {
-        sleep(10);
-    }
-
     //int prepare_galera_server(int i);
 
     //virtual int prepare_server(int i)
     //{
     //    return prepare_galera_server(i);
     //}
+    virtual void sync_slaves(int node = 0)
+    {
+        sleep(10);
+    }
 };
 

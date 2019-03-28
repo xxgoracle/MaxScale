@@ -189,7 +189,6 @@ public:
      */
     int stop_vm(int node);
 
-
 private:
     int check_node_ssh(int node);
 

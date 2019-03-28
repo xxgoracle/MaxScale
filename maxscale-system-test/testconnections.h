@@ -86,7 +86,7 @@ public:
     /**
      * @brief galera Mariadb_nodes object containing references to Galera setuo
      */
-    Mariadb_nodes * galera;
+    Galera_nodes * galera;
 
     /**
      * @brief repl Mariadb_nodes object containing references to Master/Slave setuo
