@@ -2,9 +2,9 @@
 #include <string>
 #include "envv.h"
 
-char * readenv(const char * name, const char *format, ...)
+char* readenv(const char* name, const char* format, ...)
 {
-    char * env = getenv(name);
+    char* env = getenv(name);
     if (!env)
     {
         va_list valist;
@@ -28,10 +28,10 @@ char * readenv(const char * name, const char *format, ...)
     return env;
 }
 
-int readenv_int(const char * name, int def)
+int readenv_int(const char* name, int def)
 {
     int x;
-    char * env = getenv(name);
+    char* env = getenv(name);
     if (env)
     {
         sscanf(env, "%d", &x);
@@ -44,14 +44,14 @@ int readenv_int(const char * name, int def)
     return x;
 }
 
-bool readenv_bool(const char * name, bool def)
+bool readenv_bool(const char* name, bool def)
 {
-    char * env = getenv(name);
+    char* env = getenv(name);
     if (env)
     {
-        return ((strcasecmp(env, "yes") == 0) ||
-                (strcasecmp(env, "y") == 0) ||
-                (strcasecmp(env, "true") == 0));
+        return (strcasecmp(env, "yes") == 0)
+               || (strcasecmp(env, "y") == 0)
+               || (strcasecmp(env, "true") == 0);
     }
     else
     {

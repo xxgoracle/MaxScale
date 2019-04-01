@@ -33,9 +33,9 @@ void Mariadb_nodes::require_gtid(bool value)
     g_require_gtid = value;
 }
 
-Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbose,
-                             std::string network_config):
-    v51(false)
+Mariadb_nodes::Mariadb_nodes(const char* pref, const char* test_cwd, bool verbose,
+                             std::string network_config)
+    : v51(false)
 {
     use_ipv6 = false;
     strcpy(prefix, pref);
@@ -151,32 +151,32 @@ void Mariadb_nodes::read_env()
             sprintf(env_name, "%s_%03d_port", prefix, i);
             port[i] = readenv_int(env_name, 3306);
 
-            //reading sockets
+            // reading sockets
             sprintf(env_name, "%s_%03d_socket", prefix, i);
             socket[i] = readenv(env_name, " ");
             if (strcmp(socket[i], " "))
             {
-                socket_cmd[i] = (char *) malloc(strlen(socket[i]) + 10);
+                socket_cmd[i] = (char*) malloc(strlen(socket[i]) + 10);
                 sprintf(socket_cmd[i], "--socket=%s", socket[i]);
             }
             else
             {
-                socket_cmd[i] = (char *) " ";
+                socket_cmd[i] = (char*) " ";
             }
             sprintf(env_name, "%s_%03d_socket_cmd", prefix, i);
             setenv(env_name, socket_cmd[i], 1);
 
             // reading start_db_command
             sprintf(env_name, "%s_%03d_start_db_command", prefix, i);
-            start_db_command[i] = readenv(env_name, (char *) "service mysql start");
+            start_db_command[i] = readenv(env_name, (char*) "service mysql start");
 
             // reading stop_db_command
             sprintf(env_name, "%s_%03d_stop_db_command", prefix, i);
-            stop_db_command[i] = readenv(env_name, (char *) "service mysql stop");
+            stop_db_command[i] = readenv(env_name, (char*) "service mysql stop");
 
             // reading cleanup_db_command
             sprintf(env_name, "%s_%03d_cleanup_db_command", prefix, i);
-            cleanup_db_command[i] = readenv(env_name, (char *) "rm -rf /var/lib/mysql/*; killall -9 mysqld");
+            cleanup_db_command[i] = readenv(env_name, (char*) "rm -rf /var/lib/mysql/*; killall -9 mysqld");
         }
     }
 }
@@ -452,7 +452,9 @@ int Galera_nodes::start_galera()
     sprintf(str, "%s/create_user_galera.sh", test_dir);
     copy_to_node_legacy(str, "~/", 0);
 
-    ssh_node_f(0, false, "export galera_user=\"%s\"; export galera_password=\"%s\"; ./create_user_galera.sh %s",
+    ssh_node_f(0,
+               false,
+               "export galera_user=\"%s\"; export galera_password=\"%s\"; ./create_user_galera.sh %s",
                user_name,
                password,
                socket_cmd[0]);
@@ -467,10 +469,12 @@ int Galera_nodes::start_galera()
 
 int Mariadb_nodes::clean_iptables(int node)
 {
-    return ssh_node_f(node, true,
+    return ssh_node_f(node,
+                      true,
                       "while [ \"$(iptables -n -L INPUT 1|grep '%d')\" != \"\" ]; do iptables -D INPUT 1; done;"
                       "while [ \"$(ip6tables -n -L INPUT 1|grep '%d')\" != \"\" ]; do ip6tables -D INPUT 1; done;",
-                      port[node], port[node]);
+                      port[node],
+                      port[node]);
 }
 
 int Mariadb_nodes::block_node(int node)
@@ -1003,7 +1007,8 @@ int Mariadb_nodes::get_version(int i)
     int local_result = 0;
     if (find_field(nodes[i], "SELECT @@version", "@@version", version[i]))
     {
-        cout << "Failed to get version: " << mysql_error(nodes[i]) << ", trying ssh node and use MariaDB client" << endl;
+        cout << "Failed to get version: " << mysql_error(nodes[i])
+             << ", trying ssh node and use MariaDB client" << endl;
         str = ssh_node_output(i, "mysql --batch --silent  -e \"select @@version\"", true, &ec);
         if (ec)
         {

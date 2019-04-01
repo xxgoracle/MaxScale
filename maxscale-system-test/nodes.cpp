@@ -336,7 +336,7 @@ int Nodes::read_basic_env()
             }
             setenv(env_name, IP6[i], 1);
 
-            //reading sshkey
+            // reading sshkey
             sprintf(env_name, "%s_%03d_keyfile", prefix, i);
             sshkey[i] = get_nc_item((char*) env_name);
 
@@ -345,7 +345,7 @@ int Nodes::read_basic_env()
             access_user[i] = get_nc_item((char*) env_name);
             if (access_user[i] == NULL)
             {
-                access_user[i] = (char *) "vagrant";
+                access_user[i] = (char*) "vagrant";
             }
             setenv(env_name, access_user[i], 1);
 
@@ -354,11 +354,11 @@ int Nodes::read_basic_env()
 
             if (strcmp(access_user[i], "root") == 0)
             {
-                access_homedir[i] = (char *) "/root/";
+                access_homedir[i] = (char*) "/root/";
             }
             else
             {
-                access_homedir[i] = (char *) malloc(strlen(access_user[i] + 9));
+                access_homedir[i] = (char*) malloc(strlen(access_user[i] + 9));
                 sprintf(access_homedir[i], "/home/%s/", access_user[i]);
             }
 
@@ -371,13 +371,21 @@ int Nodes::read_basic_env()
             setenv(env_name, hostname[i], 1);
 
             sprintf(env_name, "%s_%03d_start_vm_command", prefix, i);
-            start_vm_command[i] = readenv(env_name, "curr_dir=`pwd`; cd %s/%s;vagrant resume %s_%03d ; cd $curr_dir",
-                                          getenv("MDBCI_VM_PATH"), getenv("name"), prefix, i);
+            start_vm_command[i] = readenv(env_name,
+                                          "curr_dir=`pwd`; cd %s/%s;vagrant resume %s_%03d ; cd $curr_dir",
+                                          getenv("MDBCI_VM_PATH"),
+                                          getenv("name"),
+                                          prefix,
+                                          i);
             setenv(env_name, start_vm_command[i], 1);
 
             sprintf(env_name, "%s_%03d_stop_vm_command", prefix, i);
-            stop_vm_command[i] = readenv(env_name, "curr_dir=`pwd`; cd %s/%s;vagrant suspend %s_%03d ; cd $curr_dir",
-                                         getenv("MDBCI_VM_PATH"), getenv("name"), prefix, i);
+            stop_vm_command[i] = readenv(env_name,
+                                         "curr_dir=`pwd`; cd %s/%s;vagrant suspend %s_%03d ; cd $curr_dir",
+                                         getenv("MDBCI_VM_PATH"),
+                                         getenv("name"),
+                                         prefix,
+                                         i);
             setenv(env_name, stop_vm_command[i], 1);
         }
     }
@@ -390,7 +398,7 @@ const char* Nodes::ip(int i) const
     return use_ipv6 ?  IP6[i] : IP[i];
 }
 
-char * Nodes::get_nc_item(char * item_name)
+char* Nodes::get_nc_item(char* item_name)
 {
     size_t start = network_config.find(item_name);
     if (start == std::string::npos)
@@ -408,11 +416,11 @@ char * Nodes::get_nc_item(char * item_name)
         return NULL;
     }
 
-    char * cstr = new char [end - equal + 1];
+    char* cstr = new char [end - equal + 1];
     strcpy(cstr, network_config.substr(equal + 1, end - equal - 1).c_str());
     setenv(item_name, cstr, 1);
 
-    return (cstr);
+    return cstr;
 }
 
 int Nodes::get_N()
@@ -427,15 +435,15 @@ int Nodes::get_N()
     while (network_config.find(item) != std::string::npos);
     sprintf(item, "%s_N", prefix);
     setenv(item, std::to_string(N).c_str(), 1);
-    return N - 1 ;
+    return N - 1;
 }
 
 int Nodes::start_vm(int node)
 {
-    return (system(start_vm_command[node]));
+    return system(start_vm_command[node]);
 }
 
 int Nodes::stop_vm(int node)
 {
-    return (system(stop_vm_command[node]));
+    return system(stop_vm_command[node]);
 }

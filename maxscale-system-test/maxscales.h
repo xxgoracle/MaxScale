@@ -5,12 +5,12 @@
 #include "mariadb_func.h"
 #include "mariadb_nodes.h"
 
-#define DEFAULT_MAXSCALE_CNF "/etc/maxscale.cnf"
-#define DEFAULT_MAXSCALE_LOG_DIR "/var/log/maxscale/"
+#define DEFAULT_MAXSCALE_CNF        "/etc/maxscale.cnf"
+#define DEFAULT_MAXSCALE_LOG_DIR    "/var/log/maxscale/"
 #define DEFAULT_MAXSCALE_BINLOG_DIR "/var/lib/maxscale/Binlog_Service/"
-#define DEFAULT_MAXADMIN_PASSWORD "mariadb"
+#define DEFAULT_MAXADMIN_PASSWORD   "mariadb"
 
-class Maxscales: public Nodes
+class Maxscales : public Nodes
 {
 public:
     enum service
@@ -20,7 +20,7 @@ public:
         READCONN_SLAVE
     };
 
-    Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind,
+    Maxscales(const char* pref, const char* test_cwd, bool verbose, bool use_valgrind,
               std::__cxx11::string network_config);
 
     int read_env();
@@ -83,22 +83,22 @@ public:
     /**
      * @brief maxadmin_Password Password to access Maxadmin tool
      */
-    char * maxadmin_password[256];
+    char* maxadmin_password[256];
 
     /**
-      * @brief maxscale_cnf full name of Maxscale configuration file
-      */
-    char * maxscale_cnf[256];
+     * @brief maxscale_cnf full name of Maxscale configuration file
+     */
+    char* maxscale_cnf[256];
 
     /**
-      * @brief maxscale_log_dir name of log files directory
-      */
-    char * maxscale_log_dir[256];
+     * @brief maxscale_log_dir name of log files directory
+     */
+    char* maxscale_log_dir[256];
 
     /**
-      * @brief maxscale_lbinog_dir name of binlog files (for binlog router) directory
-      */
-    char * maxscale_binlog_dir[256];
+     * @brief maxscale_lbinog_dir name of binlog files (for binlog router) directory
+     */
+    char* maxscale_binlog_dir[256];
 
     /**
      * @brief N_ports Default number of routers
@@ -333,5 +333,4 @@ public:
      * @brief valgring_log_num Counter for Maxscale restarts to avoid Valgrind log overwriting
      */
     int valgring_log_num;
-
 };

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "labels_table.h"
 
-std::string get_mdbci_lables(const char *labels_string)
+std::string get_mdbci_lables(const char* labels_string)
 {
     std::string mdbci_labels("MAXSCALE");
 

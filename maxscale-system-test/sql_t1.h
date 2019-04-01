@@ -71,4 +71,4 @@ int select_from_t1(MYSQL* conn, int N);
  * @param conn MYSQL handler
  * @return 0 if content of t1 is ok
  */
-int check_if_t1_exists(MYSQL *conn);
+int check_if_t1_exists(MYSQL* conn);

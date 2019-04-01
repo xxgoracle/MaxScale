@@ -143,8 +143,8 @@ bool check_event_status(TestConnections& test, int node,
         else
         {
             rval = true;
-            cout << "Event '" << event_name << "' is '" << status << "' on node " << node <<
-                    " as it should.\n";
+            cout << "Event '" << event_name << "' is '" << status << "' on node " << node
+                 << " as it should.\n";
         }
     }
     return rval;
@@ -271,7 +271,7 @@ int main(int argc, char** argv)
     // Part 3: Switchover back to server1 as master. The event will most likely not run because the old
     // master doesn't have event scheduler on anymore.
     cout << "\nStep 3: Switchover back to " << server1_name << ". Check that event is enabled. "
-            "Don't check that the event is running since the scheduler process is likely off.\n";
+                                                               "Don't check that the event is running since the scheduler process is likely off.\n";
     switchover(test, server1_name);
     if (test.ok())
     {
@@ -281,11 +281,11 @@ int main(int argc, char** argv)
     // Part 4: Disable the event on master. The event should still be "SLAVESIDE_DISABLED" on slaves.
     // Check that after switchover, the event is not enabled.
     cout << "\nStep 4: Disable event on master, switchover to " << server2_name << ". "
-            "Check that event is still disabled.\n";
+                                                                                   "Check that event is still disabled.\n";
     if (test.ok())
     {
         set_event_state(test, EVENT_NAME, "DISABLE");
-        test.maxscales->wait_for_monitor(); // Wait for the monitor to detect the change.
+        test.maxscales->wait_for_monitor();     // Wait for the monitor to detect the change.
         check_event_status(test, server1_ind, EVENT_NAME, EV_STATE_DISABLED);
         check_event_status(test, server2_ind, EVENT_NAME, EV_STATE_SLAVE_DISABLED);
 
@@ -306,7 +306,7 @@ int main(int argc, char** argv)
 
     if (test.ok())
     {
-           // Check that all other nodes are slaves.
+        // Check that all other nodes are slaves.
         for (int i = 1; i < test.repl->N; i++)
         {
             string server_name = server_names[i];

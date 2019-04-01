@@ -43,10 +43,10 @@ int main(int argc, char* argv[])
 
     test.tprintf("Connecting to RWSplit again to recreate 'test_db' db");
     MYSQL* conn = open_conn_no_db(test.maxscales->rwsplit_port[0],
-                           test.maxscales->IP[0],
-                           test.maxscales->user_name,
-                           test.maxscales->password,
-                           test.ssl);
+                                  test.maxscales->IP[0],
+                                  test.maxscales->user_name,
+                                  test.maxscales->password,
+                                  test.ssl);
     test.add_result(conn == NULL, "Error connecting to MaxScale");
 
     test.tprintf("Creating and selecting 'test_db' DB");

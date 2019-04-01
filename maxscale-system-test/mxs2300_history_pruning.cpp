@@ -100,7 +100,10 @@ int main(int argc, char** argv)
         std::string value = std::to_string(i);
         std::string query = "SELECT @b" + value;
         std::string f = conn.field(query);
-        test.expect(conn.check(query, value), "Invalid value for user variable @b%s: %s", value.c_str(), f.c_str());
+        test.expect(conn.check(query, value),
+                    "Invalid value for user variable @b%s: %s",
+                    value.c_str(),
+                    f.c_str());
     }
 
     unblock_by_id(test, second_id);

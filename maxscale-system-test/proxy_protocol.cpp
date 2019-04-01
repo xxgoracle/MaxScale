@@ -13,9 +13,9 @@
 using std::string;
 using std::cout;
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-    TestConnections::require_repl_version("10.3.1"); // Proxy protocol support is rather new.
+    TestConnections::require_repl_version("10.3.1");    // Proxy protocol support is rather new.
     TestConnections test(argc, argv);
     test.repl->connect();
 
@@ -46,10 +46,10 @@ int main(int argc, char *argv[])
 
         string proxy_setting = string("proxy_protocol_networks =  ") + maxscale_ip;
         test.repl->add_server_setting(0, proxy_setting.c_str());
-        test.repl->add_server_setting(0, "skip-name-resolve=1"); // To disable server hostname resolution.
-        test.repl->start_node(0, (char *) "");
+        test.repl->add_server_setting(0, "skip-name-resolve=1");    // To disable server hostname resolution.
+        test.repl->start_node(0, (char*) "");
         cout << "Proxy protocol set.\n";
-        test.maxscales->wait_for_monitor(2); // Wait for server to start and be detected
+        test.maxscales->wait_for_monitor(2);    // Wait for server to start and be detected
         test.repl->connect();
         server_proxy_setting = true;
     }
@@ -108,11 +108,14 @@ int main(int argc, char *argv[])
         if (adminconn)
         {
             // Create a test table and the proxy user.
-            cout << "Creating user '"<< username << "' \n";
+            cout << "Creating user '" << username << "' \n";
             test.try_query(adminconn, "CREATE OR REPLACE TABLE test.t1(id INT)");
             test.try_query(adminconn, "CREATE USER '%s'@'%s' identified by '%s'",
                            username.c_str(), client_ip.c_str(), userpass.c_str());
-            test.try_query(adminconn, "GRANT SELECT,INSERT ON test.t1 TO '%s'@'%s'", username.c_str(), client_ip.c_str());
+            test.try_query(adminconn,
+                           "GRANT SELECT,INSERT ON test.t1 TO '%s'@'%s'",
+                           username.c_str(),
+                           client_ip.c_str());
             test.try_query(adminconn, "FLUSH PRIVILEGES;");
             if (test.global_result == 0)
             {
@@ -187,7 +190,7 @@ int main(int argc, char *argv[])
         cout << "Removing proxy setting from server1.\n";
         test.repl->stop_node(0);
         test.repl->restore_server_settings(0);
-        test.repl->start_node(0, (char *) "");
+        test.repl->start_node(0, (char*) "");
         test.maxscales->wait_for_monitor(2);
         server_proxy_setting = false;
     }
@@ -195,4 +198,3 @@ int main(int argc, char *argv[])
     test.repl->disconnect();
     return test.global_result;
 }
-

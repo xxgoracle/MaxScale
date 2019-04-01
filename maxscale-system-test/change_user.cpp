@@ -39,7 +39,7 @@ void run_test(TestConnections& test, MYSQL* conn)
                 "Query should fail, MaxScale should disconnect on auth failure");
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     TestConnections test(argc, argv);
 

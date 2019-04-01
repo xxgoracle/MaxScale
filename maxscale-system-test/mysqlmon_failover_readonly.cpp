@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 
     auto crash_node = [&test](int node) {
             test.repl->ssh_node(node, "kill -s 11 `pidof mysqld`", true);
-            test.repl->stop_node(node); // To prevent autostart.
+            test.repl->stop_node(node);     // To prevent autostart.
         };
 
     string master = "Master";
@@ -205,7 +205,7 @@ int main(int argc, char** argv)
         mysql_close(maxconn);
     }
 
-    
+
     // Start the servers, in case they weren't on already.
     for (int i = 0; i < 3; i++)
     {

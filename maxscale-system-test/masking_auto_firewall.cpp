@@ -129,7 +129,6 @@ void run(TestConnections& test)
     // This SHOULD succeed as '*' is used in the statment.
     test_one(test, "select * FROM (select * from masking_auto_firewall)", Expect::FAILURE);
 }
-
 }
 
 int main(int argc, char* argv[])

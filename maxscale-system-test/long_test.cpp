@@ -9,7 +9,7 @@
 #include "testconnections.h"
 #include "big_transaction.h"
 
-typedef void * FUNC(void * ptr);
+typedef void* FUNC (void* ptr);
 
 FUNC query_thread;
 FUNC prepared_stmt_thread;
@@ -17,24 +17,24 @@ FUNC transaction_thread;
 FUNC short_session_thread;
 FUNC read_thread;
 
-TestConnections * Test;
+TestConnections* Test;
 
 const int threads_type_num = 4;
 int threads_num[threads_type_num];
 const int max_threads_num = 32;
 int port;
-char * IP;
+char* IP;
 
 typedef struct
 {
-    int id;
-    bool exit_flag;
-    char * sql;
+    int   id;
+    bool  exit_flag;
+    char* sql;
 } t_data;
 
 t_data data[threads_type_num][max_threads_num];
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     Test = new TestConnections(argc, argv);
     int i, j;
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
                   "***************************************************\n");
 
     pthread_t thread_id[threads_type_num][max_threads_num];
-    FUNC * thread[threads_type_num];
+    FUNC* thread[threads_type_num];
     thread[0] = query_thread;
     threads_num[0] = 1;
     thread[1] = transaction_thread;
@@ -55,29 +55,29 @@ int main(int argc, char *argv[])
     thread[3] = read_thread;
     threads_num[3] = 1;
 
-    //thread[4] = short_session_thread;
-    //threads_num[4] = 4;
+    // thread[4] = short_session_thread;
+    // threads_num[4] = 4;
 
 
     port = Test->maxscales->rwsplit_port[0];
     IP = Test->maxscales->IP[0];
 
-    //port = 3306;
-    //IP = Test->repl->IP[0];
+    // port = 3306;
+    // IP = Test->repl->IP[0];
 
 
     Test->set_timeout(60);
     Test->tprintf("Set big maximums\n");
 
-    Test->repl->execute_query_all_nodes((char *) "set global max_connections = 300000;");
-    Test->repl->execute_query_all_nodes((char *) "set global max_connect_errors = 10000000;");
-    Test->repl->execute_query_all_nodes((char *) "set global expire_logs_days = 1;");
+    Test->repl->execute_query_all_nodes((char*) "set global max_connections = 300000;");
+    Test->repl->execute_query_all_nodes((char*) "set global max_connect_errors = 10000000;");
+    Test->repl->execute_query_all_nodes((char*) "set global expire_logs_days = 1;");
 
 
 
     Test->maxscales->connect_rwsplit(0);
 
-    Test->repl->execute_query_all_nodes( (char *) "set global max_allowed_packet=100000000");
+    Test->repl->execute_query_all_nodes((char*) "set global max_allowed_packet=100000000");
 
     Test->tprintf("create t1 in `test` DB\n");
     create_t1(Test->maxscales->conn_rwsplit[0]);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     Test->tprintf("Waiting for slaves after DB creation\n");
     Test->repl->sync_slaves(0);
-    //sleep(15);
+    // sleep(15);
     Test->tprintf("...ok\n");
 
     Test->tprintf("create t1 in `test1` DB\n");
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     {
         for (i = 0; i < threads_num[j]; i++)
         {
-            data[j][i].sql = (char*) malloc((i +1) * 32 * 14 + 32);
+            data[j][i].sql = (char*) malloc((i + 1) * 32 * 14 + 32);
             create_insert_string(data[j][i].sql, (i + 1) * 32, i);
             Test->tprintf("sqL %d: %d\n", i, strlen(data[j][i].sql));
             data[j][i].exit_flag = false;
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 
     Test->stop_timeout();
 
-    char * env = getenv("long_test_time");
+    char* env = getenv("long_test_time");
     int test_time = 0;
     if (env != NULL)
     {
@@ -160,9 +160,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    //Test->tprintf("Checking if MaxScale is still alive!\n");
-    //fflush(stdout);
-    //Test->check_maxscale_alive(0);
+    // Test->tprintf("Checking if MaxScale is still alive!\n");
+    // fflush(stdout);
+    // Test->check_maxscale_alive(0);
 
     Test->maxscales->stop_maxscale(0);
 
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
     return rval;
 }
 
-void try_and_reconnect(MYSQL * conn, char * db, char * sql)
+void try_and_reconnect(MYSQL* conn, char* db, char* sql)
 {
     if (execute_query(conn, "%s", sql))
     {
@@ -187,15 +187,15 @@ void try_and_reconnect(MYSQL * conn, char * db, char * sql)
     }
 }
 
-void *query_thread(void *ptr )
+void* query_thread(void* ptr)
 {
-    MYSQL * conn;
-    t_data * data = (t_data *) ptr;
+    MYSQL* conn;
+    t_data* data = (t_data*) ptr;
     int inserts_until_optimize = 100000;
     int tn = 0;
     conn = open_conn_db_timeout(port,
                                 IP,
-                                (char *) "test",
+                                (char*) "test",
                                 Test->repl->user_name,
                                 Test->repl->password,
                                 20,
@@ -203,16 +203,16 @@ void *query_thread(void *ptr )
     while (!data->exit_flag)
     {
 
-        //Test->try_query(conn, data->sql);
-        try_and_reconnect(conn, (char *) "test", data->sql);
+        // Test->try_query(conn, data->sql);
+        try_and_reconnect(conn, (char*) "test", data->sql);
 
         if (tn >= inserts_until_optimize)
         {
             tn = 0;
             Test->tprintf("Removing everything from table in the queries thread");
-            try_and_reconnect(conn, (char *) "test", (char *) "DELETE FROM t1");
+            try_and_reconnect(conn, (char*) "test", (char*) "DELETE FROM t1");
             Test->tprintf("Optimizing table in the queries thread");
-            try_and_reconnect(conn, (char *) "test", (char *) "OPTIMIZE TABLE t1");
+            try_and_reconnect(conn, (char*) "test", (char*) "OPTIMIZE TABLE t1");
         }
         tn++;
     }
@@ -220,15 +220,15 @@ void *query_thread(void *ptr )
     return NULL;
 }
 
-void *read_thread(void *ptr )
+void* read_thread(void* ptr)
 {
-    MYSQL * conn;
-    t_data * data = (t_data *) ptr;
+    MYSQL* conn;
+    t_data* data = (t_data*) ptr;
     int i = 0;
     char sql[256];
     conn = open_conn_db_timeout(port,
                                 IP,
-                                (char *) "test",
+                                (char*) "test",
                                 Test->repl->user_name,
                                 Test->repl->password,
                                 20,
@@ -236,22 +236,22 @@ void *read_thread(void *ptr )
     while (!data->exit_flag)
     {
         sprintf(sql, "SELECT * FROM t1 WHERE fl=%d", data->id);
-        try_and_reconnect(conn, (char *) "test", sql);
+        try_and_reconnect(conn, (char*) "test", sql);
         i++;
     }
     mysql_close(conn);
     return NULL;
 }
 
-void *transaction_thread(void *ptr )
+void* transaction_thread(void* ptr)
 {
-    MYSQL * conn;
+    MYSQL* conn;
     int transactions_until_optimize = 10;
     int tn = 0;
-    t_data * data = (t_data *) ptr;
+    t_data* data = (t_data*) ptr;
     conn = open_conn_db_timeout(port,
                                 IP,
-                                (char *) "test1",
+                                (char*) "test1",
                                 Test->repl->user_name,
                                 Test->repl->password,
                                 20,
@@ -259,22 +259,22 @@ void *transaction_thread(void *ptr )
     while (!data->exit_flag)
     {
 
-        try_and_reconnect(conn, (char *) "test1", (char *) "START TRANSACTION");
-        try_and_reconnect(conn, (char *) "test1", (char *) "SET autocommit = 0");
+        try_and_reconnect(conn, (char*) "test1", (char*) "START TRANSACTION");
+        try_and_reconnect(conn, (char*) "test1", (char*) "SET autocommit = 0");
 
         int stmt_num = 200000 / strlen(data->sql);
         for (int i = 0; i < stmt_num; i++)
         {
-            try_and_reconnect(conn, (char *) "test1", data->sql);
+            try_and_reconnect(conn, (char*) "test1", data->sql);
         }
-        Test->try_query(conn, (char *) "COMMIT");
+        Test->try_query(conn, (char*) "COMMIT");
         if (tn >= transactions_until_optimize)
         {
             tn = 0;
             Test->tprintf("Removing everything from table in the transactions thread");
-            try_and_reconnect(conn, (char *) "test1", (char *) "DELETE FROM t1");
+            try_and_reconnect(conn, (char*) "test1", (char*) "DELETE FROM t1");
             Test->tprintf("Optimizing table in the transactions thread");
-            try_and_reconnect(conn, (char *) "test1", (char *) "OPTIMIZE TABLE t1");
+            try_and_reconnect(conn, (char*) "test1", (char*) "OPTIMIZE TABLE t1");
         }
         tn++;
     }
@@ -282,7 +282,7 @@ void *transaction_thread(void *ptr )
 
     conn = open_conn_db_timeout(port,
                                 IP,
-                                (char *) "",
+                                (char*) "",
                                 Test->maxscales->user_name,
                                 Test->maxscales->password,
                                 20,
@@ -292,15 +292,15 @@ void *transaction_thread(void *ptr )
     return NULL;
 }
 
-void *short_session_thread(void *ptr )
+void* short_session_thread(void* ptr)
 {
-    MYSQL * conn;
-    t_data * data = (t_data *) ptr;
+    MYSQL* conn;
+    t_data* data = (t_data*) ptr;
     while (!data->exit_flag)
     {
         conn = open_conn_db_timeout(port,
                                     IP,
-                                    (char *) "test",
+                                    (char*) "test",
                                     Test->repl->user_name,
                                     Test->repl->password,
                                     20,
@@ -311,14 +311,14 @@ void *short_session_thread(void *ptr )
 }
 
 
-void *prepared_stmt_thread(void *ptr )
+void* prepared_stmt_thread(void* ptr)
 {
-    MYSQL * conn;
-    t_data * data = (t_data *) ptr;
+    MYSQL* conn;
+    t_data* data = (t_data*) ptr;
     char sql[256];
     conn = open_conn_db_timeout(port,
                                 IP,
-                                (char *) "test2",
+                                (char*) "test2",
                                 Test->repl->user_name,
                                 Test->repl->password,
                                 20,
@@ -326,22 +326,22 @@ void *prepared_stmt_thread(void *ptr )
     while (!data->exit_flag)
     {
         sprintf(sql, "PREPARE stmt%d FROM 'SELECT * FROM t1 WHERE fl=@x;';", data->id);
-        try_and_reconnect(conn, (char *) "test2", sql);
-        try_and_reconnect(conn, (char *) "test2", (char *) "SET @x = 3;");
+        try_and_reconnect(conn, (char*) "test2", sql);
+        try_and_reconnect(conn, (char*) "test2", (char*) "SET @x = 3;");
         sprintf(sql, "EXECUTE stmt%d", data->id);
-        try_and_reconnect(conn, (char *) "test2", sql);
-        try_and_reconnect(conn, (char *) "test2", (char *) "SET @x = 4;");
-        try_and_reconnect(conn, (char *) "test2", sql);
-        try_and_reconnect(conn, (char *) "test2", (char *) "SET @x = 400;");
-        try_and_reconnect(conn, (char *) "test2", sql);
+        try_and_reconnect(conn, (char*) "test2", sql);
+        try_and_reconnect(conn, (char*) "test2", (char*) "SET @x = 4;");
+        try_and_reconnect(conn, (char*) "test2", sql);
+        try_and_reconnect(conn, (char*) "test2", (char*) "SET @x = 400;");
+        try_and_reconnect(conn, (char*) "test2", sql);
         sprintf(sql, "DEALLOCATE PREPARE stmt%d", data->id);
-        try_and_reconnect(conn, (char *) "test2", sql);
+        try_and_reconnect(conn, (char*) "test2", sql);
     }
     mysql_close(conn);
 
     conn = open_conn_db_timeout(port,
                                 IP,
-                                (char *) "",
+                                (char*) "",
                                 Test->maxscales->user_name,
                                 Test->maxscales->password,
                                 20,

@@ -35,7 +35,7 @@ public:
      * @brief Constructor
      * @param pref  name of backend setup (like 'repl' or 'galera')
      */
-    Mariadb_nodes(const char *pref, const char *test_cwd, bool verbose, std::string network_config);
+    Mariadb_nodes(const char* pref, const char* test_cwd, bool verbose, std::string network_config);
 
     virtual ~Mariadb_nodes();
 
@@ -54,20 +54,20 @@ public:
     /**
      * @brief Unix socket to connecto to MariaDB
      */
-    char * socket[256];
+    char* socket[256];
     /**
      * @brief 'socket=$socket' line
      */
-    char * socket_cmd[256];
+    char* socket_cmd[256];
 
     /**
      * @brief   User name to access backend nodes
      */
-    char * user_name;
+    char* user_name;
     /**
      * @brief   Password to access backend nodes
      */
-    char * password;
+    char* password;
     /**
      * @brief master index of node which was last configured to be Master
      */
@@ -76,18 +76,18 @@ public:
     /**
      * @brief start_db_command Command to start DB server
      */
-    char * start_db_command[256];
+    char* start_db_command[256];
 
     /**
      * @brief stop_db_command Command to start DB server
      */
-    char * stop_db_command[256];
+    char* stop_db_command[256];
 
     /**
      * @brief cleanup_db_command Command to remove all
      * data files and re-install DB with mysql_install_db
      */
-    char * cleanup_db_command[256];
+    char* cleanup_db_command[256];
 
     /**
      * @brief ssl if true ssl will be used
@@ -486,8 +486,10 @@ class Galera_nodes : public Mariadb_nodes
 {
 public:
 
-    Galera_nodes(const char *pref, const char *test_cwd, bool verbose, std::string network_config) :
-        Mariadb_nodes(pref, test_cwd, verbose, network_config) { }
+    Galera_nodes(const char* pref, const char* test_cwd, bool verbose, std::string network_config)
+        : Mariadb_nodes(pref, test_cwd, verbose, network_config)
+    {
+    }
 
     int start_galera();
 

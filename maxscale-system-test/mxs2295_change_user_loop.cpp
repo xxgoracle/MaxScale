@@ -5,7 +5,7 @@
 
 #include "testconnections.h"
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     TestConnections test(argc, argv);
 
@@ -22,7 +22,8 @@ int main(int argc, char *argv[])
 
         test.set_timeout(60);
 
-        // Interleaved session commands, reads and "writes" (`SELECT @@last_insert_id` is treated as a master-only read)
+        // Interleaved session commands, reads and "writes" (`SELECT @@last_insert_id` is treated as a
+        // master-only read)
         test.expect(conn.query("SET @a = 1"), "Query failed: %s", conn.error());
         test.expect(conn.query("USE test"), "Query failed: %s", conn.error());
         test.expect(conn.query("SET SQL_MODE=''"), "Query failed: %s", conn.error());

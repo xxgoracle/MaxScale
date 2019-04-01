@@ -99,7 +99,9 @@ json_t* find_array_elem_json(TestConnections& test, json_t* object,
             json_t* arr_elem = json_array_get(object, i);
             json_t* elem_val = json_object_get(arr_elem, key.c_str());
             bool is_string = json_is_string(elem_val);
-            test.expect(is_string, "Key %s was not found in json data or the data is not string.\n", key.c_str());
+            test.expect(is_string,
+                        "Key %s was not found in json data or the data is not string.\n",
+                        key.c_str());
             if (is_string)
             {
                 std::string elem_field = json_string_value(elem_val);
@@ -164,7 +166,7 @@ void check_rlag(TestConnections& test, const char* server, int min_rlag, int max
     }
 }
 
-void change_master(TestConnections& test ,int slave, int master, const string& conn_name = "",
+void change_master(TestConnections& test, int slave, int master, const string& conn_name = "",
                    int replication_delay = 0)
 {
     const char query[] = "CHANGE MASTER '%s' TO master_host='%s', master_port=%d, "
@@ -172,7 +174,7 @@ void change_master(TestConnections& test ,int slave, int master, const string& c
                          "master_user='repl', master_password='repl', master_delay=%d; "
                          "START SLAVE '%s';";
     test.try_query(test.repl->nodes[slave], query, conn_name.c_str(),
-		   test.repl->IP[master], test.repl->port[master],
+                   test.repl->IP[master], test.repl->port[master],
                    replication_delay, conn_name.c_str());
 }
 
@@ -185,7 +187,7 @@ int main(int argc, char* argv[])
     const char reset_query[] = "STOP SLAVE; RESET SLAVE ALL; RESET MASTER; SET GLOBAL read_only='OFF'";
     const char readonly_on_query[] = "SET GLOBAL read_only='ON'";
 
-    TestConnections::require_repl_version("10.2.3"); // Delayed replication needs this.
+    TestConnections::require_repl_version("10.2.3");    // Delayed replication needs this.
     TestConnections test(argc, argv);
 
     test.tprintf("Test 1 - Configure all servers into a multi-master ring with one slave");

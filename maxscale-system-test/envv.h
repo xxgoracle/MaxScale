@@ -10,7 +10,7 @@
  * @param format Default value
  * @return Enviromental variable value
  */
-char * readenv(const char * name, const char *format, ...);
+char* readenv(const char* name, const char* format, ...);
 
 /**
  * @brief readenv_int Read integer value of enviromental variable, if empty - set dafault
@@ -18,7 +18,7 @@ char * readenv(const char * name, const char *format, ...);
  * @param def Default value
  * @return Enviromental variable value converted to int
  */
-int readenv_int(const char * name, int def);
+int readenv_int(const char* name, int def);
 
 /**
  * @brief readenv_int Read boolean value of enviromental variable, if empty - set dafault
@@ -27,4 +27,4 @@ int readenv_int(const char * name, int def);
  * @param def Default value
  * @return Enviromental variable value converted to bool
  */
-bool readenv_bool(const char * name, bool def);
+bool readenv_bool(const char* name, bool def);

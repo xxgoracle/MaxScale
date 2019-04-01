@@ -16,16 +16,16 @@ class Nodes
 public:
     Nodes();
 
-    char * IP[256];
+    char* IP[256];
     /**
      * @brief  private IP address strings for every backend node (for AWS)
      */
 
-    char * IP_private[256];
+    char* IP_private[256];
     /**
      * @brief  IP address strings for every backend node (IPv6)
      */
-    char * IP6[256];
+    char* IP6[256];
 
     /**
      * @brief use_ipv6 If true IPv6 addresses will be used to connect Maxscale and backed
@@ -36,7 +36,7 @@ public:
     /**
      * @brief  Path to ssh key for every backend node
      */
-    char * sshkey[256];
+    char* sshkey[256];
 
     /**
      * @brief Number of backend nodes
@@ -51,38 +51,38 @@ public:
     /**
      * @brief access_user Unix users name to access nodes via ssh
      */
-    char * access_user[256];
+    char* access_user[256];
 
     /**
      * @brief access_sudo empty if sudo is not needed or "sudo " if sudo is needed.
      */
-    char * access_sudo[256];
+    char* access_sudo[256];
 
     /**
      * @brief access_homedir home directory of access_user
      */
-    char * access_homedir[256];
+    char* access_homedir[256];
 
-    char * hostname[256];
+    char* hostname[256];
 
     /**
      * @brief stop_vm_command Command to suspend VM
      */
-    char * stop_vm_command[256];
+    char* stop_vm_command[256];
     /**
      *
      * @brief start_vm_command Command to resume VM
      */
-    char * start_vm_command[256];
+    char* start_vm_command[256];
 
     /**
      * @brief   User name to access backend nodes
      */
-    char * user_name;
+    char* user_name;
     /**
      * @brief   Password to access backend nodes
      */
-    char * password;
+    char* password;
 
     /**
      * @brief network_config Content of MDBCI network_config file
@@ -183,7 +183,7 @@ public:
      * @param item_name Name of the variable
      * @return value of variable
      */
-    char *get_nc_item(char * item_name);
+    char* get_nc_item(char* item_name);
 
     /**
      * @brief get_N Calculate the number of nodes discribed in the _netoek_config file

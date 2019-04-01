@@ -33,10 +33,10 @@ int main(int argc, char* argv[])
         exit(0);
     }
 
-    Test->on_destroy([&](){
-                        Test->maxscales->ssh_node_f(0, true, "service keepalived stop");
-                        Test->maxscales->ssh_node_f(1, true, "service keepalived stop");
-                    });
+    Test->on_destroy([&]() {
+                         Test->maxscales->ssh_node_f(0, true, "service keepalived stop");
+                         Test->maxscales->ssh_node_f(1, true, "service keepalived stop");
+                     });
 
 
     Test->check_maxscale_alive(0);

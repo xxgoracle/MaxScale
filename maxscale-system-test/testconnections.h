@@ -16,8 +16,8 @@
 
 typedef std::set<std::string> StringSet;
 
-#define MDBCI_FAUILT 200 // Exit code for the case when failure caused by MDBCI non-zero exit
-#define BROKEN_VM_FAUILT 201 // Exit code for the case when failure caused by screwed VMs
+#define MDBCI_FAUILT     200// Exit code for the case when failure caused by MDBCI non-zero exit
+#define BROKEN_VM_FAUILT 201// Exit code for the case when failure caused by screwed VMs
 
 /**
  * @brief Class contains references to Master/Slave and Galera test setups
@@ -97,7 +97,7 @@ public:
     /**
      * @brief galera Mariadb_nodes object containing references to Galera setuo
      */
-    Galera_nodes * galera;
+    Galera_nodes* galera;
 
     /**
      * @brief repl Mariadb_nodes object containing references to Master/Slave setuo
@@ -112,38 +112,38 @@ public:
     /**
      * @brief mdbci_config_name Name of MDBCI VMs set
      */
-    char * mdbci_config_name;
+    char* mdbci_config_name;
 
     /**
      * @brief mdbci_vm_path Path to directory with MDBCI VMs descriptions
      */
-    char * mdbci_vm_path;
+    char* mdbci_vm_path;
 
     /**
      * @brief mdbci_temlate Name of mdbci VMs tempate file
      */
-    char * mdbci_template;
+    char* mdbci_template;
 
     /**
      * @brief target Name of Maxscale repository in the CI
      */
-    char * target;
+    char* target;
 
     /**
      * @brief GetLogsCommand Command to copy log files from node virtual machines (should handle one
      * parameter: IP address of virtual machine to kill)
      */
-    char * get_logs_command;
+    char* get_logs_command;
 
     /**
      * @brief make_snapshot_command Command line to create a snapshot of all VMs
      */
-    char * take_snapshot_command;
+    char* take_snapshot_command;
 
     /**
      * @brief revert_snapshot_command Command line to revert a snapshot of all VMs
      */
-    char * revert_snapshot_command;
+    char* revert_snapshot_command;
 
     /**
      * @brief use_snapshots if TRUE every test is trying to revert snapshot before running the test
@@ -285,12 +285,12 @@ public:
     /**
      * @brief template_name Name of maxscale.cnf template
      */
-    const char * template_name;
+    const char* template_name;
 
     /**
      * @brief labels 'LABELS' string from CMakeLists.txt
      */
-    const char * labels;
+    const char* labels;
 
     /**
      * @brief mdbci_labels labels to be passed to MDBCI
@@ -303,8 +303,8 @@ public:
     std::string configured_labels;
 
     /**
-    * @brief vm_path Path to the VM Vagrant directory
-    */
+     * @brief vm_path Path to the VM Vagrant directory
+     */
     std::string vm_path;
 
     /**
@@ -668,7 +668,7 @@ public:
      *
      * @param func Function to call
      */
-    void on_destroy(std::function<void (void)> func)
+    void on_destroy(std::function<void(void)> func)
     {
         m_on_destroy.push_back(func);
     }
@@ -684,7 +684,7 @@ public:
      * @brief call_mdbci Execute MDBCI to bring up nodes
      * @return 0 if success
      */
-    int call_mdbci(const char *options);
+    int call_mdbci(const char* options);
 
     /**
      * @brief use_valrind if true Maxscale will be executed under Valgrind
@@ -700,9 +700,9 @@ public:
 
 private:
     void report_result(const char* format, va_list argp);
-    void copy_one_mariadb_log(Mariadb_nodes *nrepl, int i, std::string filename);
+    void copy_one_mariadb_log(Mariadb_nodes* nrepl, int i, std::string filename);
 
-    std::vector<std::function<void (void)>> m_on_destroy;
+    std::vector<std::function<void(void)>> m_on_destroy;
 };
 
 /**
@@ -735,7 +735,7 @@ std::string dump_status(const StringSet& current, const StringSet& expected);
  * @param labels pointer to string for storing all test labels
  * @return Name of maxscale.cnf file template
  */
-const char *get_template_name(char * test_name, const char **labels);
+const char* get_template_name(char* test_name, const char** labels);
 
 /**
  * @brief readenv_and_set_default Read enviromental variable and set default values if

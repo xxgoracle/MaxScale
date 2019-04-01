@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
         Test->add_result(execute_query(conn, "CREATE TABLE table%d (x1 int, fl int);", i),
                          "Query should succeed.");
     }
-    sleep(6); // The router is configured to refresh the shard map if older than 5 seconds.
+    sleep(6);   // The router is configured to refresh the shard map if older than 5 seconds.
 
     for (i = 0; i < Test->repl->N; i++)
     {

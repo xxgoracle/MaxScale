@@ -4,7 +4,7 @@
 #include <string>
 #include "envv.h"
 
-Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind,
+Maxscales::Maxscales(const char* pref, const char* test_cwd, bool verbose, bool use_valgrind,
                      std::string network_config)
 {
     strcpy(prefix, pref);
@@ -69,20 +69,20 @@ int Maxscales::connect_rwsplit(int m, const std::string& db)
     if (use_ipv6)
     {
         conn_rwsplit[m] = open_conn_db(rwsplit_port[m],
-                                    IP6[m],
-                                    db,
-                                    user_name,
-                                    password,
-                                    ssl);
+                                       IP6[m],
+                                       db,
+                                       user_name,
+                                       password,
+                                       ssl);
     }
     else
     {
         conn_rwsplit[m] = open_conn_db(rwsplit_port[m],
-                                    IP[m],
-                                    db,
-                                    user_name,
-                                    password,
-                                    ssl);
+                                       IP[m],
+                                       db,
+                                       user_name,
+                                       password,
+                                       ssl);
     }
     routers[m][0] = conn_rwsplit[m];
 
@@ -106,20 +106,20 @@ int Maxscales::connect_readconn_master(int m, const std::string& db)
     if (use_ipv6)
     {
         conn_master[m] = open_conn_db(readconn_master_port[m],
-                                   IP6[m],
-                                   db,
-                                   user_name,
-                                   password,
-                                   ssl);
+                                      IP6[m],
+                                      db,
+                                      user_name,
+                                      password,
+                                      ssl);
     }
     else
     {
         conn_master[m] = open_conn_db(readconn_master_port[m],
-                                   IP[m],
-                                   db,
-                                   user_name,
-                                   password,
-                                   ssl);
+                                      IP[m],
+                                      db,
+                                      user_name,
+                                      password,
+                                      ssl);
     }
     routers[m][1] = conn_master[m];
 
@@ -143,20 +143,20 @@ int Maxscales::connect_readconn_slave(int m, const std::string& db)
     if (use_ipv6)
     {
         conn_slave[m] = open_conn_db(readconn_slave_port[m],
-                                  IP6[m],
-                                  db,
-                                  user_name,
-                                  password,
-                                  ssl);
+                                     IP6[m],
+                                     db,
+                                     user_name,
+                                     password,
+                                     ssl);
     }
     else
     {
         conn_slave[m] = open_conn_db(readconn_slave_port[m],
-                                  IP[m],
-                                  db,
-                                  user_name,
-                                  password,
-                                  ssl);
+                                     IP[m],
+                                     db,
+                                     user_name,
+                                     password,
+                                     ssl);
     }
     routers[m][2] = conn_slave[m];
 
@@ -219,7 +219,7 @@ int Maxscales::start_maxscale(int m)
     }
     else
     {
-        res =ssh_node(m, "service maxscale restart", true);
+        res = ssh_node(m, "service maxscale restart", true);
     }
     fflush(stdout);
     return res;
@@ -454,5 +454,8 @@ int Maxscales::port(enum service type, int m) const
 
 void Maxscales::wait_for_monitor(int intervals, int m)
 {
-    ssh_node_f(m, false, "for ((i=0;i<%d;i++)); do maxctrl api get maxscale/debug/monitor_wait; done", intervals);
+    ssh_node_f(m,
+               false,
+               "for ((i=0;i<%d;i++)); do maxctrl api get maxscale/debug/monitor_wait; done",
+               intervals);
 }

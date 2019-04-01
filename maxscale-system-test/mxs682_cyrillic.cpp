@@ -16,7 +16,7 @@ void check_val(MYSQL* conn, TestConnections& test)
     test.stop_timeout();
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     TestConnections test(argc, argv);
     Mariadb_nodes* nodes = strstr(test.test_name, "galera") ? test.galera : test.repl;

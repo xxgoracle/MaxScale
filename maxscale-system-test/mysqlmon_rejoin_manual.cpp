@@ -89,7 +89,7 @@ int main(int argc, char** argv)
         // Switch master back to server1 so last check is faster
         int ec;
         test.maxscales->ssh_node_output(0, "maxadmin call command mysqlmon switchover "
-                                        "MySQL-Monitor server1 server2", true, &ec);
+                                           "MySQL-Monitor server1 server2", true, &ec);
         test.maxscales->wait_for_monitor();
         get_output(test);
         master_id = get_master_server_id(test);
@@ -115,13 +115,13 @@ int main(int argc, char** argv)
                         "server3 gtid is not empty as it should (%s).", row[0].c_str());
             cout << "Rejoining server3.\n";
             test.maxscales->ssh_node_output(0, "maxadmin call command mysqlmon rejoin "
-                                            "MySQL-Monitor server3", true, &ec);
+                                               "MySQL-Monitor server3", true, &ec);
             test.maxscales->wait_for_monitor();
             get_output(test);
             char result[100];
             if (find_field(conn, sstatus_query.c_str(), "Master_Host", result) == 0)
             {
-		test.expect(strcmp(result, test.repl->IP[0]) == 0,
+                test.expect(strcmp(result, test.repl->IP[0]) == 0,
                             "server3 did not rejoin the cluster (%s != %s).", result, test.repl->IP[0]);
             }
             else
