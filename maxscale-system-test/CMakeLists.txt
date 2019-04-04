@@ -1050,7 +1050,7 @@ add_test_derived(different_size_rwsplit_big different_size_rwsplit replication L
 
 # own long test
 # 'long_test_time' variable defines time of execution (in seconds)
-add_test_executable_notest(long_test.cpp long_test_big replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+#add_test_executable_notest(long_test.cpp long_test_big replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
 
 # Check how Maxscale works in case of one slave failure, only one slave is configured
 add_test_derived(slave_failover_big slave_failover replication.one_slave LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
@@ -1078,6 +1078,18 @@ add_test_derived(rwsplit_conn_num_big rwsplit_conn_num repl_lgc LABELS readwrite
 
 # Check that there is one connection to Master and one connection to one of slaves
 add_test_derived(rwsplit_connect_big rwsplit_connect replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+
+set_tests_properties(different_size_rwsplit_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(slave_failover_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(sql_queries_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(temporal_tables_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(prepared_statement_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(readconnrouter_master_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(readconnrouter_slave_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(rw_select_insert_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(rwsplit_conn_num_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(rwsplit_connect_big PROPERTIES TIMEOUT 3600)
+
 
 ############################################
 # END: tests with 15 machines backend    #
