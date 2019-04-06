@@ -63,6 +63,10 @@ add_test_executable(config_test.cpp config_test replication LABELS CONFIG)
 
 add_subdirectory(cdc_datatypes)
 
+# Tries INSERTs with size close to 0x0ffffff * N
+add_test_derived(different_size_rwsplit_big different_size_rwsplit replication_big LABELS readwritesplit HEAVY REPL_BACKEND BIG_REPL_BACKEND)
+
+
 # Routing sanity check. Also acts as the regression test case the following issues:
 #
 # MXS-127
@@ -1045,8 +1049,6 @@ add_test_executable(mxs2057_systemd_watchdog.cpp mxs2057_systemd_watchdog mxs205
 
 # temporarily added UNSTABLE HEAVY labels to prevent execution of these tests in daily rounds
 
-# Tries INSERTs with size close to 0x0ffffff * N
-add_test_derived(different_size_rwsplit_big different_size_rwsplit replication_big LABELS readwritesplit HEAVY REPL_BACKEND BIG_REPL_BACKEND UNSTABLE)
 
 # own long test
 # 'long_test_time' variable defines time of execution (in seconds)
