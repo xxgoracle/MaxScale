@@ -258,7 +258,7 @@ TestConnections::TestConnections(int argc, char* argv[])
 
     if (optind < argc)
     {
-        test_name = argv[optind];
+        test_name = argv[optind - 1];
     }
     else
     {
@@ -267,6 +267,7 @@ TestConnections::TestConnections(int argc, char* argv[])
 
     const char * labels_string = NULL;
     template_name = get_template_name(test_name, &labels_string);
+    tprintf("testname: '%s', template: '%s'", test_name, template_name);
     labels = strstr(labels_string, "LABELS;");
     if (!labels)
     {
