@@ -258,7 +258,7 @@ TestConnections::TestConnections(int argc, char* argv[])
 
     if (optind < argc)
     {
-        test_name = argv[optind - 1];
+        test_name = argv[optind];
     }
     else
     {
