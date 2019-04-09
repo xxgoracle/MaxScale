@@ -1443,7 +1443,8 @@ void Mariadb_nodes::limit_nodes(int new_N)
     if (N > new_N)
     {
         execute_query_all_nodes((char*) "stop slave;");
-        N = 4;
+        N = new_N;
         fix_replication();
     }
+    sleep(10);
 }
