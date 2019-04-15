@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 {
     MYSQL* mysql[1000];
     TestConnections* Test = new TestConnections(argc, argv);
-    Test->repl->limit_nodes(4);
+//    Test->repl->limit_nodes(4);
 
     Test->repl->execute_query_all_nodes((char*) "set global max_connections = 10;");
 
