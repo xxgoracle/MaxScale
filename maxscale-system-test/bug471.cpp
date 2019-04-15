@@ -152,7 +152,6 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     TestConnections* Test = new TestConnections(argc, argv);
-    Test->stop_timeout();
     Test->repl->limit_nodes(4);
     Test->set_timeout(10);
 

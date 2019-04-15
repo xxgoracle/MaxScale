@@ -1445,6 +1445,6 @@ void Mariadb_nodes::limit_nodes(int new_N)
         execute_query_all_nodes((char*) "stop slave;");
         N = new_N;
         fix_replication();
+        sleep(10);
     }
-    sleep(10);
 }
