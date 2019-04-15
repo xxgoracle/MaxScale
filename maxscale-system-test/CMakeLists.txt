@@ -71,6 +71,9 @@ add_subdirectory(cdc_datatypes)
 # MXS-957
 # MXS-1786
 add_test_executable(sanity_check.cpp sanity_check replication LABELS LIGHT REPL_BACKEND)
+# Tries INSERTs with size close to 0x0ffffff * N
+add_test_derived(different_size_rwsplit_big different_size_rwsplit replication_big LABELS readwritesplit UNSTABLE HEAVY REPL_BACKEND BIG_REPL_BACKEND)
+
 
 # Repeatedly connect to maxscale while the backends reject all connections, expect no crash
 add_test_executable(backend_auth_fail.cpp backend_auth_fail replication LABELS readconnroute REPL_BACKEND)
@@ -1050,8 +1053,6 @@ add_test_executable(mxs2057_systemd_watchdog.cpp mxs2057_systemd_watchdog mxs205
 # 'long_test_time' variable defines time of execution (in seconds)
 #add_test_executable_notest(long_test.cpp long_test_big replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
 
-# Tries INSERTs with size close to 0x0ffffff * N
-add_test_derived(different_size_rwsplit_big different_size_rwsplit replication_big LABELS readwritesplit UNSTABLE HEAVY REPL_BACKEND BIG_REPL_BACKEND)
 
 # Check how Maxscale works in case of one slave failure, only one slave is configured
 add_test_derived(slave_failover_big slave_failover replication.one_slave_big LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
