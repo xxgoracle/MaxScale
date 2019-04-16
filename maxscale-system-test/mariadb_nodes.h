@@ -482,6 +482,10 @@ public:
      */
     void limit_nodes(int new_N);
 
+    std::string cnf_servers();
+    std::string cnf_servers_line();
+    std::string cnf_server_name;
+
 private:
 
     bool check_master_node(MYSQL* conn);
