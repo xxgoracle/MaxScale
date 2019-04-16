@@ -1081,6 +1081,16 @@ add_test_derived(rwsplit_conn_num_big rwsplit_conn_num repl_lgc_big LABELS readw
 # Check that there is one connection to Master and one connection to one of slaves
 add_test_derived(rwsplit_connect_big rwsplit_connect replication_big LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
 
+# Regression cases for the bug "Hint filter don't work if listed before regex filter in configuration file"
+# (different filter sequence and configuration, but the same test, see .cnf for details)
+add_test_derived(bug585_big bug587 bug585_big LABELS regexfilter BIG_REPL_BACKEND REPL_BACKEND)
+add_test_derived(bug587_big bug587 bug587_big LABELS regexfilter hintfilter BIG_REPL_BACKEND REPL_BACKEND)
+add_test_derived(bug587_1_big bug587 bug587_1_big LABELS regexfilter hintfilter BIG_REPL_BACKEND REPL_BACKEND)
+# Regression case for the bug "Routing Hints route to server sometimes doesn't work"
+add_test_derived(bug471_big bug471 bug471_big LABELS readwritesplit hintfilter BIG_REPL_BACKEND REPL_BACKEND)
+
+
+
 set_tests_properties(different_size_rwsplit_big PROPERTIES TIMEOUT 3600)
 set_tests_properties(different_size_rwsplit PROPERTIES TIMEOUT 3600)
 set_tests_properties(slave_failover_big PROPERTIES TIMEOUT 3600)
