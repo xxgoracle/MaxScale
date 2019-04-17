@@ -1055,31 +1055,31 @@ add_test_executable(mxs2057_systemd_watchdog.cpp mxs2057_systemd_watchdog mxs205
 
 
 # Check how Maxscale works in case of one slave failure, only one slave is configured
-add_test_derived(slave_failover_big slave_failover replication.one_slave LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(slave_failover_big slave_failover replication.one_slave LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND  HEAVY)
 
 # Execute queries of different size, check data is the same when accessing via Maxscale and directly to backend
-add_test_derived(sql_queries_big sql_queries replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(sql_queries_big sql_queries replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND  HEAVY)
 
 # Check temporal tables commands functionality
-add_test_derived(temporal_tables_big temporal_tables replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(temporal_tables_big temporal_tables replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND  HEAVY)
 
 # Check if prepared statement works via Maxscale (via RWSplit)
-add_test_derived(prepared_statement_big prepared_statement replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(prepared_statement_big prepared_statement replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND  HEAVY)
 
 # Connect to ReadConn in master mode and check if there is only one backend connection to master
-add_test_derived(readconnrouter_master_big readconnrouter_master replication LABELS readconnroute REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(readconnrouter_master_big readconnrouter_master replication LABELS readconnroute REPL_BACKEND BIG_REPL_BACKEND  HEAVY)
 
 # Creates 100 connections to ReadConn in slave mode and check if connections are distributed among all slaves
-add_test_derived(readconnrouter_slave_big readconnrouter_slave replication LABELS readconnroute REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(readconnrouter_slave_big readconnrouter_slave replication LABELS readconnroute REPL_BACKEND BIG_REPL_BACKEND  HEAVY)
 
 # Checks changes of COM_SELECT and COM_INSERT after queris to check if RWSplit sends queries to master or to slave depending on if it is write or read only query
-add_test_derived(rw_select_insert_big rw_select_insert replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(rw_select_insert_big rw_select_insert replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND  HEAVY)
 
 # Checks connections are distributed equaly among backends
-add_test_derived(rwsplit_conn_num_big rwsplit_conn_num repl_lgc LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(rwsplit_conn_num_big rwsplit_conn_num repl_lgc LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND  HEAVY)
 
 # Check that there is one connection to Master and one connection to one of slaves
-add_test_derived(rwsplit_connect_big rwsplit_connect replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(rwsplit_connect_big rwsplit_connect replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND  HEAVY)
 
 # Regression cases for the bug "Hint filter don't work if listed before regex filter in configuration file"
 # (different filter sequence and configuration, but the same test, see .cnf for details)
