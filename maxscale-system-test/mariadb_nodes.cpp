@@ -54,7 +54,7 @@ Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbos
     {
         cnf_server_name = std::string("server");
     }
-    if (strcmp(prefix, "node") == 0)
+    if (strcmp(prefix, "galera") == 0)
     {
         cnf_server_name = std::string("gserver");
     }
@@ -1470,7 +1470,7 @@ std::string Mariadb_nodes::cnf_servers()
                 std::string(IP[i]) +
                 std::string("\\nport=") +
                 std::to_string(port[i]) +
-                std::string("]\\nprotocol=MySQLBackend\\n");
+                std::string("\\nprotocol=MySQLBackend\\n");
     }
     return s;
 }
