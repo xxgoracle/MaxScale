@@ -18,8 +18,8 @@ then
   sudo apt-get update
   sudo apt-get install -y --force-yes \
                  git wget build-essential \
-                 libssl-dev libmariadbclient-dev php perl \
-                 coreutils libjansson-dev \
+                 libssl-dev mariadb-client php perl \
+                 coreutils libjansson-dev zlib1g-dev \
                  mariadb-test python python-pip cmake libpam0g-dev
   sudo apt-get install -y --force-yes openjdk-8-jdk
   if [ $? != 0 ]
