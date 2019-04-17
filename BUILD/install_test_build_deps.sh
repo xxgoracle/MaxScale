@@ -1,3 +1,6 @@
+#!/bin/bash
+
+# Installs all build dependecies for maxscale-system-test
 
 rp=`realpath $0`
 export src_dir=`dirname $rp`
@@ -39,15 +42,14 @@ baseurl = http://yum.mariadb.org/10.3/sles/$releasever/$basearch/
 gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
 gpgcheck=0
 EOL
-    sudo cp mariadb.repo /etc/zypp.d/
+    sudo cp mariadb.repo /etc/zypp/repos.d/
 
     sudo zypper -n refresh
-    sudo zypper -n update
     sudo zypper -n install gcc gcc-c++ \
-                 libopenssl-devel libgcrypt-devel mariadb-devel mariadb-test \
-                 php perl coreutils libjansson-devel openjdk-8-jdk python python-pip \
-                 cmake pam-devel openssl-devel python-devel jansson-devel
-    sudo zypper -n install java-1.8.0-openjdk
+                 libopenssl-devel libgcrypt-devel MariaDB-devel MariaDB-test \
+                 php perl coreutils libjansson-devel python python-pip \
+                 cmake pam-devel openssl-devel python-devel libjansson-devel
+    sudo zypper -n install java-1_8_0-openjdk
   else
   # YUM!
     cat >mariadb.repo <<'EOL'
@@ -66,9 +68,9 @@ EOL
                  php perl coreutils python python-pip \
                  cmake pam-devel python-devel jansson-devel
     sudo yum install -y --nogpgcheck java-1.8.0-openjdk
-    sudo pip install --upgrade pip
-    sudo pip install JayDeBeApi
   fi
+  sudo pip install --upgrade pip
+  sudo pip install JayDeBeApi
 fi
 
 ${src_dir}/install_cmake.sh
