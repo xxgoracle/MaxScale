@@ -1102,6 +1102,11 @@ set_tests_properties(readconnrouter_slave_big PROPERTIES TIMEOUT 3600)
 set_tests_properties(rw_select_insert_big PROPERTIES TIMEOUT 3600)
 set_tests_properties(rwsplit_conn_num_big PROPERTIES TIMEOUT 3600)
 set_tests_properties(rwsplit_connect_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(bug585_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(bug587_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(bug587_1_big PROPERTIES TIMEOUT 3600)
+set_tests_properties(bug471_big PROPERTIES TIMEOUT 3600)
+
 
 ############################################
 # END: tests with 15 machines backend    #
