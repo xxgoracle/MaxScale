@@ -68,10 +68,11 @@ EOL
                  php perl coreutils python python-pip \
                  cmake pam-devel python-devel jansson-devel
     sudo yum install -y --nogpgcheck java-1.8.0-openjdk
+    sudo yum install centos-release-scl
+    sudo yum install devtoolset-7-gcc*
+    scl enable devtoolset-7 bash
   fi
   sudo pip install --upgrade pip
   sudo pip install JayDeBeApi
 fi
-
-${src_dir}/install_cmake.sh
 
