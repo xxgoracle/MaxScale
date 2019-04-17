@@ -16,8 +16,14 @@ then
   sudo apt-get install -y --force-yes \
                  git wget build-essential \
                  libssl-dev libmariadbclient-dev php perl \
-                 coreutils libjansson-dev openjdk-8-jdk \
+                 coreutils libjansson-dev \
                  mariadb-test python python-pip cmake libpam0g-dev
+  sudo apt-get install -y --force-yes openjdk-8-jdk
+  if [ $? != 0 ]
+  then
+    sudo apt-get install -y --force-yes openjdk-7-jdk
+  fi
+  pip install JayDeBeApi
 else
   ## RPM-based distro
   install_libdir=/usr/lib64
@@ -26,15 +32,25 @@ else
   if [ $? != 0 ]
   then
     # We need zypper here
+    cat >mariadb.repo <<'EOL'
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.3/sles/$releasever/$basearch/
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=0
+EOL
+    sudo cp mariadb.repo /etc/zypp.d/
+
     sudo zypper -n refresh
     sudo zypper -n update
     sudo zypper -n install gcc gcc-c++ \
-                 libgcrypt-devel libopenssl-devel mariadb-devel mariadb-test \
+                 libopenssl-devel libgcrypt-devel mariadb-devel mariadb-test \
                  php perl coreutils libjansson-devel openjdk-8-jdk python python-pip \
-                 cmake pam-devel
+                 cmake pam-devel openssl-devel python-devel jansson-devel
+    sudo zypper -n install java-1.8.0-openjdk
   else
   # YUM!
-    cat >mariadb.repo <<EOL
+    cat >mariadb.repo <<'EOL'
 [mariadb]
 name = MariaDB
 baseurl = http://yum.mariadb.org/10.3/centos/$releasever/$basearch/
@@ -43,13 +59,17 @@ gpgcheck=0
 EOL
     sudo cp mariadb.repo /etc/yum.repos.d/
     sudo yum clean all
-    sudo yum update -y
-    sudo yum install -y --nogpgcheck git wget gcc gcc-c++ 
-                 libgcrypt-devel libopenssl-devel mariadb-devel mariadb-test \
-                 php perl coreutils libjansson-devel openjdk-8-jdk python python-pip \
-                 cmake pam-devel
+    sudo yum install -y --nogpgcheck epel-release
+    sudo yum install -y --nogpgcheck git wget gcc gcc-c++ \
+                 libgcrypt-devel \
+                 openssl-devel mariadb-devel mariadb-test \
+                 php perl coreutils python python-pip \
+                 cmake pam-devel python-devel jansson-devel
+    sudo yum install -y --nogpgcheck java-1.8.0-openjdk
+    sudo pip install --upgrade pip
+    sudo pip install JayDeBeApi
   fi
 fi
 
 ${src_dir}/install_cmake.sh
-pip install JayDeBeApi
+
