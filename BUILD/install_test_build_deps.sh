@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Installs all build dependecies for maxscale-system-test
+# Only Ubuntu Bionic/Xenial, CentOS 7, SLES 15 are supported
 
 rp=`realpath $0`
 export src_dir=`dirname $rp`
@@ -69,9 +70,9 @@ EOL
                  php perl coreutils python python-pip \
                  cmake pam-devel python-devel jansson-devel
     sudo yum install -y --nogpgcheck java-1.8.0-openjdk
-    sudo yum install centos-release-scl
-    sudo yum install devtoolset-7-gcc*
-    scl enable devtoolset-7 bash
+    sudo yum install -y --nogpgcheck centos-release-scl
+    sudo yum install -y --nogpgcheck devtoolset-7-gcc*
+    echo "please run 'scl enable devtoolset-7 bash' to enable new gcc!!"
   fi
   sudo pip install --upgrade pip
   sudo pip install JayDeBeApi
