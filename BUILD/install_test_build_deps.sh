@@ -4,7 +4,7 @@
 
 rp=`realpath $0`
 export src_dir=`dirname $rp`
-
+export LC_ALL=C
 command -v apt-get
 
 if [ $? == 0 ]
@@ -26,6 +26,7 @@ then
   then
     sudo apt-get install -y --force-yes openjdk-7-jdk
   fi
+  pip install --upgrade pip
   pip install JayDeBeApi
 else
   ## RPM-based distro
