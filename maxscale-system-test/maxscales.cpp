@@ -215,7 +215,7 @@ int Maxscales::start_maxscale(int m)
                          "sudo --user=maxscale valgrind "
                          "--log-file=/%s/valgrind%02d.log --trace-children=yes "
                          " --tool=callgrind --callgrind-out-file=/%s/callgrind%02d.log "
-                         "--track-origins=yes /usr/bin/maxscale",
+                         " /usr/bin/maxscale",
                          maxscale_log_dir[m], valgring_log_num,
                          maxscale_log_dir[m], valgring_log_num);
         valgring_log_num++;
