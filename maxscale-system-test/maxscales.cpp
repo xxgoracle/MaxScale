@@ -212,7 +212,7 @@ int Maxscales::start_maxscale(int m)
     if (use_valgrind)
     {
         res = ssh_node_f(m, false,
-                         "sudo --user=maxscale valgrind --show-leak-kinds=all "
+                         "sudo --user=maxscale valgrind "
                          "--log-file=/%s/valgrind%02d.log --trace-children=yes "
                          " --tool=callgrind --callgrind-out-file=/%s/callgrind%02d.log "
                          "--track-origins=yes /usr/bin/maxscale",
