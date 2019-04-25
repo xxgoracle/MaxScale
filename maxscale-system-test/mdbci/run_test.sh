@@ -37,7 +37,7 @@
 # the value of $test_set after 'NAME#' is used as bash command 
 # line
 # example: '#NAME long_test_time=3600 ./long_test'
-
+env
 export vm_memory=${vm_memory:-"2048"}
 export dir=`pwd`
 
