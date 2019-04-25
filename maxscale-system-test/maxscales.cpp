@@ -14,7 +14,7 @@ Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose, bool 
     strcpy(test_dir, test_cwd);
     this->network_config = network_config;
     read_env();
-    if (use_valgrind)
+    if (this->use_valgrind)
     {
         for (int i = 0; i < N; i++)
         {
