@@ -220,7 +220,7 @@ int Maxscales::start_maxscale(int m)
         if (use_callgrind)
         {
             res = ssh_node_f(m, false,
-                             "sudo --user=maxscale valgrind "
+                             "sudo --user=maxscale valgrind -d "
                              "--log-file=/%s/valgrind%02d.log --trace-children=yes "
                              " --tool=callgrind --callgrind-out-file=/%s/callgrind%02d.log "
                              " /usr/bin/maxscale",
