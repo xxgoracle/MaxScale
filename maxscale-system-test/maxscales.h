@@ -339,6 +339,12 @@ public:
     bool use_valgrind;
 
     /**
+     * @brief use_callgrind if true Maxscale will be executed under Valgrind with
+     * --callgrind option
+     */
+    bool use_callgrind;
+
+    /**
      * @brief valgring_log_num Counter for Maxscale restarts to avoid Valgrind log overwriting
      */
     int valgring_log_num;
