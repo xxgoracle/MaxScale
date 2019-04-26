@@ -507,6 +507,7 @@ TestConnections::~TestConnections()
         // stop all Maxscales to get proper Valgrind logs
         for (int i = 0; i < maxscales->N; i++)
         {
+            tprintf("Stopping Maxscale %d to get Valgrind logs", i);
             stop_maxscale(i);
         }
         sleep(15);      // sleep to let logs be written do disks
