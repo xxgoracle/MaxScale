@@ -4,12 +4,11 @@
 #include <string>
 #include "envv.h"
 
-Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind,
+Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose,
                      std::string network_config)
 {
     strcpy(prefix, pref);
     this->verbose = verbose;
-    this->use_valgrind = use_valgrind;
     valgring_log_num = 0;
     strcpy(test_dir, test_cwd);
     this->network_config = network_config;
@@ -61,6 +60,7 @@ int Maxscales::read_env()
         }
     }
 
+    use_valgrind = readenv_bool("use_valgrind", false);
     use_callgrind = readenv_bool("use_callgrind", false);
     if (use_callgrind)
     {

@@ -20,7 +20,7 @@ public:
         READCONN_SLAVE
     };
 
-    Maxscales(const char *pref, const char *test_cwd, bool verbose, bool use_valgrind,
+    Maxscales(const char *pref, const char *test_cwd, bool verbose,
               std::string network_config);
 
     int read_env();

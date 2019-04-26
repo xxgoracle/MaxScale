@@ -127,7 +127,6 @@ TestConnections::TestConnections(int argc, char* argv[])
     , no_vm_revert(true)
     , threads(4)
     , use_ipv6(false)
-    , use_valgrind(false)
 {
     std::ios::sync_with_stdio(true);
     signal_set(SIGSEGV, sigfatal_handler);
@@ -372,7 +371,7 @@ TestConnections::TestConnections(int argc, char* argv[])
         galera = NULL;
     }
 
-    maxscales = new Maxscales("maxscale", test_dir, verbose, use_valgrind, network_config);
+    maxscales = new Maxscales("maxscale", test_dir, verbose, network_config);
 
     bool maxscale_ok = maxscales->check_nodes();
     bool repl_ok = no_repl || repl_future.get();
@@ -665,7 +664,6 @@ void TestConnections::read_env()
     revert_snapshot_command = readenv("revert_snapshot_command",
                                       "mdbci snapshot revert --path-to-nodes %s --snapshot-name ", mdbci_config_name);
     no_vm_revert = readenv_bool("no_vm_revert", true);
-    use_valgrind = readenv_bool("use_valgrind", false);
 }
 
 void TestConnections::print_env()
