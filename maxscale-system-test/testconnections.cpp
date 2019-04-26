@@ -502,7 +502,7 @@ TestConnections::~TestConnections()
         // galera->disable_ssl();
     }
 
-    if (use_valgrind)
+    if (maxscales->use_valgrind)
     {
         // stop all Maxscales to get proper Valgrind logs
         for (int i = 0; i < maxscales->N; i++)
