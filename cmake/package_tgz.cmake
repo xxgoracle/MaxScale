@@ -1,6 +1,6 @@
 # Tarball package configuration
 message(STATUS "Generating tar.gz packages")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(MAXSCALE_BINDIR /bin CACHE PATH "" FORCE)
 set(MAXSCALE_LIBDIR /lib/maxscale CACHE PATH "" FORCE)
 set(MAXSCALE_SHAREDIR /share CACHE PATH "" FORCE)
