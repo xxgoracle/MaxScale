@@ -1459,7 +1459,7 @@ int TestConnections::find_connected_slave1(int m)
 
 int TestConnections::check_maxscale_processes(int m, int expected)
 {
-    const char* ps_cmd = use_valgrind ?
+    const char* ps_cmd = maxscales->use_valgrind ?
         "ps ax | grep valgrind | grep maxscale | grep -v grep | wc -l" :
         "ps -C maxscale | grep maxscale | wc -l";
 
