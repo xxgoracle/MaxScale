@@ -27,6 +27,12 @@ project(MaxScale)
 # Set the installation layout
 include(${CMAKE_SOURCE_DIR}/cmake/install_layout.cmake)
 
+# Configure RPATH for tarballs
+# (it has to be before any executable generation)
+if(PACKAGE AND TARBALL)
+  include(cmake/rpath.cmake)
+endif()
+
 # Do the platform check
 include(cmake/CheckPlatform.cmake)
 
