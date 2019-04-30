@@ -341,6 +341,15 @@ TestConnections::TestConnections(int argc, char* argv[])
         }
     }
 
+    if (mdbci_labels.find(std::string("CLUSTERIX_BACKEND")) == std::string::npos)
+    {
+        no_clusterix = true;
+        if (verbose)
+        {
+            tprintf("No need to use Clusterix");
+        }
+    }
+
     get_logs_command = (char *) malloc(strlen(test_dir) + 14);
     sprintf(get_logs_command, "%s/get_logs.sh", test_dir);
 
@@ -384,6 +393,20 @@ TestConnections::TestConnections(int argc, char* argv[])
     else
     {
         galera = NULL;
+    }
+
+
+    if (!no_clusterix)
+    {
+        clusterix = new Clusterix_nodes("galera", test_dir, verbose, network_config);
+        //galera->use_ipv6 = use_ipv6;
+        clusterix->use_ipv6 = false;
+        clusterix->take_snapshot_command = take_snapshot_command;
+        clusterix->revert_snapshot_command = revert_snapshot_command;
+    }
+    else
+    {
+        clusterix = NULL;
     }
 
     maxscales = new Maxscales("maxscale", test_dir, verbose, network_config);

@@ -332,5 +332,41 @@
                 "version" : "${target}"
         }
 
+  },
+
+  "clusterix_000" :
+  {
+        "hostname" : "clusterix000",
+        "box" : "centos_7_aws_large",
+        "labels" : [
+                "CLUSTERIX_BACKEND"
+        ]
+  },
+
+  "clusterix_001" :
+  {
+        "hostname" : "clusterix001",
+        "box" : "centos_7_aws_large",
+        "labels" : [
+                "CLUSTERIX_BACKEND"
+        ]
+  },
+
+  "clusterix_002" :
+  {
+        "hostname" : "clusterix002",
+        "box" : "centos_7_aws_large",
+        "labels" : [
+                "CLUSTERIX_BACKEND"
+        ]
+  },
+
+  "clusterix_003" :
+  {
+        "hostname" : "clusterix003",
+        "box" : "centos_7_aws_large",
+        "labels" : [
+                "CLUSTERIX_BACKEND"
+        ]
   }
 }
