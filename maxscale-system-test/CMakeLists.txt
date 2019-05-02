@@ -1126,6 +1126,7 @@ set_tests_properties(bug471_big PROPERTIES TIMEOUT 3600)
 ############################################
 
 add_test_executable(clusterix_mon.cpp clusterix_mon clusterix_mon LABELS CLUSTERIX_BACKEND UNSTABLE)
+set_tests_properties(clusterix_mon PROPERTIES TIMEOUT 3600)
 
 ############################################
 # END: tests for Clusterix monitor         #
