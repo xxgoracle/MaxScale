@@ -136,6 +136,7 @@ TestConnections::TestConnections(int argc, char* argv[])
     , binlog_master_gtid(false)
     , binlog_slave_gtid(false)
     , no_galera(false)
+    , no_clusterix(false)
     , no_vm_revert(true)
     , threads(4)
     , use_ipv6(false)
@@ -298,6 +299,7 @@ TestConnections::TestConnections(int argc, char* argv[])
     std::string mdbci_labels_c = mdbci_labels + delimiter;
 
     bool mdbci_call_needed = false;
+    bool clusterix_create_needed = false;
 
     while ((pos_end = mdbci_labels_c.find (delimiter, pos_start)) != std::string::npos)
     {
@@ -305,8 +307,16 @@ TestConnections::TestConnections(int argc, char* argv[])
         pos_start = pos_end + delim_len;
         if (configured_labels.find(label, 0) == std::string::npos)
         {
-            mdbci_call_needed = true;
-            tprintf("Machines with label '%s' are not running, MDBCI UP call is needed", label.c_str());
+            if (label.find("CLUSTERIX_BACKEND") == std::string::npos)
+            {
+                mdbci_call_needed = true;
+                tprintf("Machines with label '%s' are not running, MDBCI UP call is needed", label.c_str());
+            }
+            else
+            {
+                clusterix_create_needed = true;
+                tprintf("Machines with label '%s' are not running, Clusterix machines creation scripts", label.c_str());
+            }
         }
         else if (verbose)
         {
@@ -320,7 +330,19 @@ TestConnections::TestConnections(int argc, char* argv[])
         {
             exit(MDBCI_FAUILT);
         }
-
+    }
+    // Temporal dirty hack for Clusterix AWS machines
+    if (clusterix_create_needed)
+    {
+        tprintf("Starting AWS machines");
+        std::string aws_up_script =
+                std::string(test_dir) +
+                std::string("/create_vm_for_clusterix.sh ") +
+                mdbci_vm_path +
+                std::string("/")
+                + mdbci_config_name;
+        system(aws_up_script.c_str());
+        read_env();
     }
 
     if (mdbci_labels.find(std::string("REPL_BACKEND")) == std::string::npos)
@@ -395,14 +417,14 @@ TestConnections::TestConnections(int argc, char* argv[])
         galera = NULL;
     }
 
-
     if (!no_clusterix)
     {
-        clusterix = new Clusterix_nodes("galera", test_dir, verbose, network_config);
+        clusterix = new Clusterix_nodes("clusterix", test_dir, verbose, network_config);
         //galera->use_ipv6 = use_ipv6;
         clusterix->use_ipv6 = false;
         clusterix->take_snapshot_command = take_snapshot_command;
         clusterix->revert_snapshot_command = revert_snapshot_command;
+        clusterix->start_cluster();
     }
     else
     {
@@ -780,12 +802,14 @@ void TestConnections::process_template(int m, const char* template_name, const c
     sprintf(str, "sed -i \"s/###threads###/%d/\"  maxscale.cnf", threads);
     system(str);
 
-    Mariadb_nodes * mdn[2];
+    Mariadb_nodes * mdn[3];
     char * IPcnf;
     mdn[0] = repl;
     mdn[1] = galera;
+    mdn[2] = clusterix;
     int i, j;
-    int mdn_n = galera ? 2 : 1;
+    //int mdn_n = galera ? 2 : 1;
+    int mdn_n = 3;
 
     for (j = 0; j < mdn_n; j++)
     {
@@ -2243,7 +2267,6 @@ int TestConnections::call_mdbci(const char * options)
             team_keys +
             std::string(" ") +
             std::string(mdbci_config_name)).c_str() );
-
     read_env();
     if (repl)
     {

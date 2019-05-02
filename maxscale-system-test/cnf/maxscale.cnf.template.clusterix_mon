@@ -5,14 +5,14 @@ threads=###threads###
 [Clusterix-Monitor]
 type=monitor
 module=clustrixmon
-servers=###server_line###
+servers=###clusterix_server_line###
 user=maxskysql
 password=skysql
 
 [RW-Split-Router]
 type=service
 router=readwritesplit
-servers=###server_line###
+servers=###clusterix_server_line###
 user=maxskysql
 password=skysql
 slave_selection_criteria=LEAST_GLOBAL_CONNECTIONS
@@ -22,7 +22,7 @@ max_slave_connections=1
 type=service
 router=readconnroute
 router_options=slave
-servers=###server_line###
+servers=###clusterix_server_line###
 user=maxskysql
 password=skysql
 
@@ -30,7 +30,7 @@ password=skysql
 type=service
 router=readconnroute
 router_options=master
-servers=###server_line###
+servers=###clusterix_server_line###
 user=maxskysql
 password=skysql
 
@@ -62,4 +62,4 @@ service=CLI
 protocol=maxscaled
 socket=default
 
-###server###
+###clusterix_server###
