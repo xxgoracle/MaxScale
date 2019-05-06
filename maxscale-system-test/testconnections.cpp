@@ -299,7 +299,6 @@ TestConnections::TestConnections(int argc, char* argv[])
     std::string mdbci_labels_c = mdbci_labels + delimiter;
 
     bool mdbci_call_needed = false;
-    bool clusterix_create_needed = false;
 
     while ((pos_end = mdbci_labels_c.find (delimiter, pos_start)) != std::string::npos)
     {
@@ -307,16 +306,8 @@ TestConnections::TestConnections(int argc, char* argv[])
         pos_start = pos_end + delim_len;
         if (configured_labels.find(label, 0) == std::string::npos)
         {
-            if (label.find("CLUSTERIX_BACKEND") == std::string::npos)
-            {
-                mdbci_call_needed = true;
-                tprintf("Machines with label '%s' are not running, MDBCI UP call is needed", label.c_str());
-            }
-            else
-            {
-                clusterix_create_needed = true;
-                tprintf("Machines with label '%s' are not running, Clusterix machines creation scripts", label.c_str());
-            }
+            mdbci_call_needed = true;
+            tprintf("Machines with label '%s' are not running, MDBCI UP call is needed", label.c_str());
         }
         else if (verbose)
         {
@@ -330,19 +321,6 @@ TestConnections::TestConnections(int argc, char* argv[])
         {
             exit(MDBCI_FAUILT);
         }
-    }
-    // Temporal dirty hack for Clusterix AWS machines
-    if (clusterix_create_needed)
-    {
-        tprintf("Starting AWS machines");
-        std::string aws_up_script =
-                std::string(test_dir) +
-                std::string("/create_vm_for_clusterix.sh ") +
-                mdbci_vm_path +
-                std::string("/")
-                + mdbci_config_name;
-        system(aws_up_script.c_str());
-        read_env();
     }
 
     if (mdbci_labels.find(std::string("REPL_BACKEND")) == std::string::npos)
@@ -808,7 +786,6 @@ void TestConnections::process_template(int m, const char* template_name, const c
     mdn[1] = galera;
     mdn[2] = clusterix;
     int i, j;
-    //int mdn_n = galera ? 2 : 1;
     int mdn_n = 3;
 
     for (j = 0; j < mdn_n; j++)

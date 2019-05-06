@@ -4,7 +4,8 @@
 # $1 - path to MDBCI configuration 
 
 sg=`cat ~/.config/mdbci/config.yaml | grep security_group | sed "s/security_group://" | tr -d " "`
-i_ids=`aws ec2 run-instances --image ami-65fa5c16 --instance-type c3.8xlarge --security-groups turenko-home_1547635960 --key-name maxscale --count 4 | grep InstanceId | tr -d ' ' | tr -d ',' | tr -d '"' | sed "s/InstanceId://" | sed ':a;N;$!ba;s/\n/ /g'`
+i_ids=`aws ec2 run-instances --image ami-65fa5c16 --instance-type m3.large --security-groups turenko-home_1547635960 --key-name maxscale --count 4 | grep InstanceId | tr -d ' ' | tr -d ',' | tr -d '"' | sed "s/InstanceId://" | sed ':a;N;$!ba;s/\n/ /g'`
+#i_ids=`aws ec2 run-instances --image ami-0ff760d16d9497662 --instance-type i3.large --security-groups turenko-home_1547635960 --key-name maxscale --count 4 | grep InstanceId | tr -d ' ' | tr -d ',' | tr -d '"' | sed "s/InstanceId://" | sed ':a;N;$!ba;s/\n/ /g'`
 aws ec2 wait instance-running --instance-ids ${i_ids}
 j=0
 for i in ${i_ids}

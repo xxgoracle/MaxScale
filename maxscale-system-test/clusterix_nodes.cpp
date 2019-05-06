@@ -9,7 +9,6 @@ int Clusterix_nodes::install_clusterix(int m)
     char * clusterix_rpm = ssh_node_output(m, "rpm -qa | grep clustrix-clxnode", true, &ec);
     if (strstr(clusterix_rpm, "clustrix-clxnode") == NULL)
     {
-        printf("%s\n", ssh_node_output(m, "rm /etc/yum.repos.d/epel.repo", true, &ec));
         printf("%s\n", ssh_node_output(m, CLUSTERIX_DEPS_YUM, true, &ec));
         printf("%s\n", ssh_node_output(m, WGET_CLUSTERIX, false, &ec));
         printf("%s\n", ssh_node_output(m, UNPACK_CLUSTERIX, false, &ec));
@@ -39,7 +38,7 @@ int Clusterix_nodes::start_cluster()
     std::string cluster_setup_sql = std::string("ALTER CLUSTER ADD '") +
             std::string(IP_private[0]) +
             std::string("'");
-    for (int i = 0; i < N; i++)
+    for (int i = 1; i < N; i++)
     {
         cluster_setup_sql += std::string(",'") +
                 std::string(IP_private[i]) +
@@ -49,4 +48,21 @@ int Clusterix_nodes::start_cluster()
     execute_query(nodes[0], "%s", cluster_setup_sql.c_str());
     close_connections();
     return 0;
+}
+
+std::string Clusterix_nodes::cnf_servers()
+{
+    std::string s;
+    for (int i = 0; i < N; i++)
+    {
+        s += std::string("\\n[") +
+                cnf_server_name +
+                std::to_string(i + 1) +
+                std::string("]\\ntype=server\\naddress=") +
+                std::string(IP_private[i]) +
+                std::string("\\nport=") +
+                std::to_string(port[i]) +
+                std::string("\\nprotocol=MySQLBackend\\n");
+    }
+    return s;
 }

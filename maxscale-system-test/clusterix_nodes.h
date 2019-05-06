@@ -19,4 +19,5 @@ public:
 
      int install_clusterix(int m);
      int start_cluster();
+     std::string cnf_servers();
 };
