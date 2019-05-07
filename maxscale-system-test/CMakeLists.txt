@@ -1125,8 +1125,9 @@ set_tests_properties(bug471_big PROPERTIES TIMEOUT 3600)
 # BEGIN: tests for Clustrix monitor        #
 ############################################
 
+# creates Clustrix cluster and connect Maxscale to it
 add_test_executable(clustrix_mon.cpp clustrix_mon clustrix_mon LABELS CLUSTRIX_BACKEND UNSTABLE)
-set_tests_properties(clustrix_mon PROPERTIES TIMEOUT 3600)
+set_tests_properties(clustrix_mon PROPERTIES TIMEOUT 7200)
 
 ############################################
 # END: tests for Clustrix monitor          #
