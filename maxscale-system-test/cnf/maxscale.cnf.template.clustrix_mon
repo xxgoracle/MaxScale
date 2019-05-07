@@ -5,7 +5,7 @@ threads=###threads###
 [Clusterix-Monitor]
 type=monitor
 module=clustrixmon
-servers=###clusterix_server_line###
+servers=###clustrix_server_line###
 user=maxskysql
 password=skysql
 
@@ -62,4 +62,4 @@ service=CLI
 protocol=maxscaled
 socket=default
 
-###clusterix_server###
+###clustrix_server###
