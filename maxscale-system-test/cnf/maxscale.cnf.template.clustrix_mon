@@ -12,7 +12,7 @@ password=skysql
 [RW-Split-Router]
 type=service
 router=readwritesplit
-servers=###clusterix_server_line###
+servers=###clustrix_server_line###
 user=maxskysql
 password=skysql
 slave_selection_criteria=LEAST_GLOBAL_CONNECTIONS
@@ -22,7 +22,7 @@ max_slave_connections=1
 type=service
 router=readconnroute
 router_options=slave
-servers=###clusterix_server_line###
+servers=###clustrix_server_line###
 user=maxskysql
 password=skysql
 
@@ -30,7 +30,7 @@ password=skysql
 type=service
 router=readconnroute
 router_options=master
-servers=###clusterix_server_line###
+servers=###clustrix_server_line###
 user=maxskysql
 password=skysql
 
