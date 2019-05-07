@@ -1,39 +1,39 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "clusterix_nodes.h"
+#include "clustrix_nodes.h"
 
-int Clusterix_nodes::install_clusterix(int m)
+int Clustrix_nodes::install_clustrix(int m)
 {
     int ec;
-    char * clusterix_rpm = ssh_node_output(m, "rpm -qa | grep clustrix-clxnode", true, &ec);
-    if (strstr(clusterix_rpm, "clustrix-clxnode") == NULL)
+    char * clustrix_rpm = ssh_node_output(m, "rpm -qa | grep clustrix-clxnode", true, &ec);
+    if (strstr(clustrix_rpm, "clustrix-clxnode") == NULL)
     {
-        printf("%s\n", ssh_node_output(m, CLUSTERIX_DEPS_YUM, true, &ec));
-        printf("%s\n", ssh_node_output(m, WGET_CLUSTERIX, false, &ec));
-        printf("%s\n", ssh_node_output(m, UNPACK_CLUSTERIX, false, &ec));
-        printf("%s\n", ssh_node_output(m, INSTALL_CLUSTERIX, false, &ec));
+        printf("%s\n", ssh_node_output(m, CLUSTRIX_DEPS_YUM, true, &ec));
+        printf("%s\n", ssh_node_output(m, WGET_CLUSTRIX, false, &ec));
+        printf("%s\n", ssh_node_output(m, UNPACK_CLUSTRIX, false, &ec));
+        printf("%s\n", ssh_node_output(m, INSTALL_CLUSTRIX, false, &ec));
         create_users(m);
    }
     return 0;
 }
 
-int Clusterix_nodes::start_cluster()
+int Clustrix_nodes::start_cluster()
 {
     for (int i = 0; i < N; i++)
     {
-        install_clusterix(i);
+        install_clustrix(i);
     }
     std::string lic_filename = std::string(getenv("HOME")) +
-            std::string("/.config/mdbci/clusterix_license");
+            std::string("/.config/mdbci/clustrix_license");
     std::ifstream lic_file;
     lic_file.open(lic_filename.c_str());
     std::stringstream strStream;
     strStream << lic_file.rdbuf();
-    std::string clusterix_license = strStream.str();
+    std::string clustrix_license = strStream.str();
     lic_file.close();
 
-    execute_query_all_nodes(clusterix_license.c_str());
+    execute_query_all_nodes(clustrix_license.c_str());
 
     std::string cluster_setup_sql = std::string("ALTER CLUSTER ADD '") +
             std::string(IP_private[0]) +
@@ -50,7 +50,7 @@ int Clusterix_nodes::start_cluster()
     return 0;
 }
 
-std::string Clusterix_nodes::cnf_servers()
+std::string Clustrix_nodes::cnf_servers()
 {
     std::string s;
     for (int i = 0; i < N; i++)

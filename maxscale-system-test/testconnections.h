@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mariadb_nodes.h"
-#include "clusterix_nodes.h"
+#include "clustrix_nodes.h"
 #include "maxscales.h"
 #include "templates.h"
 #include <fcntl.h>
@@ -105,7 +105,7 @@ public:
      */
     Mariadb_nodes* repl;
 
-    Clusterix_nodes * clusterix;
+    Clustrix_nodes * clustrix;
 
     /**
      * @brief maxscales Maxscale object containing referebces to all Maxscale machines
@@ -234,9 +234,9 @@ public:
     bool no_galera;
 
     /**
-     * @brief no_clusterix Do not check, restart and use Clusterix setup
+     * @brief no_clustrix Do not check, restart and use Clustrix setup
      */
-    bool no_clusterix;
+    bool no_clustrix;
 
     /**
      * @brief no_vm_revert If true tests do not revert VMs after the test even if test failed

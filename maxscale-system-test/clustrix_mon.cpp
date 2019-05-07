@@ -1,5 +1,5 @@
 /**
- * @file clusterix_mon.cpp - simple Clusterix monitor test
+ * @file clustrix_mon.cpp - simple Clustrix monitor test
  */
 
 #include "testconnections.h"

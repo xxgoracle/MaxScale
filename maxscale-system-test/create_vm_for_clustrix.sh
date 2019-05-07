@@ -14,12 +14,12 @@ do
     pip=`aws ec2 describe-instances --instance-id $i | grep "PrivateIpAddress" | tr -d ' ' | tr -d ',' | tr -d '"' | sed "s/PrivateIpAddress://"`
     num=`printf "%03d" $j`
     j=`expr $j + 1`
-    echo "clusterix_${num}_network=$ip" >> $1_network_config
-    echo "clusterix_${num}_private=$pip" >> $1_network_config
-    echo "clusterix_${num}_keyfile=~/.config/mdbci/maxscale.pem" >> $1_network_config
-    echo "clusterix_${num}_hostname=clusterix${num}" >> $1_network_config
-    echo "clusterix_${num}_whoami=ec2-user" >> $1_network_config
+    echo "clustrix_${num}_network=$ip" >> $1_network_config
+    echo "clustrix_${num}_private=$pip" >> $1_network_config
+    echo "clustrix_${num}_keyfile=~/.config/mdbci/maxscale.pem" >> $1_network_config
+    echo "clustrix_${num}_hostname=clusterix${num}" >> $1_network_config
+    echo "clustrix_${num}_whoami=ec2-user" >> $1_network_config
 done
 
 labels=`cat $1_configured_labels`
-echo "$labels,CLUSTERIX_BACKEND" > $1_configured_labels
+echo "$labels,CLUSTRIX_BACKEND" > $1_configured_labels

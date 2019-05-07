@@ -136,7 +136,7 @@ TestConnections::TestConnections(int argc, char* argv[])
     , binlog_master_gtid(false)
     , binlog_slave_gtid(false)
     , no_galera(false)
-    , no_clusterix(false)
+    , no_clustrix(false)
     , no_vm_revert(true)
     , threads(4)
     , use_ipv6(false)
@@ -341,12 +341,12 @@ TestConnections::TestConnections(int argc, char* argv[])
         }
     }
 
-    if (mdbci_labels.find(std::string("CLUSTERIX_BACKEND")) == std::string::npos)
+    if (mdbci_labels.find(std::string("CLUSTRIX_BACKEND")) == std::string::npos)
     {
-        no_clusterix = true;
+        no_clustrix = true;
         if (verbose)
         {
-            tprintf("No need to use Clusterix");
+            tprintf("No need to use Clustrix");
         }
     }
 
@@ -395,18 +395,18 @@ TestConnections::TestConnections(int argc, char* argv[])
         galera = NULL;
     }
 
-    if (!no_clusterix)
+    if (!no_clustrix)
     {
-        clusterix = new Clusterix_nodes("clusterix", test_dir, verbose, network_config);
+        clustrix = new Clustrix_nodes("clustrix", test_dir, verbose, network_config);
         //galera->use_ipv6 = use_ipv6;
-        clusterix->use_ipv6 = false;
-        clusterix->take_snapshot_command = take_snapshot_command;
-        clusterix->revert_snapshot_command = revert_snapshot_command;
-        clusterix->start_cluster();
+        clustrix->use_ipv6 = false;
+        clustrix->take_snapshot_command = take_snapshot_command;
+        clustrix->revert_snapshot_command = revert_snapshot_command;
+        clustrix->start_cluster();
     }
     else
     {
-        clusterix = NULL;
+        clustrix = NULL;
     }
 
     maxscales = new Maxscales("maxscale", test_dir, verbose, network_config);
@@ -784,7 +784,7 @@ void TestConnections::process_template(int m, const char* template_name, const c
     char * IPcnf;
     mdn[0] = repl;
     mdn[1] = galera;
-    mdn[2] = clusterix;
+    mdn[2] = clustrix;
     int i, j;
     int mdn_n = 3;
 
