@@ -36,9 +36,9 @@ int Clustrix_nodes::start_cluster()
     execute_query_all_nodes(clustrix_license.c_str());
 
     std::string cluster_setup_sql = std::string("ALTER CLUSTER ADD '") +
-            std::string(IP_private[0]) +
+            std::string(IP_private[1]) +
             std::string("'");
-    for (int i = 1; i < N; i++)
+    for (int i = 2; i < N; i++)
     {
         cluster_setup_sql += std::string(",'") +
                 std::string(IP_private[i]) +
