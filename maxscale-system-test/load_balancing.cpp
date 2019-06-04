@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     {
         threads_num = 15;
     }
-exit(0)    ;
+//exit(0)    ;
     Test->tprintf("Increasing connection and error limits on backend nodes.\n");
     Test->repl->connect();
     for (int i = 0; i < Test->repl->N; i++)
