@@ -40,6 +40,14 @@ bool Nodes::check_nodes()
 
 void Nodes::generate_ssh_cmd(char* cmd, int node, const char* ssh, bool sudo)
 {
+    if (docker_backend)
+    {
+        sprintf(cmd,
+                "docker exec -i %s %s",
+                docker_container_id[node],
+                ssh);
+        return;
+    }
     if (strcmp(IP[node], "127.0.0.1") == 0)
     {
         if (sudo)
@@ -82,6 +90,7 @@ void Nodes::generate_ssh_cmd(char* cmd, int node, const char* ssh, bool sudo)
 
 char* Nodes::ssh_node_output_f(int node, bool sudo, int* exit_code, const char* format, ...)
 {
+    //if (docker_backend) return NULL;
     va_list valist;
 
     va_start(valist, format);
@@ -108,6 +117,7 @@ char* Nodes::ssh_node_output_f(int node, bool sudo, int* exit_code, const char* 
 
 char* Nodes::ssh_node_output(int node, const char* ssh, bool sudo, int* exit_code)
 {
+    //if (docker_backend) return NULL;
     char* cmd = (char*)malloc(strlen(ssh) + 1024);
 
     generate_ssh_cmd(cmd, node, ssh, sudo);
@@ -146,6 +156,7 @@ char* Nodes::ssh_node_output(int node, const char* ssh, bool sudo, int* exit_cod
 
 int Nodes::ssh_node(int node, const char* ssh, bool sudo)
 {
+    //if (docker_backend) return 0;
     char* cmd = (char*)malloc(strlen(ssh) + 1024);
 
     if (strcmp(IP[node], "127.0.0.1") == 0)
@@ -155,12 +166,22 @@ int Nodes::ssh_node(int node, const char* ssh, bool sudo)
     }
     else
     {
+        if (docker_backend)
+        {
+            sprintf(cmd,
+                    "docker exec -i %s %s",
+                    docker_container_id[node],
+                    ssh);
+        }
+        else
+        {
         sprintf(cmd,
                 "ssh -i %s -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet %s@%s%s",
                 sshkey[node],
                 access_user[node],
                 IP[node],
                 verbose ? "" :  " > /dev/null");
+        }
     }
 
     if (verbose)
@@ -204,6 +225,7 @@ int Nodes::ssh_node(int node, const char* ssh, bool sudo)
 
 int Nodes::ssh_node_f(int node, bool sudo, const char* format, ...)
 {
+    //if (docker_backend) return 0;
     va_list valist;
 
     va_start(valist, format);
@@ -227,6 +249,7 @@ int Nodes::ssh_node_f(int node, bool sudo, const char* format, ...)
 
 int Nodes::copy_to_node(int i, const char* src, const char* dest)
 {
+    if (docker_backend) return 0;
     if (i >= N)
     {
         return 1;
@@ -268,6 +291,7 @@ int Nodes::copy_to_node_legacy(const char* src, const char* dest, int i)
 
 int Nodes::copy_from_node(int i, const char* src, const char* dest)
 {
+    if (docker_backend) return 0;
     if (i >= N)
     {
         return 1;
@@ -315,6 +339,8 @@ int Nodes::read_basic_env()
     password = readenv(env_name, "skysql");
 
     N = get_N();
+
+    docker_backend = readenv_bool("docker_backend", false);
 
     if ((N > 0) && (N < 255))
     {
@@ -385,6 +411,12 @@ int Nodes::read_basic_env()
             stop_vm_command[i] = readenv(env_name, "curr_dir=`pwd`; cd %s/%s;vagrant suspend %s_%03d ; cd $curr_dir",
                                          getenv("MDBCI_VM_PATH"), getenv("name"), prefix, i);
             setenv(env_name, stop_vm_command[i], 1);
+
+            if (docker_backend)
+            {
+                sprintf(env_name, "%s_%03d_docker_container_id", prefix, i);
+                docker_container_id[i] = get_nc_item((char*) env_name);
+            }
         }
     }
 
@@ -415,7 +447,9 @@ char * Nodes::get_nc_item(char * item_name)
     }
 
     char * cstr = new char [end - equal + 1];
-    strcpy(cstr, network_config.substr(equal + 1, end - equal - 1).c_str());
+    std::string nc_item = network_config.substr(equal + 1, end - equal - 1);
+    nc_item.erase(std::remove(nc_item.begin(), nc_item.end(), ' '), nc_item.end());
+    strcpy(cstr, nc_item.c_str());
     setenv(item_name, cstr, 1);
 
     return (cstr);

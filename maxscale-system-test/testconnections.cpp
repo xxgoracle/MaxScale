@@ -394,11 +394,13 @@ TestConnections::TestConnections(int argc, char* argv[])
         exit(MDBCI_FAUILT);
     }
 
-    std::string src = std::string(test_dir) + "/mdbci/add_core_cnf.sh";
-    maxscales->copy_to_node(0, src.c_str(), maxscales->access_homedir[0]);
-    maxscales->ssh_node_f(0, true, "%s/add_core_cnf.sh %s", maxscales->access_homedir[0],
-                          verbose ? "verbose" : "");
-
+    if (!docker_backend)
+    {
+        std::string src = std::string(test_dir) + "/mdbci/add_core_cnf.sh";
+        maxscales->copy_to_node(0, src.c_str(), maxscales->access_homedir[0]);
+        maxscales->ssh_node_f(0, true, "%s/add_core_cnf.sh %s", maxscales->access_homedir[0],
+                verbose ? "verbose" : "");
+    }
 
     maxscales->use_ipv6 = use_ipv6;
     maxscales->ssl = ssl;
@@ -762,7 +764,7 @@ void TestConnections::process_template(int m, const char* template_name, const c
     mdn[1] = galera;
     int i, j;
     int mdn_n = galera ? 2 : 1;
-
+printf("process template\n");
     for (j = 0; j < mdn_n; j++)
     {
         if (mdn[j])
@@ -775,7 +777,7 @@ void TestConnections::process_template(int m, const char* template_name, const c
                 }
                 else
                 {
-                    IPcnf = mdn[j]->IP[i];
+                    IPcnf = mdn[j]->IP_private[i];
                 }
                 sprintf(str, "sed -i \"s/###%s_server_IP_%0d###/%s/\" maxscale.cnf",
                         mdn[j]->prefix, i + 1, IPcnf);
@@ -864,28 +866,35 @@ void TestConnections::init_maxscale(int m)
 
 void TestConnections::copy_one_mariadb_log(Mariadb_nodes* nrepl, int i, std::string filename)
 {
-    auto log_retrive_commands =
+    if (docker_backend)
     {
-        "cat /var/lib/mysql/*.err",
-        "cat /var/log/syslog | grep mysql",
-        "cat /var/log/messages | grep mysql"
-    };
-
-    int j = 1;
-
-    for (auto cmd : log_retrive_commands)
-    {
-        auto output = nrepl->ssh_output(cmd, i).second;
-
-        if (!output.empty())
+        return;
+    }
+    else {
+        auto log_retrive_commands =
         {
-            std::ofstream outfile(filename + std::to_string(j++));
+            "cat /var/lib/mysql/*.err",
+            "cat /var/log/syslog | grep mysql",
+            "cat /var/log/messages | grep mysql"
+        };
 
-            if (outfile)
+        int j = 1;
+
+        for (auto cmd : log_retrive_commands)
+        {
+            auto output = nrepl->ssh_output(cmd, i).second;
+
+            if (!output.empty())
             {
-                outfile << output;
+                std::ofstream outfile(filename + std::to_string(j++));
+
+                if (outfile)
+                {
+                    outfile << output;
+                }
             }
         }
+
     }
 }
 
@@ -2180,12 +2189,10 @@ int TestConnections::call_mdbci(const char * options)
             tprintf("Failed to generate MDBCI virtual machines template");
             return 1;
         }
-        if (system((std::string("mdbci --override --template ") +
-                    vm_path +
-                    std::string(".json generate ") +
-                    std::string(mdbci_config_name)).c_str() ))
+        if (system((std::string("mkdir ") +
+                    std::string(vm_path)).c_str()))
         {
-            tprintf("MDBCI failed to generate virtual machines description");
+            tprintf("Failed to create directory for VMs");
             return 1;
         }
         if (system((std::string("cp -r ") +
@@ -2197,24 +2204,49 @@ int TestConnections::call_mdbci(const char * options)
             tprintf("Failed to copy my.cnf files");
             return 1;
         }
+        tprintf("Generate ...");
+        if (system((std::string("mdbci --override --template ") +
+                    vm_path +
+                    std::string(".json generate ") +
+                    std::string(mdbci_config_name)).c_str() ))
+        {
+            tprintf("MDBCI failed to generate virtual machines description");
+            return 1;
+        }
     }
-
-    if (system((std::string("mdbci up ") +
+ printf("running mdbci up\n");
+    int exc = system((std::string("mdbci up ") +
+                      std::string(mdbci_config_name) +
+                      std::string(" --labels ") +
+                      mdbci_labels +
+                      std::string(" ") +
+                      std::string(options)).c_str() );
+    if (exc)
+    /*if (system((std::string("mdbci up ") +
                 std::string(mdbci_config_name) +
                 std::string(" --labels ") +
                 mdbci_labels +
                 std::string(" ") +
-                std::string(options)).c_str() ))
+                std::string(options)).c_str() ))*/
     {
         tprintf("MDBCI failed to bring up virtual machines");
-        return 1;
+        printf("ec = %d\n", exc);
+        if (WIFEXITED(exc))
+        {
+            printf("ec decoded = %d\n",  WEXITSTATUS(exc));
+        }
+        //return 1;
+    }
+    docker_backend = readenv_bool("docker_backend", false);
+    if (!docker_backend)
+    {
+        std::string team_keys = readenv("team_keys", "~/.ssh/id_rsa.pub");
+        system((std::string("mdbci public_keys --key ") +
+                team_keys +
+                std::string(" ") +
+                std::string(mdbci_config_name)).c_str() );
     }
 
-    std::string team_keys = readenv("team_keys", "~/.ssh/id_rsa.pub");
-    system((std::string("mdbci public_keys --key ") +
-            team_keys +
-            std::string(" ") +
-            std::string(mdbci_config_name)).c_str() );
 
     read_env();
     if (repl)

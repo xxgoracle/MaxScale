@@ -121,6 +121,7 @@ void* query_thread1(void* ptr)
     // conn1 = data->Test->maxscales->open_rwsplit_connection(0);
     if (mysql_errno(conn1) != 0)
     {
+        printf("err=%d, %lu\n", conn_err, data->i1);
         conn_err++;
     }
     if (data->rwsplit_only == 0)

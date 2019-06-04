@@ -81,13 +81,14 @@ int Mariadb_nodes::connect(int i, const std::string& db)
         {
             mysql_close(nodes[i]);
         }
+printf("port %d ip %s\n", port[i], IP[i]);
         nodes[i] = open_conn_db_timeout(port[i], IP[i], db.c_str(), user_name, password, 50, ssl);
     }
 
     if ((nodes[i] != NULL) && (mysql_errno(nodes[i]) != 0))
     {
-        return 1;
-    }
+        printf("%s\n", mysql_error(nodes[i]));
+        return 1;    }
     else
     {
         return 0;
@@ -106,13 +107,13 @@ int Mariadb_nodes::connect(const std::string& db)
     return res;
 }
 
-bool Mariadb_nodes::robust_connect(int n)
+bool Mariadb_nodes::robust_connect(int n, const std::string& db)
 {
     bool rval = false;
 
     for (int i = 0; i < n; i++)
     {
-        if (connect() == 0)
+        if (connect(db) == 0)
         {
             // Connected successfully, return immediately
             rval = true;
@@ -371,14 +372,15 @@ int Mariadb_nodes::start_replication()
             printf("Start of node %d failed\n", i);
             return 1;
         }
-
         create_users(i);
     }
-
-    robust_connect(10);
-
+//    connect("");
+printf("Trying to connect\n");
+    robust_connect(10, "");
+printf("Create DB\n");
     for (int i = 0; i < N; i++)
     {
+        execute_query(nodes[i], "CREATE DATABASE IF NOT EXISTS test");
         execute_query(nodes[i], "SET GLOBAL read_only=OFF");
         execute_query(nodes[i], "STOP SLAVE;");
 
@@ -468,7 +470,7 @@ int Galera_nodes::start_galera()
                password,
                socket_cmd[0]);
 
-    local_result += robust_connect(5) ? 0 : 1;
+    local_result += robust_connect(5, "") ? 0 : 1;
     local_result += execute_query(nodes[0], "%s", create_repl_user);
 
     close_connections();
@@ -487,11 +489,20 @@ int Mariadb_nodes::clean_iptables(int node)
 int Mariadb_nodes::block_node(int node)
 {
     int local_result = 0;
-
-    local_result += ssh_node_f(node, true,
-                               "iptables -I INPUT -p tcp --dport %d -j REJECT;"
-                               "ip6tables -I INPUT -p tcp --dport %d -j REJECT",
-                               port[node], port[node]);
+    if (docker_backend)
+    {
+        char cmd[1024];
+        sprintf(cmd, "docker pause %s", docker_container_id[node]);
+printf("%s\n", cmd)        ; fflush(stdout);
+        system(cmd);
+    }
+    else
+    {
+        local_result += ssh_node_f(node, true,
+                                   "iptables -I INPUT -p tcp --dport %d -j REJECT;"
+                                   "ip6tables -I INPUT -p tcp --dport %d -j REJECT",
+                                   port[node], port[node]);
+    }
     blocked[node] = true;
     return local_result;
 }
@@ -499,12 +510,21 @@ int Mariadb_nodes::block_node(int node)
 int Mariadb_nodes::unblock_node(int node)
 {
     int local_result = 0;
-    local_result += clean_iptables(node);
-    local_result += ssh_node_f(node, true,
-                               "iptables -I INPUT -p tcp --dport %d -j ACCEPT;"
-                               "ip6tables -I INPUT -p tcp --dport %d -j ACCEPT",
-                               port[node], port[node]);
-
+    if (docker_backend)
+    {
+        char cmd[1024];
+        sprintf(cmd, "docker unpause %s", docker_container_id[node]);
+printf("%s\n", cmd)        ; fflush(stdout);
+        system(cmd);
+    }
+    else
+    {
+        local_result += clean_iptables(node);
+        local_result += ssh_node_f(node, true,
+                                   "iptables -I INPUT -p tcp --dport %d -j ACCEPT;"
+                                   "ip6tables -I INPUT -p tcp --dport %d -j ACCEPT",
+                                   port[node], port[node]);
+    }
     blocked[node] = false;
     return local_result;
 }
@@ -514,7 +534,7 @@ int Mariadb_nodes::unblock_all_nodes()
 {
     int rval = 0;
     std::vector<std::thread> threads;
-
+printf("unblocking\n");
     for (int i = 0; i < this->N; i++)
     {
         threads.emplace_back([&, i]() {
@@ -1317,6 +1337,7 @@ std::string Galera_nodes::get_config_name(int node)
 
 void Mariadb_nodes::reset_server_settings(int node)
 {
+    if (docker_backend) return;
     std::string cnfdir = std::string(test_dir) + "/mdbci/cnf/";
     std::string cnf = get_config_name(node);
 
@@ -1355,12 +1376,16 @@ char* extract_version_from_string(char* version)
     {
         pos2++;
     }
-    version[pos2] = '\0';
+    if (pos2 != l)
+    {
+        version[pos2] = '\0';
+    }
     return &version[pos1];
 }
 
 int Mariadb_nodes::prepare_server(int i)
 {
+    if (docker_backend) return(0);
     cleanup_db_node(i);
     reset_server_settings(i);
 
@@ -1409,7 +1434,6 @@ int Mariadb_nodes::prepare_server(int i)
         }
     }
 
-    free(version);
     return ec;
 }
 

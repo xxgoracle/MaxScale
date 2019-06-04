@@ -315,6 +315,11 @@ public:
      */
     bool reinstall_maxscale;
 
+    /**
+     * @brief docker_backend True if backend is running in Docker containers
+     */
+    bool docker_backend;
+
     /** Check whether all nodes are in a valid state */
     static void check_nodes(bool value);
 

@@ -165,7 +165,7 @@ public:
      *
      * @return True on success
      */
-    bool robust_connect(int n);
+    bool robust_connect(int n, const std::string &db);
 
     /**
      * @brief Close connections opened by connect()

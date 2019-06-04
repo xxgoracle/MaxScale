@@ -199,14 +199,36 @@ int Maxscales::close_maxscale_connections(int m)
 int Maxscales::restart_maxscale(int m)
 {
     int res;
-    if (use_valgrind)
+    if (docker_backend)
     {
-        res = stop_maxscale(m);
-        res += start_maxscale(m);
+        char num[4];
+        sprintf(num, "%03d", m);
+        std::string s1 = std::string("mdbci update-configuration --configuration-file ") +
+                std::string(realpath("maxscale.cnf", NULL)) +
+                std::string(" ") +
+                readenv("mdbci_config_name", "local") +
+                std::string("/maxscale_") +
+                std::string(num);
+printf("restarting maxscale: %s\n", s1.c_str());fflush(stdout);
+        res = system((std::string("mdbci update-configuration --configuration-file ") +
+                      std::string(realpath("maxscale.cnf", NULL)) +
+                      std::string(" ") +
+                      readenv("mdbci_config_name", "local") +
+                      std::string("/maxscale_") +
+                      std::string(num)).c_str());
+printf("restarted\n");fflush(stdout);
     }
     else
     {
-        res = ssh_node(m, "service maxscale restart", true);
+        if (use_valgrind)
+        {
+            res = stop_maxscale(m);
+            res += start_maxscale(m);
+        }
+        else
+        {
+            res = ssh_node(m, "service maxscale restart", true);
+        }
     }
     fflush(stdout);
     return res;
@@ -215,30 +237,37 @@ int Maxscales::restart_maxscale(int m)
 int Maxscales::start_maxscale(int m)
 {
     int res;
-    if (use_valgrind)
+    if (docker_backend)
     {
-        if (use_callgrind)
-        {
-            res = ssh_node_f(m, false,
-                             "sudo --user=maxscale valgrind -d "
-                             "--log-file=/%s/valgrind%02d.log --trace-children=yes "
-                             " --tool=callgrind --callgrind-out-file=/%s/callgrind%02d.log "
-                             " /usr/bin/maxscale",
-                             maxscale_log_dir[m], valgring_log_num,
-                             maxscale_log_dir[m], valgring_log_num);
-        }
-        else
-        {
-            res = ssh_node_f(m, false,
-                             "sudo --user=maxscale valgrind --leak-check=full --show-leak-kinds=all "
-                             "--log-file=/%s/valgrind%02d.log --trace-children=yes "
-                             "--track-origins=yes /usr/bin/maxscale", maxscale_log_dir[m], valgring_log_num);
-        }
-        valgring_log_num++;
+        res = restart_maxscale(m);
     }
     else
     {
-        res =ssh_node(m, "service maxscale restart", true);
+        if (use_valgrind)
+        {
+            if (use_callgrind)
+            {
+                res = ssh_node_f(m, false,
+                                 "sudo --user=maxscale valgrind -d "
+                                 "--log-file=/%s/valgrind%02d.log --trace-children=yes "
+                                 " --tool=callgrind --callgrind-out-file=/%s/callgrind%02d.log "
+                                 " /usr/bin/maxscale",
+                                 maxscale_log_dir[m], valgring_log_num,
+                                 maxscale_log_dir[m], valgring_log_num);
+            }
+            else
+            {
+                res = ssh_node_f(m, false,
+                                 "sudo --user=maxscale valgrind --leak-check=full --show-leak-kinds=all "
+                                 "--log-file=/%s/valgrind%02d.log --trace-children=yes "
+                                 "--track-origins=yes /usr/bin/maxscale", maxscale_log_dir[m], valgring_log_num);
+            }
+            valgring_log_num++;
+        }
+        else
+        {
+            res = ssh_node(m, "service maxscale restart", true);
+        }
     }
     fflush(stdout);
     return res;

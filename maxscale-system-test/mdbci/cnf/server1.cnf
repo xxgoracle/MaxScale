@@ -11,6 +11,8 @@
 
 # this is only for the mysqld standalone daemon
 [mysqld]
+general_log
+general_log_file=/var/log/mysql/mariadb_sql.log
 log-slave-updates
 plugin_maturity=unknown
 log-bin=mar-bin

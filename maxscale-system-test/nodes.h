@@ -27,6 +27,8 @@ public:
      */
     char * IP6[256];
 
+    char * docker_container_id[256];
+
     /**
      * @brief use_ipv6 If true IPv6 addresses will be used to connect Maxscale and backed
      * Also IPv6 addresses go to maxscale.cnf
@@ -93,6 +95,11 @@ public:
      * @brief Verbose command output
      */
     bool verbose;
+
+    /**
+     * @brief docker_backend True if backend is running in Docker containers
+     */
+    bool docker_backend;
 
     /**
      * @brief Get IP address
