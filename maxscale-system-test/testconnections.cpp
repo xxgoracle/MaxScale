@@ -869,9 +869,16 @@ void TestConnections::copy_one_mariadb_log(Mariadb_nodes* nrepl, int i, std::str
 {
     if (docker_backend)
     {
-        return;
+        system((std::string("docker logs ") +
+                std::string(nrepl->docker_container_id[i]) +
+                std::string(" > ") +
+                filename +
+                std::string(" 2> ") +
+                filename +
+                std::string(".err")).c_str());
     }
-    else {
+    else
+    {
         auto log_retrive_commands =
         {
             "cat /var/lib/mysql/*.err",
@@ -970,34 +977,45 @@ int TestConnections::copy_maxscale_logs(double timestamp)
         sprintf(log_dir_i, "%s/%03d", log_dir, i);
         sprintf(sys, "mkdir -p %s", log_dir_i);
         system(sys);
-        if (strcmp(maxscales->IP[i], "127.0.0.1") != 0)
+        if (docker_backend)
         {
-            int rc = maxscales->ssh_node_f(i, true,
-                                           "rm -rf %s/logs;"
-                                           "mkdir %s/logs;"
-                                           "cp %s/*.log %s/logs/;"
-                                           "cp /tmp/core* %s/logs/;"
-                                           "cp %s %s/logs/;"
-                                           "chmod 777 -R %s/logs;"
-                                           "ls /tmp/core* && exit 42;",
-                                           maxscales->access_homedir[i],
-                                           maxscales->access_homedir[i],
-                                           maxscales->maxscale_log_dir[i],
-                                           maxscales->access_homedir[i],
-                                           maxscales->access_homedir[i],
-                                           maxscales->maxscale_cnf[i],
-                                           maxscales->access_homedir[i],
-                                           maxscales->access_homedir[i]);
-            sprintf(sys, "%s/logs/*", maxscales->access_homedir[i]);
-            maxscales->copy_from_node(i, sys, log_dir_i);
-            expect(rc != 42, "Test should not generate core files");
+            sprintf(sys, "docker logs %s > %s/maxscale_%03d 2> %s/maxscale_%03d.err",
+                    maxscales->docker_container_id[i],
+                    log_dir_i, i,
+                    log_dir_i, i);
+            system(sys);
         }
         else
         {
-            maxscales->ssh_node_f(i, true, "cp %s/*.logs %s/", maxscales->maxscale_log_dir[i], log_dir_i);
-            maxscales->ssh_node_f(i, true, "cp /tmp/core* %s/", log_dir_i);
-            maxscales->ssh_node_f(i, true, "cp %s %s/", maxscales->maxscale_cnf[i], log_dir_i);
-            maxscales->ssh_node_f(i, true, "chmod a+r -R %s", log_dir_i);
+            if (strcmp(maxscales->IP[i], "127.0.0.1") != 0)
+            {
+                int rc = maxscales->ssh_node_f(i, true,
+                                               "rm -rf %s/logs;"
+                                               "mkdir %s/logs;"
+                                               "cp %s/*.log %s/logs/;"
+                                               "cp /tmp/core* %s/logs/;"
+                                               "cp %s %s/logs/;"
+                                               "chmod 777 -R %s/logs;"
+                                               "ls /tmp/core* && exit 42;",
+                                               maxscales->access_homedir[i],
+                                               maxscales->access_homedir[i],
+                                               maxscales->maxscale_log_dir[i],
+                                               maxscales->access_homedir[i],
+                                               maxscales->access_homedir[i],
+                                               maxscales->maxscale_cnf[i],
+                                               maxscales->access_homedir[i],
+                                               maxscales->access_homedir[i]);
+                sprintf(sys, "%s/logs/*", maxscales->access_homedir[i]);
+                maxscales->copy_from_node(i, sys, log_dir_i);
+                expect(rc != 42, "Test should not generate core files");
+            }
+            else
+            {
+                maxscales->ssh_node_f(i, true, "cp %s/*.logs %s/", maxscales->maxscale_log_dir[i], log_dir_i);
+                maxscales->ssh_node_f(i, true, "cp /tmp/core* %s/", log_dir_i);
+                maxscales->ssh_node_f(i, true, "cp %s %s/", maxscales->maxscale_cnf[i], log_dir_i);
+                maxscales->ssh_node_f(i, true, "chmod a+r -R %s", log_dir_i);
+            }
         }
     }
     return 0;
