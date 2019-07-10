@@ -88,6 +88,14 @@ bool RWBackend::write(GWBUF* buffer, response_type type)
 
     if (mxs_mysql_is_ps_command(cmd))
     {
+        // We need to completely separate the buffer this backend owns and the one that the caller owns to
+        // prevent any modifications from affecting the one that was written through this backend. If the
+        // buffer gets placed into the write queue of the DCB, subsequent modifications to the original buffer
+        // would be propagated to the one this backend owns.
+        GWBUF* tmp = gwbuf_deep_clone(buffer);
+        gwbuf_free(buffer);
+        buffer = tmp;
+
         uint32_t id = mxs_mysql_extract_ps_id(buffer);
         BackendHandleMap::iterator it = m_ps_handles.find(id);
 
@@ -284,6 +292,8 @@ void RWBackend::process_packets(GWBUF* result)
 {
     mxs::Buffer buffer(result);
     auto it = buffer.begin();
+    MXB_AT_DEBUG(size_t total_len = buffer.length());
+    MXB_AT_DEBUG(size_t used_len = 0);
 
     while (it != buffer.end())
     {
@@ -293,6 +303,8 @@ void RWBackend::process_packets(GWBUF* result)
         len |= (*it++) << 16;
         ++it;   // Skip the sequence
         mxb_assert(it != buffer.end());
+        mxb_assert(used_len + len <= total_len);
+        MXB_AT_DEBUG(used_len += len);
         auto end = it;
         end.advance(len);
         uint8_t cmd = *it;
@@ -315,9 +327,16 @@ void RWBackend::process_packets(GWBUF* result)
             break;
 
         case REPLY_STATE_DONE:
-            // This should never happen
-            MXS_ERROR("Unexpected result state. cmd: 0x%02hhx, len: %u", cmd, len);
-            mxb_assert(!true);
+            if (cmd == MYSQL_REPLY_ERR)
+            {
+                // Unexpected error at the end of a resultset, possibly a killed connection
+            }
+            else
+            {
+                // This should never happen
+                MXS_ERROR("Unexpected result state. cmd: 0x%02hhx, len: %u", cmd, len);
+                mxb_assert(!true);
+            }
             break;
 
         case REPLY_STATE_RSET_COLDEF:

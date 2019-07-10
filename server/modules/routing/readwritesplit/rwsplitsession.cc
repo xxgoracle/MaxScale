@@ -175,23 +175,15 @@ int32_t RWSplitSession::routeQuery(GWBUF* querybuf)
     }
     else
     {
-        /**
-         * We are already processing a request from the client. Store the
-         * new query and wait for the previous one to complete.
-         */
-        mxb_assert(m_expected_responses > 0 || !m_query_queue.empty());
+        // We are already processing a request from the client. Store the new query and wait for the previous
+        // one to complete.
         MXS_INFO("Storing query (len: %d cmd: %0x), expecting %d replies to current command",
-                 gwbuf_length(querybuf),
-                 GWBUF_DATA(querybuf)[4],
-                 m_expected_responses);
+                 gwbuf_length(querybuf), GWBUF_DATA(querybuf)[4], m_expected_responses);
+        mxb_assert(m_expected_responses > 0 || !m_query_queue.empty());
         m_query_queue.emplace_back(querybuf);
         querybuf = NULL;
         rval = 1;
-
-        if (m_expected_responses == 0 && !route_stored_query())
-        {
-            rval = 0;
-        }
+        mxb_assert(m_expected_responses != 0);
     }
 
     if (querybuf != NULL)
@@ -471,14 +463,15 @@ void RWSplitSession::trx_replay_next_stmt()
             else
             {
                 MXS_INFO("Checksum mismatch, transaction replay failed. Closing connection.");
-                modutil_send_mysql_err_packet(m_client,
-                                              0,
-                                              0,
-                                              1927,
-                                              "08S01",
+                modutil_send_mysql_err_packet(m_client, 1, 0, 1927, "08S01",
                                               "Transaction checksum mismatch encountered "
                                               "when replaying transaction.");
                 poll_fake_hangup_event(m_client);
+
+                // Turn the replay flag back on to prevent queries from getting routed before the hangup we
+                // just added is processed. For example, this can happen if the error is sent and the client
+                // manages to send a COM_QUIT that gets processed before the fake hangup event.
+                m_is_replay_active = true;
             }
         }
         else
@@ -746,6 +739,7 @@ void RWSplitSession::clientReply(GWBUF* writebuf, DCB* backend_dcb)
         // Backend is still in use and has more session commands to execute
         if (backend->execute_session_command() && backend->is_waiting_result())
         {
+            MXS_INFO("%lu session commands left on '%s'", backend->session_command_count(), backend->name());
             m_expected_responses++;
         }
     }
@@ -880,6 +874,44 @@ bool RWSplitSession::start_trx_replay()
     return rval;
 }
 
+bool RWSplitSession::retry_master_query(SRWBackend& backend)
+{
+    bool can_continue = false;
+
+    if (backend->has_session_commands())
+    {
+        // Try to route the session command again. If the master is not available, the response will be
+        // returned from one of the slaves.
+
+        mxb_assert(!m_current_query.get());
+        mxb_assert(!m_sescmd_list.empty());
+        mxb_assert(m_sescmd_count >= 2);
+        MXS_INFO("Retrying session command due to master failure: %s",
+                 backend->next_session_command()->to_string().c_str());
+
+        // Before routing it, pop the failed session command off the list and decrement the number of
+        // executed session commands. This "overwrites" the existing command and prevents history duplication.
+        m_sescmd_list.pop_back();
+        --m_sescmd_count;
+
+        retry_query(backend->next_session_command()->deep_copy_buffer());
+        can_continue = true;
+    }
+    else if (m_current_query.get())
+    {
+        retry_query(m_current_query.release());
+        can_continue = true;
+    }
+    else
+    {
+        // This should never happen
+        mxb_assert_message(!true, "m_current_query is empty and no session commands being executed");
+        MXS_ERROR("Current query unexpectedly empty when trying to retry query on master");
+    }
+
+    return can_continue;
+}
+
 /**
  * @brief Router error handling routine
  *
@@ -907,6 +939,18 @@ void RWSplitSession::handleError(GWBUF* errmsgbuf,
     SRWBackend& backend = get_backend_from_dcb(problem_dcb);
     mxb_assert(backend->in_use());
 
+    if (backend->reply_has_started())
+    {
+        MXS_ERROR("Server '%s' was lost in the middle of a resultset, cannot continue the session: %s",
+                  backend->name(), extract_error(errmsgbuf).c_str());
+
+        // This effectively causes an instant termination of the client connection and prevents any errors
+        // from being sent to the client (MXS-2562).
+        dcb_close(m_client);
+        *succp = true;
+        return;
+    }
+
     switch (action)
     {
     case ERRACT_NEW_CONNECTION:
@@ -916,7 +960,7 @@ void RWSplitSession::handleError(GWBUF* errmsgbuf,
 
             if (m_current_master && m_current_master->in_use() && m_current_master == backend)
             {
-                MXS_INFO("Master '%s' failed", backend->name());
+                MXS_INFO("Master '%s' failed: %s", backend->name(), extract_error(errmsgbuf).c_str());
                 /** The connection to the master has failed */
 
                 if (!backend->is_waiting_result())
@@ -946,8 +990,7 @@ void RWSplitSession::handleError(GWBUF* errmsgbuf,
 
                     if (can_retry_query())
                     {
-                        can_continue = true;
-                        retry_query(m_current_query.release());
+                        can_continue = retry_master_query(backend);
                     }
                     else if (m_config.master_failure_mode == RW_ERROR_ON_WRITE)
                     {
@@ -989,7 +1032,7 @@ void RWSplitSession::handleError(GWBUF* errmsgbuf,
             }
             else
             {
-                MXS_INFO("Slave '%s' failed", backend->name());
+                MXS_INFO("Slave '%s' failed: %s", backend->name(), extract_error(errmsgbuf).c_str());
                 if (m_target_node && m_target_node == backend
                     && session_trx_is_read_only(problem_dcb->session))
                 {
@@ -1074,33 +1117,23 @@ bool RWSplitSession::handle_error_new_connection(DCB* backend_dcb, GWBUF* errmsg
         mxb_assert(m_expected_responses > 0);
         m_expected_responses--;
 
-        /**
-         * A query was sent through the backend and it is waiting for a reply.
-         * Try to reroute the statement to a working server or send an error
-         * to the client.
-         */
-        GWBUF* stored = m_current_query.release();
+        // Route stored queries if this was the last server we expected a response from
+        route_stored = m_expected_responses == 0;
 
-        if (stored && m_config.retry_failed_reads)
+        if (!backend->has_session_commands())
         {
-            MXS_INFO("Re-routing failed read after server '%s' failed", backend->name());
-            retry_query(stored, 0);
-        }
-        else
-        {
-            gwbuf_free(stored);
-
-            if (!backend->has_session_commands())
+            // The backend was busy executing command and the client is expecting a response.
+            if (m_current_query.get() && m_config.retry_failed_reads)
             {
-                /** The backend was not executing a session command so the client
-                 * is expecting a response. Send an error so they know to proceed. */
-                m_client->func.write(m_client, gwbuf_clone(errmsg));
+                MXS_INFO("Re-routing failed read after server '%s' failed", backend->name());
+                route_stored = false;
+                retry_query(m_current_query.release(), 0);
             }
-
-            if (m_expected_responses == 0)
+            else
             {
-                // This was the last response, try to route pending queries
-                route_stored = true;
+                // Send an error so that the client knows to proceed.
+                m_client->func.write(m_client, gwbuf_clone(errmsg));
+                m_current_query.reset();
             }
         }
     }

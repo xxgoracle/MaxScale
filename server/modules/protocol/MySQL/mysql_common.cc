@@ -38,7 +38,7 @@ uint8_t null_client_sha1[MYSQL_SCRAMBLE_LEN] = "";
 MYSQL_session* mysql_session_alloc()
 {
     MYSQL_session* ses = (MYSQL_session*)MXS_CALLOC(1, sizeof(MYSQL_session));
-
+    ses->changing_user = false;
     return ses;
 }
 
@@ -1299,8 +1299,8 @@ bool mxs_mysql_extract_ps_response(GWBUF* buffer, MXS_PS_RESPONSE* out)
 {
     bool rval = false;
     uint8_t id[MYSQL_PS_ID_SIZE];
-    uint8_t cols[MYSQL_PS_ID_SIZE];
-    uint8_t params[MYSQL_PS_ID_SIZE];
+    uint8_t cols[MYSQL_PS_COLS_SIZE];
+    uint8_t params[MYSQL_PS_PARAMS_SIZE];
     uint8_t warnings[MYSQL_PS_WARN_SIZE];
 
     if (gwbuf_copy_data(buffer, MYSQL_PS_ID_OFFSET, sizeof(id), id) == sizeof(id)

@@ -1116,11 +1116,11 @@ const char* keywords[] =
     NULL
 };
 
-static bool token_is_keyword(const char* tok, int len)
+static bool token_is_keyword(const char* tok, size_t len)
 {
     for (int i = 0; keywords[i]; i++)
     {
-        if (strncasecmp(keywords[i], tok, len) == 0)
+        if (strncasecmp(keywords[i], tok, len) == 0 && strlen(keywords[i]) == len)
         {
             return true;
         }

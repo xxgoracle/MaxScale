@@ -202,12 +202,7 @@ bool RWSplitSession::route_single_stmt(GWBUF* querybuf)
 
     SRWBackend target;
 
-    if (command == MXS_COM_STMT_EXECUTE && stmt_id == 0)
-    {
-        // Unknown prepared statement ID
-        succp = send_unknown_ps_error(extract_binary_ps_id(querybuf));
-    }
-    else if (TARGET_IS_ALL(route_target))
+    if (TARGET_IS_ALL(route_target))
     {
         succp = handle_target_is_all(route_target, querybuf, command, qtype);
     }
@@ -248,6 +243,11 @@ bool RWSplitSession::route_single_stmt(GWBUF* querybuf)
             store_stmt = track_optimistic_trx(&querybuf);
             target = m_prev_target;
             succp = true;
+        }
+        else if (mxs_mysql_is_ps_command(command) && stmt_id == 0)
+        {
+            // Unknown prepared statement ID
+            succp = send_unknown_ps_error(extract_binary_ps_id(querybuf));
         }
         else if (TARGET_IS_NAMED_SERVER(route_target) || TARGET_IS_RLAG_MAX(route_target))
         {
@@ -333,13 +333,14 @@ bool RWSplitSession::route_single_stmt(GWBUF* querybuf)
                 // Target server was found and is in the correct state
                 succp = handle_got_target(querybuf, target, store_stmt);
 
-                if (succp && command == MXS_COM_STMT_EXECUTE && !is_locked_to_master())
+                if (succp && !is_locked_to_master()
+                    && (command == MXS_COM_STMT_EXECUTE || command == MXS_COM_STMT_SEND_LONG_DATA))
                 {
                     /** Track the targets of the COM_STMT_EXECUTE statements. This
                      * information is used to route all COM_STMT_FETCH commands
                      * to the same server where the COM_STMT_EXECUTE was done. */
                     m_exec_map[stmt_id] = target;
-                    MXS_INFO("COM_STMT_EXECUTE on %s: %s", target->name(), target->uri());
+                    MXS_INFO("%s on %s: %s", STRPACKETTYPE(command), target->name(), target->uri());
                 }
             }
         }
@@ -660,17 +661,19 @@ SRWBackend RWSplitSession::get_slave_backend(int max_rlag)
     // then feed that list to compare.
     SRWBackendVector candidates;
     auto counts = get_slave_counts(m_backends, m_current_master);
+    // Slaves can be taken into use if we need more slave connections
+    bool need_slaves = counts.second < m_router->max_slave_count();
 
     for (auto& backend : m_backends)
     {
-        bool can_take_slave_into_use = backend->is_slave()
-            && !backend->in_use()
-            && can_recover_servers()
-            && backend->can_connect()
-            && counts.second < m_router->max_slave_count();
-
+        // We can take the current master back into use even for reads
+        bool my_master = backend == m_current_master;
+        bool can_take_into_use = !backend->in_use() && can_recover_servers() && backend->can_connect();
         bool master_or_slave = backend->is_master() || backend->is_slave();
-        bool is_usable = backend->in_use() || can_take_slave_into_use;
+
+        // The server is usable if it's already in use or it can be taken into use and we need either more
+        // slaves or a master.
+        bool is_usable = backend->in_use() || (can_take_into_use && (need_slaves || my_master));
         bool rlag_ok = rpl_lag_is_ok(backend, max_rlag);
 
         if (master_or_slave && is_usable)
@@ -812,7 +815,7 @@ SRWBackend RWSplitSession::handle_hinted_target(GWBUF* querybuf, route_target_t 
 {
     const char rlag_hint_tag[] = "max_slave_replication_lag";
     const int comparelen = sizeof(rlag_hint_tag);
-    int config_max_rlag = get_max_replication_lag(); // From router configuration.
+    int config_max_rlag = get_max_replication_lag();    // From router configuration.
     SRWBackend target;
 
     for (HINT* hint = querybuf->hint; !target && hint; hint = hint->next)
@@ -893,10 +896,8 @@ SRWBackend RWSplitSession::handle_slave_is_target(uint8_t cmd, uint32_t stmt_id)
     int rlag_max = get_max_replication_lag();
     SRWBackend target;
 
-    if (cmd == MXS_COM_STMT_FETCH)
+    if (m_qc.is_ps_continuation())
     {
-        /** The COM_STMT_FETCH must be executed on the same server as the
-         * COM_STMT_EXECUTE was executed on */
         ExecMap::iterator it = m_exec_map.find(stmt_id);
 
         if (it != m_exec_map.end())
@@ -904,18 +905,18 @@ SRWBackend RWSplitSession::handle_slave_is_target(uint8_t cmd, uint32_t stmt_id)
             if (it->second->in_use())
             {
                 target = it->second;
-                MXS_INFO("COM_STMT_FETCH on %s", target->name());
+                MXS_INFO("%s on %s", STRPACKETTYPE(cmd), target->name());
             }
             else
             {
                 MXS_ERROR("Old COM_STMT_EXECUTE target %s not in use, cannot "
-                          "proceed with COM_STMT_FETCH",
-                          it->second->name());
+                          "proceed with %s",
+                          it->second->name(), STRPACKETTYPE(cmd));
             }
         }
         else
         {
-            MXS_WARNING("Unknown statement ID %u used in COM_STMT_FETCH", stmt_id);
+            MXS_WARNING("Unknown statement ID %u used in %s", stmt_id, STRPACKETTYPE(cmd));
         }
     }
     else
@@ -1235,6 +1236,12 @@ bool RWSplitSession::handle_got_target(GWBUF* querybuf, SRWBackend& target, bool
         target->write(send_buf, response) :
         target->continue_write(send_buf);
 
+    if (orig_id)
+    {
+        // Put the original ID back in case we try to route the query again
+        replace_binary_ps_id(querybuf, orig_id);
+    }
+
     if (success)
     {
         if (store)
@@ -1278,12 +1285,6 @@ bool RWSplitSession::handle_got_target(GWBUF* querybuf, SRWBackend& target, bool
     }
     else
     {
-        if (orig_id)
-        {
-            // Put the original ID back in case we try to route the query again
-            replace_binary_ps_id(querybuf, orig_id);
-        }
-
         MXS_ERROR("Routing query failed.");
     }
 

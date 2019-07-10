@@ -113,6 +113,7 @@ int conversation_func(int num_msg, const struct pam_message** messages, struct p
     }
 
     bool conv_error = false;
+    string userhost = data->m_client + "@" + data->m_client_remote;
     for (int i = 0; i < num_msg; i++)
     {
         const pam_message* message = messages[i]; // This may crash on Solaris, see PAM documentation.
@@ -123,11 +124,13 @@ int conversation_func(int num_msg, const struct pam_message** messages, struct p
         // PAM api to work with worker-threads. Not worth the trouble unless really required.
         if (msg_type == PAM_ERROR_MSG)
         {
-            MXB_WARNING("Error message from PAM api: %s", message->msg);
+            MXB_WARNING("Error message from PAM api when authenticating '%s': '%s'",
+                        userhost.c_str(), message->msg);
         }
         else if (msg_type == PAM_TEXT_INFO)
         {
-            MXB_NOTICE("Message from PAM api: '%s'", message->msg);
+            MXB_NOTICE("Message from PAM api when authenticating '%s': '%s'",
+                       userhost.c_str(), message->msg);
         }
         else if (msg_type == PAM_PROMPT_ECHO_ON || msg_type == PAM_PROMPT_ECHO_OFF)
         {
@@ -140,8 +143,8 @@ int conversation_func(int num_msg, const struct pam_message** messages, struct p
             }
             else
             {
-                MXB_ERROR("Unexpected prompt from PAM api: '%s'. Only '%s' is allowed.",
-                          message->msg, PASSWORD.c_str());
+                MXB_ERROR("Unexpected prompt from PAM api when authenticating '%s': '%s'. "
+                          "Only '%s' is allowed.", userhost.c_str(), message->msg, PASSWORD.c_str());
                 conv_error = true;
             }
         }
@@ -257,17 +260,34 @@ PamClientSession* PamClientSession::create(const PamInstance& inst)
 {
     // This handle is only used from one thread, can define no_mutex.
     sqlite3* dbhandle = NULL;
+    bool error = false;
     int db_flags = SQLITE_OPEN_READONLY | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_NOMUTEX;
-    if (sqlite3_open_v2(inst.m_dbname.c_str(), &dbhandle, db_flags, NULL) == SQLITE_OK)
+    const char* filename = inst.m_dbname.c_str();
+    if (sqlite3_open_v2(filename, &dbhandle, db_flags, NULL) == SQLITE_OK)
     {
         sqlite3_busy_timeout(dbhandle, 1000);
     }
     else
     {
-        MXS_ERROR("Failed to open SQLite3 handle.");
+        if (dbhandle)
+        {
+            MXS_ERROR(SQLITE_OPEN_FAIL, filename, sqlite3_errmsg(dbhandle));
+        }
+        else
+        {
+            // This means memory allocation failed.
+            MXS_ERROR(SQLITE_OPEN_OOM, filename);
+        }
+        error = true;
     }
+
     PamClientSession* rval = NULL;
-    if (!dbhandle || (rval = new(std::nothrow) PamClientSession(dbhandle, inst)) == NULL)
+    if (!error && ((rval = new(std::nothrow) PamClientSession(dbhandle, inst)) == NULL))
+    {
+        error = true;
+    }
+
+    if (error)
     {
         sqlite3_close_v2(dbhandle);
     }
@@ -287,7 +307,7 @@ void PamClientSession::get_pam_user_services(const DCB* dcb, const MYSQL_session
     string services_query = string("SELECT authentication_string FROM ") + m_instance.m_tablename + " WHERE "
         + FIELD_USER + " = '" + session->user + "'"
         + " AND '" + dcb->remote + "' LIKE " + FIELD_HOST
-        + " AND (" + FIELD_ANYDB + " = '1' OR '" + session->db + "' = '' OR '"
+        + " AND (" + FIELD_ANYDB + " = '1' OR '" + session->db + "' IN ('information_schema', '') OR '"
         + session->db + "' LIKE " + FIELD_DB + ")"
         + " AND " + FIELD_PROXY + " = '0' ORDER BY authentication_string;";
     MXS_DEBUG("PAM services search sql: '%s'.", services_query.c_str());

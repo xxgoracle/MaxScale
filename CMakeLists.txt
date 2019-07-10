@@ -48,6 +48,7 @@ find_package(GSSAPI)
 find_package(SQLite)
 find_package(ASAN)
 find_package(TSAN)
+find_package(UBSAN)
 
 # Build PCRE2 so we always know the version
 # Read BuildPCRE2 for details about how to add pcre2 as a dependency to a target
@@ -154,6 +155,9 @@ if (WITH_ASAN AND ASAN_FOUND)
 elseif (WITH_TSAN AND TSAN_FOUND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=thread")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
+elseif (WITH_UBSAN AND UBSAN_FOUND)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -D_GNU_SOURCE=1 ${FLAGS}")
@@ -229,14 +233,18 @@ install_file(${CMAKE_SOURCE_DIR}/LICENSE-THIRDPARTY.TXT core)
 install_file(etc/lsyncd_example.conf core)
 install_manual(Documentation/maxscale.1 1 core)
 install_file(${CMAKE_SOURCE_DIR}/server/maxscale_binlogserver_template.cnf core)
+install_file(${CMAKE_SOURCE_DIR}/etc/logrotate.d/maxscale_logrotate core)
 
 # For devel package, these files are put to the base folder
 install_header(${CMAKE_SOURCE_DIR}/COPYRIGHT devel)
 install_header(${CMAKE_SOURCE_DIR}/LICENSE.TXT devel)
 
-# Install startup scripts and ldconfig files
+# Install startup scripts and other system configuration files
 if(WITH_SCRIPTS)
   include(cmake/init_scripts.cmake)
+
+  # Prevents prelink from corrupting maxctrl
+  install_custom_file(etc/prelink.conf.d/maxscale.conf /etc/prelink.conf.d/ core)
 endif()
 
 if(PACKAGE)

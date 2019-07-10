@@ -235,6 +235,17 @@ public:
     }
 
     /**
+     * Whether the current binary protocol statement is a continuation of a previously executed statement.
+     *
+     * All COM_STMT_FETCH are continuations of a previously executed COM_STMT_EXECUTE. A COM_STMT_EXECUTE can
+     * be a continuation if it has parameters but it doesn't provide the metadata for them.
+     */
+    bool is_ps_continuation() const
+    {
+        return m_ps_continuation;
+    }
+
+    /**
      * @brief Store and process a prepared statement
      *
      * @param buffer Buffer containing either a text or a binary protocol
@@ -251,12 +262,16 @@ public:
     void ps_erase(GWBUF* buffer);
 
     /**
-     * @brief Store a mapping from an external id to the corresponding internal id
+     * @brief Store a prepared statement response
      *
-     * @param external_id  The external id as seen by the client.
-     * @param internal_id  The corresponding internal id.
+     * The response maps the internal ID to the external ID that is given to the client. It also collects
+     * the number of parameters in the prepared statement which are required in some cases in the routing
+     * process.
+     *
+     * @param internal_id The internal id (i.e. the session command number)
+     * @param buffer      The buffer containing the OK response to a COM_STMT_PREPARE
      */
-    void ps_id_internal_put(uint32_t external_id, uint32_t internal_id);
+    void ps_store_response(uint32_t internal_id, GWBUF* buffer);
 
     /**
      * @brief Update the current RouteInfo.
@@ -348,7 +363,7 @@ private:
      */
     bool query_type_is_read_only(uint32_t qtype) const;
 
-    void process_routing_hints(HINT* pHints, uint32_t* target);
+    void     process_routing_hints(HINT* pHints, uint32_t* target);
     uint32_t get_route_target(uint8_t command, uint32_t qtype);
 
     MXS_SESSION* session() const
@@ -372,6 +387,8 @@ private:
                                                 GWBUF* querybuf,
                                                 uint8_t packet_type,
                                                 uint32_t* qtype);
+
+    bool query_continues_ps(uint8_t cmd, uint32_t stmt_id, GWBUF* buffer);
 
 private:
     class PSManager;
@@ -397,5 +414,9 @@ private:
     HandleMap         m_ps_handles;                 /** External ID to internal ID */
     RouteInfo         m_route_info;
     bool              m_trx_is_read_only;
+    bool              m_ps_continuation;
+
+    uint32_t m_prev_ps_id = 0;      /**< For direct PS execution, storest latest prepared PS ID.
+                                     * https://mariadb.com/kb/en/library/com_stmt_execute/#statement-id **/
 };
 }

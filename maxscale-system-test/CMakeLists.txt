@@ -204,6 +204,15 @@ add_test_executable(maxctrl_basic.cpp maxctrl_basic maxctrl_basic LABELS maxctrl
 # MXS-2167: Monitors should be able to use extra_port
 add_test_executable(mxs2167_extra_port.cpp mxs2167_extra_port mxs2167_extra_port LABELS REPL_BACKEND)
 
+# Test KILL QUERY functionality
+add_test_executable(kill_query.cpp kill_query replication LABELS REPL_BACKEND)
+
+# MXS-2250: DESCRIBE on temporary table should work.
+add_test_executable(mxs2250_describe_temp_table.cpp mxs2250_describe_temp_table mxs2250_describe_temp_table LABELS REPL_BACKEND)
+
+# MXS-2355: Try to log in using a different authentication plugin
+add_test_executable(mxs2355_wrong_auth.cpp mxs2355_wrong_auth maxctrl LABELS REPL_BACKEND)
+
 ############################################
 # BEGIN: Tests that require GTID           #
 ############################################
@@ -948,6 +957,21 @@ add_test_executable(mxs2450_change_user_crash.cpp mxs2450_change_user_crash mxs2
 # PAM authentication
 add_test_executable(pam_authentication.cpp pam_authentication pam_authentication LABELS REPL_BACKEND)
 
+# MXS-2520: Allow master reconnection on reads
+add_test_executable(mxs2520_master_read_reconnect.cpp mxs2520_master_read_reconnect mxs2520_master_read_reconnect LABELS REPL_BACKEND readwritesplit)
+
+# MXS-2464: Crash in route_stored_query with ReadWriteSplit
+add_test_executable(mxs2464_sescmd_reconnect.cpp mxs2464_sescmd_reconnect mxs2464_sescmd_reconnect LABELS REPL_BACKEND readwritesplit)
+
+# MXS-2563: Failing debug assertion at rwsplitsession.cc:1129 : m_expected_responses == 0
+add_test_executable(mxs2563_concurrent_slave_failure.cpp mxs2563_concurrent_slave_failure mxs2563_concurrent_slave_failure LABELS REPL_BACKEND readwritesplit)
+
+# MXS-2521: COM_STMT_EXECUTE maybe return empty result
+add_test_executable(mxs2521_double_exec.cpp mxs2521_double_exec mxs2521_double_exec LABELS REPL_BACKEND readwritesplit)
+
+# MXS-2490: Direct execution doesn't work with MaxScale
+add_test_executable(mxs2490_ps_execute_direct.cpp mxs2490_ps_execute_direct replication LABELS REPL_BACKEND readwritesplit)
+
 ############################################
 # BEGIN: binlogrouter and avrorouter tests #
 ############################################
@@ -1060,7 +1084,7 @@ add_test_executable(mxs2057_systemd_watchdog.cpp mxs2057_systemd_watchdog mxs205
 #add_test_executable_notest(long_test.cpp long_test_big replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
 
 # Tries INSERTs with size close to 0x0ffffff * N
-add_test_derived(different_size_rwsplit_big different_size_rwsplit replication LABELS readwritesplit UNSTABLE HEAVY REPL_BACKEND BIG_REPL_BACKEND UNSTABLE)
+add_test_derived(different_size_rwsplit_big different_size_rwsplit replication LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY )
 
 # Check how Maxscale works in case of one slave failure, only one slave is configured
 add_test_derived(slave_failover_big slave_failover replication.one_slave LABELS readwritesplit REPL_BACKEND BIG_REPL_BACKEND UNSTABLE HEAVY)
@@ -1091,11 +1115,11 @@ add_test_derived(rwsplit_connect_big rwsplit_connect replication LABELS readwrit
 
 # Regression cases for the bug "Hint filter don't work if listed before regex filter in configuration file"
 # (different filter sequence and configuration, but the same test, see .cnf for details)
-add_test_derived(bug585_big bug587 bug585 LABELS regexfilter BIG_REPL_BACKEND REPL_BACKEND UNSTABLE)
-add_test_derived(bug587_big bug587 bug587 LABELS regexfilter hintfilter BIG_REPL_BACKEND REPL_BACKEND UNSTABLE)
-add_test_derived(bug587_1_big bug587 bug587_1 LABELS regexfilter hintfilter BIG_REPL_BACKEND REPL_BACKEND UNSTABLE)
+add_test_derived(bug585_big bug587 bug585 LABELS regexfilter BIG_REPL_BACKEND REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(bug587_big bug587 bug587 LABELS regexfilter hintfilter BIG_REPL_BACKEND REPL_BACKEND UNSTABLE HEAVY)
+add_test_derived(bug587_1_big bug587 bug587_1 LABELS regexfilter hintfilter BIG_REPL_BACKEND REPL_BACKEND UNSTABLE HEAVY)
 # Regression case for the bug "Routing Hints route to server sometimes doesn't work"
-add_test_derived(bug471_big bug471 bug471_big LABELS readwritesplit hintfilter BIG_REPL_BACKEND REPL_BACKEND UNSTABLE)
+add_test_derived(bug471_big bug471 bug471_big LABELS readwritesplit hintfilter BIG_REPL_BACKEND REPL_BACKEND UNSTABLE HEAVY)
 
 set_tests_properties(different_size_rwsplit_big PROPERTIES TIMEOUT 3600)
 set_tests_properties(different_size_rwsplit PROPERTIES TIMEOUT 3600)

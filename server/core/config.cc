@@ -2844,6 +2844,7 @@ void config_set_global_defaults()
     gateway.passive = false;
     gateway.promoted_at = 0;
     gateway.load_persisted_configs = true;
+    gateway.users_refresh_time = USERS_REFRESH_TIME_DEFAULT;
 
     gateway.peer_hosts[0] = '\0';
     gateway.peer_user[0] = '\0';
@@ -3638,6 +3639,7 @@ void config_add_defaults(CONFIG_CONTEXT* ctx, const MXS_MODULE_PARAM* params)
             {
                 bool rv = config_add_param(ctx, params[i].name, params[i].default_value);
                 MXS_ABORT_IF_FALSE(rv);
+                config_fix_param(params, config_get_param(ctx->parameters, params[i].name));
             }
         }
     }
@@ -5001,9 +5003,24 @@ void dump_param_list(int file,
                      const MXS_MODULE_PARAM* common_params,
                      const MXS_MODULE_PARAM* module_params)
 {
+    // Generate a set which contains deprecated parameter names. These parameters are not printed.
+    set<string> deprecated_names;
+    for (auto param_def_list : {common_params, module_params})
+    {
+        const MXS_MODULE_PARAM* param_def = param_def_list;
+        for (int i = 0; param_def[i].name; i++)
+        {
+            if (param_def[i].options & MXS_MODULE_OPT_DEPRECATED)
+            {
+                deprecated_names.insert(param_def[i].name);
+            }
+        }
+    }
+
     for (auto p = list; p; p = p->next)
     {
-        if (ignored.count(p->name) == 0 && *p->value)
+        string param_name = p->name;
+        if (ignored.count(param_name) == 0 && deprecated_names.count(param_name) == 0 && *p->value)
         {
             if (dprintf(file, "%s=%s\n", p->name, p->value) == -1)
             {

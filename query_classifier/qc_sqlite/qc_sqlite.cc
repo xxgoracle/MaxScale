@@ -738,7 +738,7 @@ public:
 
             if (should_collect_database)
             {
-                zCollected_database = update_database_names(database);
+                zCollected_database = update_database_names(database, nDatabase);
             }
 
             if (pAliases && zCollected_table && zAlias)
@@ -878,9 +878,18 @@ public:
                         }
                     }
                 }
-                else if (zToken[0] != '?')
+                else
                 {
-                    MXS_WARNING("%s reported as VARIABLE.", zToken);
+                    // '?' is always accepted as a positional parameter.
+                    if (zToken[0] != '?')
+                    {
+                        // If the mode is Oracle then :N is accepted as well.
+                        if (zToken[0] != ':' || this_thread.sql_mode != QC_SQL_MODE_ORACLE)
+                        {
+                            // Everything else is unexpected, but harmless.
+                            MXS_WARNING("%s reported as VARIABLE.", zToken);
+                        }
+                    }
                 }
             }
             break;
@@ -1702,7 +1711,7 @@ public:
         const Token* pDatabase = pName2->z ? pName1 : NULL;
 
         char name[pName->n + 1];
-        strncpy(name, pName->z, pName->n);
+        memcpy(name, pName->z, pName->n);
         name[pName->n] = 0;
 
         QcAliases aliases;
@@ -1710,7 +1719,7 @@ public:
         if (pDatabase)
         {
             char database[pDatabase->n + 1];
-            strncpy(database, pDatabase->z, pDatabase->n);
+            memcpy(database, pDatabase->z, pDatabase->n);
             database[pDatabase->n] = 0;
 
             update_names(database, name, NULL, &aliases);
@@ -1974,13 +1983,13 @@ public:
         const Token* pDatabase = pName2->z ? pName1 : NULL;
 
         char name[pName->n + 1];
-        strncpy(name, pName->z, pName->n);
+        memcpy(name, pName->z, pName->n);
         name[pName->n] = 0;
 
         if (pDatabase)
         {
             char database[pDatabase->n + 1];
-            strncpy(database, pDatabase->z, pDatabase->n);
+            memcpy(database, pDatabase->z, pDatabase->n);
             database[pDatabase->n] = 0;
 
             update_names(database, name, NULL, NULL);
@@ -2177,14 +2186,14 @@ public:
 
         if (pDatabase)
         {
-            strncpy(database, pDatabase->z, pDatabase->n);
+            memcpy(database, pDatabase->z, pDatabase->n);
             database[pDatabase->n] = 0;
 
             zDatabase = database;
         }
 
         char table[pTable->n + 1];
-        strncpy(table, pTable->z, pTable->n);
+        memcpy(table, pTable->z, pTable->n);
         table[pTable->n] = 0;
 
         update_names(zDatabase, table, NULL, NULL);
@@ -2273,11 +2282,7 @@ public:
                 // TODO: certain what a returned database actually refers to
                 // TODO: so better not to provide a name until there is a
                 // TODO: specific op.
-                char database[pDatabase->n + 1];
-                strncpy(database, pDatabase->z, pDatabase->n);
-                database[pDatabase->n] = 0;
-
-                update_database_names(database);
+                update_database_names(pDatabase->z, pDatabase->n);
 #endif
             }
             break;
@@ -2289,14 +2294,14 @@ public:
 
                 if (pDatabase)
                 {
-                    strncpy(database, pDatabase->z, pDatabase->n);
+                    memcpy(database, pDatabase->z, pDatabase->n);
                     database[pDatabase->n] = 0;
 
                     zDatabase = database;
                 }
 
                 char table[pName->n + 1];
-                strncpy(table, pName->z, pName->n);
+                memcpy(table, pName->z, pName->n);
                 table[pName->n] = 0;
 
                 update_names(zDatabase, table, NULL, NULL);
@@ -2361,7 +2366,7 @@ public:
         exposed_sqlite3ExprDelete(pParse->db, pExprSpan->pExpr);
     }
 
-    void maxscaleExplain(Parse* pParse, Token* pNext)
+    void maxscaleExplainTable(Parse* pParse, SrcList* pList)
     {
         mxb_assert(this_thread.initialized);
 
@@ -2369,26 +2374,22 @@ public:
         m_type_mask = QUERY_TYPE_READ;
         m_operation = QUERY_OP_SHOW;
 
-        if (pNext)
+        for (int i = 0; i < pList->nSrc; ++i)
         {
-            if (pNext->z)
+            if (pList->a[i].zName)
             {
-                const char EXTENDED[] = "EXTENDED";
-                const char PARTITIONS[] = "PARTITIONS";
-                const char FORMAT[] = "FORMAT";
-                const char FOR[] = "FOR";
-
-#define MATCHES_KEYWORD(t, k) ((t->n == sizeof(k) - 1) && (strncasecmp(t->z, k, t->n) == 0))
-
-                if (MATCHES_KEYWORD(pNext, EXTENDED)
-                    || MATCHES_KEYWORD(pNext, PARTITIONS)
-                    || MATCHES_KEYWORD(pNext, FORMAT)
-                    || MATCHES_KEYWORD(pNext, FOR))
-                {
-                    m_operation = QUERY_OP_EXPLAIN;
-                }
+                update_names(pList->a[i].zDatabase, pList->a[i].zName, pList->a[i].zAlias, nullptr);
             }
         }
+    }
+
+    void maxscaleExplain(Parse* pParse)
+    {
+        mxb_assert(this_thread.initialized);
+
+        m_status = QC_QUERY_PARSED;
+        m_type_mask = QUERY_TYPE_READ;
+        m_operation = QUERY_OP_EXPLAIN;
     }
 
     void maxscaleFlush(Parse* pParse, Token* pWhat)
@@ -2423,7 +2424,7 @@ public:
                 m_type_mask = QUERY_TYPE_WRITE;
 
                 char zName[pName->n + 1];
-                strncpy(zName, pName->z, pName->n);
+                memcpy(zName, pName->z, pName->n);
                 zName[pName->n] = 0;
 
                 update_names("*any*", zName, NULL, NULL);
@@ -3023,7 +3024,21 @@ public:
         switch (pShow->what)
         {
         case MXS_SHOW_COLUMNS:
-            m_type_mask = QUERY_TYPE_READ;
+            {
+                m_type_mask = QUERY_TYPE_READ;
+                const char* zDatabase = nullptr;
+                size_t nDatabase = 0;
+
+                if (pShow->pDatabase)
+                {
+                    zDatabase = pShow->pDatabase->z;
+                    nDatabase = pShow->pDatabase->n;
+
+                    update_database_names(zDatabase, nDatabase);
+                }
+
+                update_table_names(zDatabase, nDatabase, pShow->pName->z, pShow->pName->n);
+            }
             break;
 
         case MXS_SHOW_CREATE_SEQUENCE:
@@ -3083,11 +3098,7 @@ public:
             m_type_mask = QUERY_TYPE_SHOW_TABLES;
             if (pShow->pDatabase->z)
             {
-                char db[pShow->pDatabase->n + 1];
-                strncpy(db, pShow->pDatabase->z, pShow->pDatabase->n);
-                db[pShow->pDatabase->n] = 0;
-
-                update_database_names(db);
+                update_database_names(pShow->pDatabase->z, pShow->pDatabase->n);
             }
             break;
 
@@ -3125,7 +3136,7 @@ public:
         char database[pDatabase ? pDatabase->n + 1 : 0];
         if (pDatabase)
         {
-            strncpy(database, pDatabase->z, pDatabase->n);
+            memcpy(database, pDatabase->z, pDatabase->n);
             database[pDatabase->n] = 0;
             zDatabase = database;
         }
@@ -3135,7 +3146,7 @@ public:
         }
 
         char name[pName->n + 1];
-        strncpy(name, pName->z, pName->n);
+        memcpy(name, pName->z, pName->n);
         name[pName->n] = 0;
 
         update_names(zDatabase, name, NULL, NULL);
@@ -3272,11 +3283,13 @@ private:
         return pz;
     }
 
-    const char* table_name_collected(const char* zTable)
+    const char* table_name_collected(const char* zTable, size_t nTable)
     {
         size_t i = 0;
 
-        while ((i < m_table_names.size()) && (strcmp(m_table_names[i], zTable) != 0))
+        while ((i < m_table_names.size())
+               && (strlen(m_table_names[i]) != nTable
+                   || (strncmp(m_table_names[i], zTable, nTable) != 0)))
         {
             ++i;
         }
@@ -3296,11 +3309,13 @@ private:
         return (i != m_table_fullnames.size()) ? m_table_fullnames[i] : NULL;
     }
 
-    const char* database_name_collected(const char* zDatabase)
+    const char* database_name_collected(const char* zDatabase, size_t nDatabase)
     {
         size_t i = 0;
 
-        while ((i < m_database_names.size()) && (strcmp(m_database_names[i], zDatabase) != 0))
+        while ((i < m_database_names.size())
+               && (strlen(m_database_names[i]) != nDatabase
+                   || (strncmp(m_database_names[i], zDatabase, nDatabase) != 0)))
         {
             ++i;
         }
@@ -3315,11 +3330,11 @@ private:
     {
         mxb_assert(zTable && nTable);
 
-        const char* zCollected_table = table_name_collected(zTable);
+        const char* zCollected_table = table_name_collected(zTable, nTable);
 
         if (!zCollected_table)
         {
-            char* zCopy = MXS_STRDUP_A(zTable);
+            char* zCopy = MXS_STRNDUP_A(zTable, nTable);
 
             m_table_names.push_back(zCopy);
 
@@ -3330,7 +3345,8 @@ private:
 
         if (nDatabase)
         {
-            strcpy(fullname, zDatabase);
+            memcpy(fullname, zDatabase, nDatabase);
+            fullname[nDatabase] = 0;
             strcat(fullname, ".");
         }
         else
@@ -3338,7 +3354,7 @@ private:
             fullname[0] = 0;
         }
 
-        strcat(fullname, zTable);
+        strncat(fullname, zTable, nTable);
 
         if (!table_fullname_collected(fullname))
         {
@@ -3350,16 +3366,16 @@ private:
         return zCollected_table;
     }
 
-    const char* update_database_names(const char* zDatabase)
+    const char* update_database_names(const char* zDatabase, size_t nDatabase)
     {
         mxb_assert(zDatabase);
         mxb_assert(strlen(zDatabase) != 0);
 
-        const char* zCollected_database = database_name_collected(zDatabase);
+        const char* zCollected_database = database_name_collected(zDatabase, nDatabase);
 
         if (!zCollected_database)
         {
-            char* zCopy = MXS_STRDUP_A(zDatabase);
+            char* zCopy = MXS_STRNDUP_A(zDatabase, nDatabase);
 
             m_database_names.push_back(zCopy);
 
@@ -3456,7 +3472,8 @@ extern "C"
     extern void maxscaleDrop(Parse*, int what, Token* pDatabase, Token* pName);
     extern void maxscaleExecute(Parse*, Token* pName, int type_mask);
     extern void maxscaleExecuteImmediate(Parse*, Token* pName, ExprSpan* pExprSpan, int type_mask);
-    extern void maxscaleExplain(Parse*, Token* pNext);
+    extern void maxscaleExplainTable(Parse*, SrcList* pList);
+    extern void maxscaleExplain(Parse*);
     extern void maxscaleFlush(Parse*, Token* pWhat);
     extern void maxscaleHandler(Parse*, mxs_handler_t, SrcList* pFullName, Token* pName);
     extern void maxscaleLoadData(Parse*, SrcList* pFullName, int local);
@@ -4381,14 +4398,24 @@ void maxscaleExecuteImmediate(Parse* pParse, Token* pName, ExprSpan* pExprSpan, 
     QC_EXCEPTION_GUARD(pInfo->maxscaleExecuteImmediate(pParse, pName, pExprSpan, type_mask));
 }
 
-void maxscaleExplain(Parse* pParse, Token* pNext)
+void maxscaleExplainTable(Parse* pParse, SrcList* pList)
 {
     QC_TRACE();
 
     QcSqliteInfo* pInfo = this_thread.pInfo;
     mxb_assert(pInfo);
 
-    QC_EXCEPTION_GUARD(pInfo->maxscaleExplain(pParse, pNext));
+    QC_EXCEPTION_GUARD(pInfo->maxscaleExplainTable(pParse, pList));
+}
+
+void maxscaleExplain(Parse* pParse)
+{
+    QC_TRACE();
+
+    QcSqliteInfo* pInfo = this_thread.pInfo;
+    mxb_assert(pInfo);
+
+    QC_EXCEPTION_GUARD(pInfo->maxscaleExplain(pParse));
 }
 
 void maxscaleFlush(Parse* pParse, Token* pWhat)

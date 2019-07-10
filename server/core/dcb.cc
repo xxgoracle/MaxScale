@@ -1006,6 +1006,8 @@ static void dcb_log_write_failure(DCB* dcb, GWBUF* queue, int eno)
  */
 int dcb_drain_writeq(DCB* dcb)
 {
+    mxb_assert(dcb->poll.owner == RoutingWorker::get_current());
+
     if (dcb->ssl_read_want_write)
     {
         /** The SSL library needs to write more data */
@@ -2046,15 +2048,19 @@ static void dcb_hangup_foreach_worker(MXB_WORKER* worker, struct server* server)
 {
     RoutingWorker* rworker = static_cast<RoutingWorker*>(worker);
     int id = rworker->id();
+    DCB* old_current = this_thread.current_dcb;
 
     for (DCB* dcb = this_unit.all_dcbs[id]; dcb; dcb = dcb->thread.next)
     {
         if (dcb->state == DCB_STATE_POLLING && dcb->server && dcb->server == server && dcb->n_close == 0)
         {
+            this_thread.current_dcb = dcb;
             dcb->flags |= DCBF_HUNG;
             dcb->func.hangup(dcb);
         }
     }
+
+    this_thread.current_dcb = old_current;
 }
 
 /**
