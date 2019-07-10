@@ -873,7 +873,7 @@ void TestConnections::copy_one_mariadb_log(Mariadb_nodes* nrepl, int i, std::str
     if (docker_backend)
     {
         system((std::string("docker logs ") +
-                std::string(nrepl->docker_container_id[i]) +
+                nrepl->docker_container_id[i] +
                 std::string(" > ") +
                 filename +
                 std::string(" 2> ") +

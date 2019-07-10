@@ -27,7 +27,7 @@ public:
      */
     char * IP6[256];
 
-    char * docker_container_id[256];
+    std::string docker_container_id[256];
 
     /**
      * @brief use_ipv6 If true IPv6 addresses will be used to connect Maxscale and backed
