@@ -668,7 +668,7 @@ void TestConnections::read_env()
         maxscale::start = false;
     }
 
-    docker_backend = readenv_bool("docker_backend", false);
+    //docker_backend = readenv_bool("docker_backend", false);
     no_backend_log_copy = readenv_bool("no_backend_log_copy", false);
     no_maxscale_log_copy = readenv_bool("no_maxscale_log_copy", false);
     use_ipv6 = readenv_bool("use_ipv6", false);
@@ -681,6 +681,9 @@ void TestConnections::read_env()
     revert_snapshot_command = readenv("revert_snapshot_command",
                                       "mdbci snapshot revert --path-to-nodes %s --snapshot-name ", mdbci_config_name);
     no_vm_revert = readenv_bool("no_vm_revert", true);
+    box = readenv("box", "centos_7_libvirt");
+    docker_backend = !strcmp(box, "docker");
+    backend_box = readenv("backend_box", "centos_7_libvirt");
 }
 
 void TestConnections::print_env()
@@ -2261,8 +2264,8 @@ int TestConnections::call_mdbci(const char * options)
         }
         //return 1;
     }
-    docker_backend = readenv_bool("docker_backend", false);
-    tprintf("Docker backend!");
+    //docker_backend = readenv_bool("docker_backend", false);
+    //tprintf("Docker backend!");
     if (!docker_backend)
     {
         std::string team_keys = readenv("team_keys", "~/.ssh/id_rsa.pub");

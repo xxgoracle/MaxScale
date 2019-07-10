@@ -320,6 +320,16 @@ public:
      */
     bool docker_backend;
 
+    /**
+     * @brief box The value of 'box' enviromental varable
+     */
+    char * box;
+
+    /**
+     * @brief backend_box The value of 'backend_box' enviromental varable
+     */
+    char * backend_box;
+
     /** Check whether all nodes are in a valid state */
     static void check_nodes(bool value);
 

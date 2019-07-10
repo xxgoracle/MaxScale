@@ -340,7 +340,10 @@ int Nodes::read_basic_env()
 
     N = get_N();
 
-    docker_backend = readenv_bool("docker_backend", false);
+    backend_box = readenv("backend_box", "centos_7_libvirt");
+    docker_backend = !strcmp(backend_box, "docker");
+
+    //docker_backend = readenv_bool("docker_backend", false);
 
     if ((N > 0) && (N < 255))
     {

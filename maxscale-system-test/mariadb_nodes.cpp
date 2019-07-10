@@ -1115,6 +1115,7 @@ std::string Mariadb_nodes::get_lowest_version()
 
 int Mariadb_nodes::truncate_mariadb_logs()
 {
+    if (docker_backend) return 0;
     std::vector<std::future<int>> results;
 
     for (int node = 0; node < N; node++)

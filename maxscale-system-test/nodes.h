@@ -102,6 +102,11 @@ public:
     bool docker_backend;
 
     /**
+     * @brief backend_box The value of 'backend_box' enviromental varable
+     */
+    char * backend_box;
+
+    /**
      * @brief Get IP address
      *
      * @return The current IP address
