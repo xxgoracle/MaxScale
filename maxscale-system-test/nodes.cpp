@@ -44,7 +44,7 @@ void Nodes::generate_ssh_cmd(char* cmd, int node, const char* ssh, bool sudo)
     {
         sprintf(cmd,
                 "docker exec -i %s %s",
-                docker_container_id[node],
+                docker_container_id[node].c_str(),
                 ssh);
         return;
     }
@@ -170,7 +170,7 @@ int Nodes::ssh_node(int node, const char* ssh, bool sudo)
         {
             sprintf(cmd,
                     "docker exec -i %s %s",
-                    docker_container_id[node],
+                    docker_container_id[node].c_str(),
                     ssh);
         }
         else

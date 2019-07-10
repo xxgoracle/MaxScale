@@ -491,10 +491,7 @@ int Mariadb_nodes::block_node(int node)
     int local_result = 0;
     if (docker_backend)
     {
-        char cmd[1024];
-        sprintf(cmd, "docker pause %s", docker_container_id[node]);
-printf("%s\n", cmd)        ; fflush(stdout);
-        system(cmd);
+        system((std::string("docker pause ")  + docker_container_id[node]).c_str());
     }
     else
     {
@@ -512,10 +509,7 @@ int Mariadb_nodes::unblock_node(int node)
     int local_result = 0;
     if (docker_backend)
     {
-        char cmd[1024];
-        sprintf(cmd, "docker unpause %s", docker_container_id[node]);
-printf("%s\n", cmd)        ; fflush(stdout);
-        system(cmd);
+        system((std::string("docker unpause ")  + docker_container_id[node]).c_str());
     }
     else
     {

@@ -983,7 +983,7 @@ int TestConnections::copy_maxscale_logs(double timestamp)
         if (docker_backend)
         {
             sprintf(sys, "docker logs %s > %s/maxscale_%03d 2> %s/maxscale_%03d.err",
-                    maxscales->docker_container_id[i],
+                    maxscales->docker_container_id[i].c_str(),
                     log_dir_i, i,
                     log_dir_i, i);
             system(sys);
