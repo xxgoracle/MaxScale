@@ -59,7 +59,7 @@ if [ $box == "docker" ] ; then
 else
     export backend_box=${backend_box:-"centos_7_"$provider}
 fi
-
+echo $box , $backend_box
 mdbci destroy ${mdbci_config_name}
 
 . ${script_dir}/configure_log_dir.sh
