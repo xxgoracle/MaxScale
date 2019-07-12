@@ -276,21 +276,35 @@ void Mariadb_nodes::change_master(int NewMaster, int OldMaster)
 
 int Mariadb_nodes::stop_node(int node)
 {
-    return ssh_node(node, stop_db_command[node], true);
+    if (docker_backend)
+    {
+        return 0;
+    }
+    else
+    {
+        return ssh_node(node, stop_db_command[node], true);
+    }
 }
 
 int Mariadb_nodes::start_node(int node, const char* param)
 {
-    char cmd[1024];
-    if (v51)
+    if (docker_backend)
     {
-        sprintf(cmd, "%s %s --report-host", start_db_command[node], param);
+        return 0;
     }
     else
     {
-        sprintf(cmd, "%s %s", start_db_command[node], param);
+        char cmd[1024];
+        if (v51)
+        {
+            sprintf(cmd, "%s %s --report-host", start_db_command[node], param);
+        }
+        else
+        {
+            sprintf(cmd, "%s %s", start_db_command[node], param);
+        }
+        return ssh_node(node, cmd, true);
     }
-    return ssh_node(node, cmd, true);
 }
 
 int Mariadb_nodes::stop_nodes()
@@ -351,13 +365,16 @@ int Mariadb_nodes::cleanup_db_nodes()
 
 void Mariadb_nodes::create_users(int node)
 {
-    char str[strlen(test_dir) + 17];
-    // Create users for replication as well as the users that are used by the tests
-    sprintf(str, "%s/create_user.sh", test_dir);
-    copy_to_node(node, str, access_homedir[node]);
-    ssh_node_f(node, true,
-               "export node_user=\"%s\"; export node_password=\"%s\"; %s/create_user.sh %s",
-               user_name, password, access_homedir[0], socket_cmd[0]);
+    if (!docker_backend)
+    {
+        char str[strlen(test_dir) + 17];
+        // Create users for replication as well as the users that are used by the tests
+        sprintf(str, "%s/create_user.sh", test_dir);
+        copy_to_node(node, str, access_homedir[node]);
+        ssh_node_f(node, true,
+                   "export node_user=\"%s\"; export node_password=\"%s\"; %s/create_user.sh %s",
+                   user_name, password, access_homedir[0], socket_cmd[0]);
+    }
 }
 
 int Mariadb_nodes::start_replication()
@@ -462,13 +479,16 @@ int Galera_nodes::start_galera()
     }
 
     char str[strlen(test_dir) + 25];
-    sprintf(str, "%s/create_user_galera.sh", test_dir);
-    copy_to_node_legacy(str, "~/", 0);
+    if (!docker_backend)
+    {
+        sprintf(str, "%s/create_user_galera.sh", test_dir);
+        copy_to_node_legacy(str, "~/", 0);
 
-    ssh_node_f(0, true, "export galera_user=\"%s\"; export galera_password=\"%s\"; ./create_user_galera.sh %s",
-               user_name,
-               password,
-               socket_cmd[0]);
+        ssh_node_f(0, true, "export galera_user=\"%s\"; export galera_password=\"%s\"; ./create_user_galera.sh %s",
+                   user_name,
+                   password,
+                   socket_cmd[0]);
+    }
 
     local_result += robust_connect(5, "") ? 0 : 1;
     local_result += execute_query(nodes[0], "%s", create_repl_user);
@@ -528,7 +548,6 @@ int Mariadb_nodes::unblock_all_nodes()
 {
     int rval = 0;
     std::vector<std::thread> threads;
-printf("unblocking\n");
     for (int i = 0; i < this->N; i++)
     {
         threads.emplace_back([&, i]() {
@@ -1149,7 +1168,7 @@ int Mariadb_nodes::configure_ssl(bool require)
         start_node(i, (char*) "");
     }
 
-    if (require)
+    if ((require) && (!docker_backend))
     {
         // Create DB user on first node
         printf("Set user to require ssl: %s\n", str);

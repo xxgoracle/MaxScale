@@ -683,6 +683,7 @@ void TestConnections::read_env()
     no_vm_revert = readenv_bool("no_vm_revert", true);
     box = readenv("box", "centos_7_libvirt");
     docker_backend = !strcmp(box, "docker");
+    if (docker_backend) printf("DOCKER!!!!!\n");
     backend_box = readenv("backend_box", "centos_7_libvirt");
 }
 
@@ -2273,6 +2274,10 @@ int TestConnections::call_mdbci(const char * options)
                 team_keys +
                 std::string(" ") +
                 std::string(mdbci_config_name)).c_str() );
+    }
+    else
+    {
+        tprintf("Docker deteted");
     }
 
 
