@@ -54,7 +54,11 @@ export target=`echo $target | sed "s/?//g"`
 export mdbci_config_name=`echo ${mdbci_config_name} | sed "s/?//g"`
 
 export provider=`mdbci show provider $box --silent 2> /dev/null`
-export backend_box=${backend_box:-"centos_7_"$provider}
+if [ $box == "docker" ] ; then
+    export backend_box = $box
+else
+    export backend_box=${backend_box:-"centos_7_"$provider}
+fi
 
 mdbci destroy ${mdbci_config_name}
 
