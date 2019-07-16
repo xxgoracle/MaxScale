@@ -5,7 +5,7 @@
         "memory_size" : "4096",
         "box" : "$box",
         "product" : {
-                "name": "docker",
+                "name": "docker"
         }
 
   }
