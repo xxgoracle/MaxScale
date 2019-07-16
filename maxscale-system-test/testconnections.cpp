@@ -346,7 +346,7 @@ TestConnections::TestConnections(int argc, char* argv[])
 
     if (!no_repl)
     {
-        repl = new Mariadb_nodes("node", test_dir, verbose, network_config);
+        repl = new Mariadb_nodes("node", test_dir, verbose);
         repl->use_ipv6 = use_ipv6;
         repl->take_snapshot_command = take_snapshot_command;
         repl->revert_snapshot_command = revert_snapshot_command;
@@ -359,7 +359,7 @@ TestConnections::TestConnections(int argc, char* argv[])
 
     if (!no_galera)
     {
-        galera = new Galera_nodes("galera", test_dir, verbose, network_config);
+        galera = new Galera_nodes("galera", test_dir, verbose);
         //galera->use_ipv6 = use_ipv6;
         galera->use_ipv6 = false;
         galera->take_snapshot_command = take_snapshot_command;
@@ -371,7 +371,7 @@ TestConnections::TestConnections(int argc, char* argv[])
         galera = NULL;
     }
 
-    maxscales = new Maxscales("maxscale", test_dir, verbose, network_config);
+    maxscales = new Maxscales("maxscale", test_dir, verbose);
 
     bool maxscale_ok = maxscales->check_nodes();
     bool repl_ok = no_repl || repl_future.get();
@@ -668,7 +668,6 @@ void TestConnections::read_env()
         maxscale::start = false;
     }
 
-    //docker_backend = readenv_bool("docker_backend", false);
     no_backend_log_copy = readenv_bool("no_backend_log_copy", false);
     no_maxscale_log_copy = readenv_bool("no_maxscale_log_copy", false);
     use_ipv6 = readenv_bool("use_ipv6", false);
@@ -769,7 +768,6 @@ void TestConnections::process_template(int m, const char* template_name, const c
     mdn[1] = galera;
     int i, j;
     int mdn_n = galera ? 2 : 1;
-printf("process template\n");
     for (j = 0; j < mdn_n; j++)
     {
         if (mdn[j])
@@ -863,6 +861,8 @@ void TestConnections::init_maxscale(int m)
     if (maxscale::start)
     {
         maxscales->restart_maxscale(m);
+        read_env();
+        maxscales->read_env();
         maxscales->ssh_node_f(m,
                               true,
                               "maxctrl api get maxscale/debug/monitor_wait");
@@ -2265,8 +2265,7 @@ int TestConnections::call_mdbci(const char * options)
         }
         //return 1;
     }
-    //docker_backend = readenv_bool("docker_backend", false);
-    //tprintf("Docker backend!");
+
     if (!docker_backend)
     {
         std::string team_keys = readenv("team_keys", "~/.ssh/id_rsa.pub");
@@ -2279,20 +2278,18 @@ int TestConnections::call_mdbci(const char * options)
     {
         tprintf("Docker deteted");
     }
-
-
     read_env();
     if (repl)
     {
-        repl->read_basic_env();
+        repl->read_env();
     }
     if (galera)
     {
-        galera->read_basic_env();
+        galera->read_env();
     }
     if (maxscales)
     {
-        maxscales->read_basic_env();
+        maxscales->read_env();
     }
     return 0;
 }

@@ -35,8 +35,7 @@ void Mariadb_nodes::require_gtid(bool value)
     g_require_gtid = value;
 }
 
-Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbose,
-                             std::string network_config):
+Mariadb_nodes::Mariadb_nodes(const char *pref, const char *test_cwd, bool verbose):
     v51(false)
 {
     use_ipv6 = false;
@@ -1510,7 +1509,7 @@ std::string Mariadb_nodes::cnf_servers()
                 cnf_server_name +
                 std::to_string(i + 1) +
                 std::string("]\\ntype=server\\naddress=") +
-                std::string(IP[i]) +
+                std::string(IP_private[i]) +
                 std::string("\\nport=") +
                 std::to_string(port[i]) +
                 std::string("\\nprotocol=MySQLBackend\\n");

@@ -4,14 +4,12 @@
 #include <string>
 #include "envv.h"
 
-Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose,
-                     std::string network_config)
+Maxscales::Maxscales(const char *pref, const char *test_cwd, bool verbose)
 {
     strcpy(prefix, pref);
     this->verbose = verbose;
     valgring_log_num = 0;
     strcpy(test_dir, test_cwd);
-    this->network_config = network_config;
     read_env();
     if (this->use_valgrind)
     {
@@ -203,20 +201,13 @@ int Maxscales::restart_maxscale(int m)
     {
         char num[4];
         sprintf(num, "%03d", m);
-        std::string s1 = std::string("mdbci update-configuration --configuration-file ") +
-                std::string(realpath("maxscale.cnf", NULL)) +
-                std::string(" ") +
-                readenv("mdbci_config_name", "local") +
-                std::string("/maxscale_") +
-                std::string(num);
-printf("restarting maxscale: %s\n", s1.c_str());fflush(stdout);
         res = system((std::string("mdbci update-configuration --configuration-file ") +
                       std::string(realpath("maxscale.cnf", NULL)) +
                       std::string(" ") +
                       readenv("mdbci_config_name", "local") +
                       std::string("/maxscale_") +
                       std::string(num)).c_str());
-printf("restarted\n");fflush(stdout);
+        read_env();
     }
     else
     {

@@ -6,6 +6,8 @@
 #include <functional>
 #include <algorithm>
 #include <signal.h>
+#include <sstream>
+#include <fstream>
 
 #include "envv.h"
 
@@ -331,6 +333,7 @@ int Nodes::copy_from_node_legacy(const char* src, const char* dest, int i)
 int Nodes::read_basic_env()
 {
     char env_name[64];
+    read_nc();
 
     sprintf(env_name, "%s_user", prefix);
     user_name = readenv(env_name, "skysql");
@@ -342,8 +345,6 @@ int Nodes::read_basic_env()
 
     backend_box = readenv("backend_box", "centos_7_libvirt");
     docker_backend = !strcmp(backend_box, "docker");
-
-    //docker_backend = readenv_bool("docker_backend", false);
 
     if ((N > 0) && (N < 255))
     {
@@ -481,4 +482,18 @@ int Nodes::start_vm(int node)
 int Nodes::stop_vm(int node)
 {
     return (system(stop_vm_command[node]));
+}
+
+int Nodes::read_nc()
+{
+    char * mdbci_vm_path = readenv("MDBCI_VM_PATH", "%s/vms/", getenv("HOME"));
+    char * mdbci_config_name = readenv("mdbci_config_name", "local");
+    std::string vm_path = std::string(mdbci_vm_path) + "/" + std::string(mdbci_config_name);
+    std::ifstream nc_file;
+    nc_file.open(vm_path + "_network_config");
+    std::stringstream strStream;
+    strStream << nc_file.rdbuf();
+    network_config = strStream.str();
+    nc_file.close();
+    return 0;
 }

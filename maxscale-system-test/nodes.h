@@ -217,6 +217,12 @@ public:
      */
     int stop_vm(int node);
 
+    /**
+     * @brief reread_nc Read _network_config file and load it to 'network_config' string
+     * @return 0 in case of success
+     */
+    int read_nc();
+
 private:
     bool check_node_ssh(int node);
 };

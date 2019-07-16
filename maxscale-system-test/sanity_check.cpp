@@ -102,7 +102,6 @@ void test_rwsplit(TestConnections& test)
 int main(int argc, char** argv)
 {
     TestConnections test(argc, argv);
-
     auto connections = [&]() {
             return test.maxctrl("api get servers/server1 data.attributes.statistics.connections").second;
         };
