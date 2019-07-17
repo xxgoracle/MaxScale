@@ -625,11 +625,6 @@ void TestConnections::read_mdbci_info()
     if (mdbci_config_name != NULL)
     {
         std::ifstream nc_file;
-        nc_file.open(vm_path + "_network_config");
-        std::stringstream strStream;
-        strStream << nc_file.rdbuf();
-        network_config = strStream.str();
-        nc_file.close();
 
         nc_file.open(vm_path + "_configured_labels");
         std::stringstream strStream1;
@@ -641,10 +636,6 @@ void TestConnections::read_mdbci_info()
     {
         tprintf("The name of MDBCI configuration is not defined, exiting!");
         exit(1);
-    }
-    if (verbose)
-    {
-        tprintf(network_config.c_str());
     }
 }
 
@@ -2265,6 +2256,8 @@ int TestConnections::call_mdbci(const char * options)
         }
         //return 1;
     }
+
+sleep(60);
 
     if (!docker_backend)
     {
