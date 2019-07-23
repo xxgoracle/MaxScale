@@ -2254,7 +2254,7 @@ int TestConnections::call_mdbci(const char * options)
         {
             printf("ec decoded = %d\n",  WEXITSTATUS(exc));
         }
-        //return 1;
+        return 1;
     }
 
 sleep(60);
