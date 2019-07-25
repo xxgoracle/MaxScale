@@ -207,7 +207,6 @@ int Maxscales::restart_maxscale(int m)
                       readenv("mdbci_config_name", "local") +
                       std::string("/maxscale_") +
                       std::string(num)).c_str());
-        sleep(60);
         read_env();
     }
     else

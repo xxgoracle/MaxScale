@@ -2256,8 +2256,6 @@ int TestConnections::call_mdbci(const char * options)
         return 1;
     }
 
-sleep(60);
-
     if (!docker_backend)
     {
         std::string team_keys = readenv("team_keys", "~/.ssh/id_rsa.pub");
