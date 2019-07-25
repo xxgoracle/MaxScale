@@ -45,7 +45,7 @@ void Nodes::generate_ssh_cmd(char* cmd, int node, const char* ssh, bool sudo)
     if (docker_backend)
     {
         sprintf(cmd,
-                "docker exec -i %s %s",
+                "docker exec -i %s /bin/bash -c '%s'",
                 docker_container_id[node].c_str(),
                 ssh);
         return;
@@ -92,7 +92,6 @@ void Nodes::generate_ssh_cmd(char* cmd, int node, const char* ssh, bool sudo)
 
 char* Nodes::ssh_node_output_f(int node, bool sudo, int* exit_code, const char* format, ...)
 {
-    //if (docker_backend) return NULL;
     va_list valist;
 
     va_start(valist, format);
@@ -119,7 +118,6 @@ char* Nodes::ssh_node_output_f(int node, bool sudo, int* exit_code, const char* 
 
 char* Nodes::ssh_node_output(int node, const char* ssh, bool sudo, int* exit_code)
 {
-    //if (docker_backend) return NULL;
     char* cmd = (char*)malloc(strlen(ssh) + 1024);
 
     generate_ssh_cmd(cmd, node, ssh, sudo);
@@ -158,7 +156,6 @@ char* Nodes::ssh_node_output(int node, const char* ssh, bool sudo, int* exit_cod
 
 int Nodes::ssh_node(int node, const char* ssh, bool sudo)
 {
-    //if (docker_backend) return 0;
     char* cmd = (char*)malloc(strlen(ssh) + 1024);
 
     if (strcmp(IP[node], "127.0.0.1") == 0)
@@ -171,7 +168,7 @@ int Nodes::ssh_node(int node, const char* ssh, bool sudo)
         if (docker_backend)
         {
             sprintf(cmd,
-                    "docker exec -i %s %s",
+                    "docker exec -i %s /bin/bash -c '%s'",
                     docker_container_id[node].c_str(),
                     ssh);
         }
@@ -227,7 +224,6 @@ int Nodes::ssh_node(int node, const char* ssh, bool sudo)
 
 int Nodes::ssh_node_f(int node, bool sudo, const char* format, ...)
 {
-    //if (docker_backend) return 0;
     va_list valist;
 
     va_start(valist, format);
@@ -251,30 +247,39 @@ int Nodes::ssh_node_f(int node, bool sudo, const char* format, ...)
 
 int Nodes::copy_to_node(int i, const char* src, const char* dest)
 {
-    if (docker_backend) return 0;
     if (i >= N)
     {
         return 1;
     }
     char sys[strlen(src) + strlen(dest) + 1024];
-
-    if (strcmp(IP[i], "127.0.0.1") == 0)
+    if (docker_backend)
     {
         sprintf(sys,
-                "cp %s %s",
+                "docker cp '%s' '%s:%s'", +
                 src,
+                docker_container_id[i].c_str(),
                 dest);
     }
     else
     {
-        sprintf(sys,
-                "scp -q -r -i %s -o UserKnownHostsFile=/dev/null "
-                "-o StrictHostKeyChecking=no -o LogLevel=quiet %s %s@%s:%s",
-                sshkey[i],
-                src,
-                access_user[i],
-                IP[i],
-                dest);
+        if (strcmp(IP[i], "127.0.0.1") == 0)
+        {
+            sprintf(sys,
+                    "cp %s %s",
+                    src,
+                    dest);
+        }
+        else
+        {
+            sprintf(sys,
+                    "scp -q -r -i %s -o UserKnownHostsFile=/dev/null "
+                    "-o StrictHostKeyChecking=no -o LogLevel=quiet %s %s@%s:%s",
+                    sshkey[i],
+                    src,
+                    access_user[i],
+                    IP[i],
+                    dest);
+        }
     }
     if (verbose)
     {
@@ -293,29 +298,40 @@ int Nodes::copy_to_node_legacy(const char* src, const char* dest, int i)
 
 int Nodes::copy_from_node(int i, const char* src, const char* dest)
 {
-    if (docker_backend) return 0;
     if (i >= N)
     {
         return 1;
     }
+
     char sys[strlen(src) + strlen(dest) + 1024];
-    if (strcmp(IP[i], "127.0.0.1") == 0)
+    if (docker_backend)
     {
         sprintf(sys,
-                "cp %s %s",
+                "docker cp '%s:%s' '%s'", +
+                docker_container_id[i].c_str(),
                 src,
                 dest);
     }
     else
     {
-        sprintf(sys,
-                "scp -q -r -i %s -o UserKnownHostsFile=/dev/null "
-                "-o StrictHostKeyChecking=no -o LogLevel=quiet %s@%s:%s %s",
-                sshkey[i],
-                access_user[i],
-                IP[i],
-                src,
-                dest);
+        if (strcmp(IP[i], "127.0.0.1") == 0)
+        {
+            sprintf(sys,
+                    "cp %s %s",
+                    src,
+                    dest);
+        }
+        else
+        {
+            sprintf(sys,
+                    "scp -q -r -i %s -o UserKnownHostsFile=/dev/null "
+                    "-o StrictHostKeyChecking=no -o LogLevel=quiet %s@%s:%s %s",
+                    sshkey[i],
+                    access_user[i],
+                    IP[i],
+                    src,
+                    dest);
+        }
     }
     if (verbose)
     {
@@ -385,17 +401,31 @@ int Nodes::read_basic_env()
             }
             setenv(env_name, access_user[i], 1);
 
-            sprintf(env_name, "%s_%03d_access_sudo", prefix, i);
-            access_sudo[i] = readenv(env_name, " sudo ");
-
-            if (strcmp(access_user[i], "root") == 0)
+            if (docker_backend)
             {
-                access_homedir[i] = (char *) "/root/";
+                access_sudo[i] = (char *) " ";
             }
             else
             {
-                access_homedir[i] = (char *) malloc(strlen(access_user[i]) + 9);
-                sprintf(access_homedir[i], "/home/%s/", access_user[i]);
+                sprintf(env_name, "%s_%03d_access_sudo", prefix, i);
+                access_sudo[i] = readenv(env_name, " sudo ");
+            }
+
+            if (docker_backend)
+            {
+                access_homedir[i] = (char *) "./";
+            }
+            else
+            {
+                if (strcmp(access_user[i], "root") == 0)
+                {
+                    access_homedir[i] = (char *) "/root/";
+                }
+                else
+                {
+                    access_homedir[i] = (char *) malloc(strlen(access_user[i]) + 9);
+                    sprintf(access_homedir[i], "/home/%s/", access_user[i]);
+                }
             }
 
             sprintf(env_name, "%s_%03d_hostname", prefix, i);
