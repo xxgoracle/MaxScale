@@ -822,32 +822,36 @@ void TestConnections::init_maxscales()
 void TestConnections::init_maxscale(int m)
 {
     process_template(m, template_name, maxscales->access_homedir[m]);
-    if (maxscales->ssh_node_f(m, true, "test -d %s/certs", maxscales->access_homedir[m]))
+
+    if (!docker_backend)
     {
-        tprintf("SSL certificates not found, copying to maxscale");
+        if (maxscales->ssh_node_f(m, true, "test -d %s/certs", maxscales->access_homedir[m]))
+        {
+            tprintf("SSL certificates not found, copying to maxscale");
+            maxscales->ssh_node_f(m,
+                                  true,
+                                  "rm -rf %s/certs;mkdir -m a+wrx %s/certs;",
+                                  maxscales->access_homedir[m],
+                                  maxscales->access_homedir[m]);
+
+            char str[4096];
+            char dtr[4096];
+            sprintf(str, "%s/ssl-cert/*", test_dir);
+            sprintf(dtr, "%s/certs/", maxscales->access_homedir[m]);
+            maxscales->copy_to_node_legacy(str, dtr, m);
+            sprintf(str, "cp %s/ssl-cert/* .", test_dir);
+            system(str);
+            maxscales->ssh_node_f(m, true, "chmod -R a+rx %s;", maxscales->access_homedir[m]);
+        }
+
         maxscales->ssh_node_f(m,
                               true,
-                              "rm -rf %s/certs;mkdir -m a+wrx %s/certs;",
-                              maxscales->access_homedir[m],
-                              maxscales->access_homedir[m]);
-
-        char str[4096];
-        char dtr[4096];
-        sprintf(str, "%s/ssl-cert/*", test_dir);
-        sprintf(dtr, "%s/certs/", maxscales->access_homedir[m]);
-        maxscales->copy_to_node_legacy(str, dtr, m);
-        sprintf(str, "cp %s/ssl-cert/* .", test_dir);
-        system(str);
-        maxscales->ssh_node_f(m, true, "chmod -R a+rx %s;", maxscales->access_homedir[m]);
+                              "cp maxscale.cnf %s;"
+                              "iptables -F INPUT;"
+                              "rm -rf %s/*.log /tmp/core* /dev/shm/* /var/lib/maxscale/maxscale.cnf.d/ /var/lib/maxscale/*;",
+                              maxscales->maxscale_cnf[m],
+                              maxscales->maxscale_log_dir[m]);
     }
-
-    maxscales->ssh_node_f(m,
-                          true,
-                          "cp maxscale.cnf %s;"
-                          "iptables -F INPUT;"
-                          "rm -rf %s/*.log /tmp/core* /dev/shm/* /var/lib/maxscale/maxscale.cnf.d/ /var/lib/maxscale/*;",
-                          maxscales->maxscale_cnf[m],
-                          maxscales->maxscale_log_dir[m]);
     if (maxscale::start)
     {
         maxscales->restart_maxscale(m);
