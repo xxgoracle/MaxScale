@@ -40,6 +40,21 @@ bool is_master(MYSQL* conn)
     return false;
 }
 
+void change_maxscale_cnf(TestConnections * Test, char * str)
+{
+    char cmd[strlen(str) + strlen(" /etc/maxscale.cnf ")];
+    if (Test->maxscales->docker_backend)
+    {
+        sprintf(cmd, "%s maxscale.cnf", str);
+        system(cmd);
+    }
+    else
+    {
+        sprintf(cmd, "%s /etc/maxscale.cnf", str);
+        Test->maxscales->ssh_node(0, cmd, true);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     TestConnections* test = new TestConnections(argc, argv);
@@ -73,8 +88,8 @@ int main(int argc, char* argv[])
                   "insert should go to the master.");
 
     test->maxscales->close_maxscale_connections(0);
-    test->maxscales->ssh_node(0, "sed -i -e 's/time.*/time=0/' /etc/maxscale.cnf", true);
-    test->maxscales->ssh_node(0, "sed -i -e 's/###count/count/' /etc/maxscale.cnf", true);
+    change_maxscale_cnf(test, (char *) "sed -i -e 's/time.*/time=0/'");
+    change_maxscale_cnf(test, (char *) "sed -i -e 's/###count/count/'");
     test->maxscales->restart_maxscale(0);
     test->maxscales->connect_maxscale(0);
 
@@ -94,7 +109,7 @@ int main(int argc, char* argv[])
                   "should go to the master.");
 
     test->maxscales->close_maxscale_connections(0);
-    test->maxscales->ssh_node(0, "sed -i -e 's/###match/match/' /etc/maxscale.cnf", true);
+    change_maxscale_cnf(test, (char *) "sed -i -e 's/###match/match/'");
     test->maxscales->restart_maxscale(0);
     test->maxscales->connect_maxscale(0);
 
@@ -124,8 +139,8 @@ int main(int argc, char* argv[])
                   "results as previous test.");
 
     test->maxscales->close_maxscale_connections(0);
-    test->maxscales->ssh_node(0, "sed -i -e 's/match/###match/' /etc/maxscale.cnf", true);
-    test->maxscales->ssh_node(0, "sed -i -e 's/###ignore/ignore/' /etc/maxscale.cnf", true);
+    change_maxscale_cnf(test, (char *) "sed -i -e 's/match/###match/'");
+    change_maxscale_cnf(test, (char *) "sed -i -e 's/###ignore/ignore/'");
     test->maxscales->restart_maxscale(0);
     test->maxscales->connect_maxscale(0);
 

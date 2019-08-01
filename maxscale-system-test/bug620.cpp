@@ -255,6 +255,10 @@ int main(int argc, char* argv[])
     Test->try_query(Test->maxscales->conn_rwsplit[0],
                     (char*) "GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY 'skysqlroot';");
     sleep(10);
+    if (Test->repl)
+    {
+        Test->repl->sync_slaves();
+    }
 
     MYSQL* conn;
 
