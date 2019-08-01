@@ -1056,7 +1056,7 @@ add_test_executable(binlog_change_master_gtid.cpp binlog_change_master_gtid setu
 
 # MXS-701: Binlog filtering
 # https://jira.mariadb.org/browse/MXS-701
-add_test_executable(mxs701_binlog_filter.cpp mxs701_binlog_filter mxs701_binlog_filter LABELS bilogrouter REPL_BACKEND)
+add_test_executable(mxs701_binlog_filter.cpp mxs701_binlog_filter mxs701_binlog_filter LABELS binlogrouter REPL_BACKEND)
 
 # MXS-1949: Warning for user load failure logged even when service has no users
 # https://jira.mariadb.org/browse/MXS-1949
