@@ -1385,7 +1385,18 @@ bool TestConnections::log_matches(int m, const char* pattern)
         }
     }
 
-    return maxscales->ssh_node_f(m, true, "grep '%s' /var/log/maxscale/maxscale*.log", p.c_str()) == 0;
+    if (docker_backend)
+    {
+        std::string sys = std::string("docker logs ") +
+                maxscales->docker_container_id[m] +
+                std::string(" | grep ") +
+                p;
+        return(system(sys.c_str()));
+    }
+    else
+    {
+        return maxscales->ssh_node_f(m, true, "grep '%s' /var/log/maxscale/maxscale*.log", p.c_str()) == 0;
+    }
 }
 
 void TestConnections::log_includes(int m, const char* pattern)
