@@ -2272,6 +2272,11 @@ int TestConnections::call_mdbci(const char * options)
         {
             printf("ec decoded = %d\n",  WEXITSTATUS(exc));
         }
+        if (docker_backend)
+        {
+            system((std::string("docker logs ") +
+                    maxscales->docker_container_id[0]).c_str());
+        }
         return 1;
     }
 
