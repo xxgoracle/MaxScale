@@ -1787,6 +1787,10 @@ int TestConnections::get_client_ip(int m, char* ip)
         return ret;
     }
     maxscales->close_rwsplit(m);
+    if (repl)
+    {
+        repl->sync_slaves();
+    }
     conn = open_conn_db(maxscales->rwsplit_port[m],
                         maxscales->IP[m],
                         (char*) "db_to_check_client_ip",

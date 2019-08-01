@@ -133,6 +133,8 @@ int main(int argc, char* argv[])
         Test->set_timeout(200);
         Test->tprintf("Create t1\n");
         create_t1(Test->maxscales->conn_rwsplit[0]);
+        Test->stop_timeout();
+        Test->repl->sync_slaves();
         Test->tprintf("Loading data to t1 from file\n");
         Test->try_query(srv[i], (char*) "LOAD DATA LOCAL INFILE 't1.csv' INTO TABLE t1;");
         Test->stop_timeout();
