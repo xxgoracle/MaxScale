@@ -2274,7 +2274,6 @@ int TestConnections::call_mdbci(const char * options)
         }
         if (docker_backend)
         {
-            read_env();maxscales->read_env();
             system((std::string("docker logs ") +
                     maxscales->docker_container_id[0]).c_str());
         }
