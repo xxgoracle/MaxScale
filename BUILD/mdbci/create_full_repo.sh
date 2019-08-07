@@ -82,7 +82,7 @@ if [ $? -ne 0 ] ; then
   exit 2
 fi
 
-
+ssh $sshopt ./MaxScale/BUILD/install_build_deps.sh
 ${script_dir}/create_remote_repo.sh full_repo
 export build_result=$?
 
