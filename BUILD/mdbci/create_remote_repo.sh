@@ -17,8 +17,8 @@ ssh $sshopt "mkdir -p dest ; mkdir -p src; mkdir gpg_keys"
 
 echo "copying stuff to VM"
 if [ $1 == "full_repo" ] ; then
-         find  -name "*.rpm" -path "${repo_path}/maxscale-${major_ver}.*-release/mariadb-maxscale/${platform}/${platform_version}/*" -exec scp $scpopt {} $sshuser@$IP:src/ \;
-         find  -name "*.deb" -path "${repo_path}/maxscale-${major_ver}.*-release/mariadb-maxscale/${platform}/${platform_version}/*" -exec scp $scpopt {} $sshuser@$IP:src/ \;
+         find  "${repo_path}/maxscale-${major_ver}.*-release/mariadb-maxscale/${platform}/${platform_version}/*" -name "*.rpm" -exec scp $scpopt {} $sshuser@$IP:src/ \;
+         find  "${repo_path}/maxscale-${major_ver}.*-release/mariadb-maxscale/${platform}/${platform_version}/*" -name "*.deb" -exec scp $scpopt {} $sshuser@$IP:src/ \;
 else
          scp $scpopt $pre_repo_dir/$target/$box/* $sshuser@$IP:src/
 fi
