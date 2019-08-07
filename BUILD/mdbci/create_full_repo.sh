@@ -65,6 +65,24 @@ export sshkey=`${mdbci_dir}/mdbci show keyfile $name/build --silent 2> /dev/null
 export scpopt="-i $sshkey -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectTimeout=120 "
 export sshopt="$scpopt $sshuser@$IP"
 
+rm -rf $pre_repo_dir/$target/$box
+mkdir -p $pre_repo_dir/$target/SRC
+mkdir -p $pre_repo_dir/$target/$box
+
+export work_dir="MaxScale"
+export orig_image=$box
+
+ssh $sshopt "sudo rm -rf $work_dir"
+echo "copying stuff to $image machine"
+ssh $sshopt "mkdir -p $work_dir"
+
+rsync -avz --delete -e "ssh $scpopt" ${script_dir}/../../ $sshuser@$IP:./$work_dir/
+if [ $? -ne 0 ] ; then
+  echo "Error copying stuff to $box machine"
+  exit 2
+fi
+
+
 ${script_dir}/create_remote_repo.sh full_repo
 export build_result=$?
 
