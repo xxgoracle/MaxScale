@@ -1384,14 +1384,14 @@ bool TestConnections::log_matches(int m, const char* pattern)
             a = '.';
         }
     }
-
     if (docker_backend)
     {
         std::string sys = std::string("docker logs ") +
                 maxscales->docker_container_id[m] +
-                std::string(" | grep ") +
-                p;
-        return(system(sys.c_str()));
+                std::string(" | grep \"") +
+                p +
+                std::string("\"");
+        return(system(sys.c_str()) == 0);
     }
     else
     {
