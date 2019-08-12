@@ -179,11 +179,25 @@ void Mariadb_nodes::read_env()
 
             // reading start_db_command
             sprintf(env_name, "%s_%03d_start_db_command", prefix, i);
-            start_db_command[i] = readenv(env_name, (char *) "systemctl start mariadb || service mysql start");
+            if (docker_backend)
+            {
+                start_db_command[i] = readenv(env_name, (char *) "docker unpause %s", docker_container_id[i]);
+            }
+            else
+            {
+                start_db_command[i] = readenv(env_name, (char *) "systemctl start mariadb || service mysql start");
+            }
 
             // reading stop_db_command
             sprintf(env_name, "%s_%03d_stop_db_command", prefix, i);
-            stop_db_command[i] = readenv(env_name, (char *) "systemctl stop mariadb || service mysql stop");
+            if (docker_backend)
+            {
+                stop_db_command[i] = readenv(env_name, (char *) "docker pause %s", docker_container_id[i]);
+            }
+            else
+            {
+                stop_db_command[i] = readenv(env_name, (char *) "systemctl stop mariadb || service mysql stop");
+            }
 
             // reading cleanup_db_command
             sprintf(env_name, "%s_%03d_cleanup_db_command", prefix, i);
@@ -277,7 +291,7 @@ int Mariadb_nodes::stop_node(int node)
 {
     if (docker_backend)
     {
-        return 0;
+        return system(stop_db_command[node]);
     }
     else
     {
@@ -289,7 +303,7 @@ int Mariadb_nodes::start_node(int node, const char* param)
 {
     if (docker_backend)
     {
-        return 0;
+        return system(start_db_command[node]);;
     }
     else
     {
