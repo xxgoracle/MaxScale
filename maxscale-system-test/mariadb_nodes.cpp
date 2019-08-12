@@ -181,7 +181,7 @@ void Mariadb_nodes::read_env()
             sprintf(env_name, "%s_%03d_start_db_command", prefix, i);
             if (docker_backend)
             {
-                start_db_command[i] = readenv(env_name, (char *) "docker unpause %s", docker_container_id[i]);
+                start_db_command[i] = readenv(env_name, (char *) "docker unpause %s", docker_container_id[i].c_str());
             }
             else
             {
@@ -192,7 +192,7 @@ void Mariadb_nodes::read_env()
             sprintf(env_name, "%s_%03d_stop_db_command", prefix, i);
             if (docker_backend)
             {
-                stop_db_command[i] = readenv(env_name, (char *) "docker pause %s", docker_container_id[i]);
+                stop_db_command[i] = readenv(env_name, (char *) "docker pause %s", docker_container_id[i].c_str());
             }
             else
             {
@@ -291,7 +291,8 @@ int Mariadb_nodes::stop_node(int node)
 {
     if (docker_backend)
     {
-        return system(stop_db_command[node]);
+        system(stop_db_command[node]);
+        return(0);
     }
     else
     {
@@ -303,7 +304,8 @@ int Mariadb_nodes::start_node(int node, const char* param)
 {
     if (docker_backend)
     {
-        return system(start_db_command[node]);;
+        system(start_db_command[node]);
+        return 0;
     }
     else
     {
