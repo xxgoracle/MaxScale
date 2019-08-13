@@ -1288,6 +1288,7 @@ void Mariadb_nodes::sync_slaves(int node)
                 {
                     if (i != node)
                     {
+printf("node to sync = %d\n", i)                        ;
                         wait_until_pos(this->nodes[i], filenum, pos);
                     }
                 }
