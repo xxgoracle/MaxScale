@@ -1255,6 +1255,7 @@ static void wait_until_pos(MYSQL* mysql, int filenum, int pos)
         }
 printf("filenum %d\t pos %d\n", filenum, pos);
 printf("slave num %d\t pos %d\n", slave_filenum, slave_pos);
+sleep(1);
     }
     while (slave_filenum < filenum || slave_pos < pos);
 }
