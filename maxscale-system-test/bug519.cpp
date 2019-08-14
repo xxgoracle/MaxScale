@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
     insert_into_t1(Test->maxscales->conn_rwsplit[0], N);
     Test->stop_timeout();
     Test->repl->sync_slaves();
-    sleep(100);
+
     Test->set_timeout(200);
 
     sprintf(str,

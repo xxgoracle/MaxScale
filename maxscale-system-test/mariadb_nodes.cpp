@@ -410,6 +410,8 @@ int Mariadb_nodes::start_replication()
 printf("Trying to connect\n");
     robust_connect(10, "");
 printf("Create DB\n");
+execute_query(nodes[0], "RESET MASTER");
+
     for (int i = 0; i < N; i++)
     {
         execute_query(nodes[i], "CREATE DATABASE IF NOT EXISTS test");
