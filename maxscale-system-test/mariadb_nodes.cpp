@@ -281,7 +281,7 @@ void Mariadb_nodes::change_master(int NewMaster, int OldMaster)
         if (i != NewMaster && mysql_ping(nodes[i]) == 0)
         {
             char str[1024];
-            sprintf(str, setup_slave, IP[NewMaster], log_file, log_pos, port[NewMaster]);
+            sprintf(str, setup_slave, IP_private[NewMaster], log_file, log_pos, port[NewMaster]);
             execute_query(nodes[i], "%s", str);
         }
     }
