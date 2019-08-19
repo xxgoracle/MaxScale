@@ -867,12 +867,16 @@ MaxScale will at startup load the users from the backend server, but if
 the authentication of a user fails, MaxScale assumes it is because a new
 user has been created and will thus refresh the users. By default, MaxScale
 will do that at most once per 30 seconds and with this configuration option
-that can be changed. The minimum allowed value is 10 seconds. A negative
+that can be changed. A value of 0 allows infinite refreshes and a negative
 value disables the refreshing entirelly. Note that using `maxadmin` it is
 possible to explicitly cause the users of a service to be reloaded.
+
 ```
 users_refresh_time=120
 ```
+
+In MaxScale 2.3.9 and older versions, the minimum allowed value was 10 seconds
+but, due to a bug, the default value was 0 which allowed infinite refreshes.
 
 ### `retain_last_statements`
 
@@ -907,6 +911,22 @@ Default is `never`.
 Note that you need to specify with `retain_last_statements` how many statements
 MaxScale should retain for each session. Unless it has been set to another value
 than `0`, this configuration setting will not have an effect.
+
+### `session_trace`
+
+How many log entries are stored in the session specific trace log. This log is
+written to disk when a session ends abnormally and can be used for debugging
+purposes. It would be good to enable this if a session is disconnected and the
+log is not detailed enough. In this case the info log might reveal the true
+cause of why the connection was closed.
+
+```
+session_trace=20
+```
+Default is `0`.
+
+The session trace log is also exposed by REST API and is shown with
+`maxctrl show sessions`.
 
 ### `writeq_high_water`
 
