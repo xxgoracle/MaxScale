@@ -69,7 +69,7 @@
                 "MAXSCALE"
         ],
         "product" : {
-                 "name" : "maxscale",
+                 "name" : "maxscale_ci",
                 "version" : "${target}"
         }
 
@@ -83,7 +83,7 @@
                 "SECOND_MAXSCALE"
         ],
         "product" : {
-                "name" : "maxscale",
+                "name" : "maxscale_ci",
                 "version" : "${target}"
         }
 
