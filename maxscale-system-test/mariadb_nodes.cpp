@@ -1255,9 +1255,7 @@ static void wait_until_pos(MYSQL* mysql, int filenum, int pos)
             }
             mysql_free_result(res);
         }
-printf("filenum %d\t pos %d\n", filenum, pos);
-printf("slave num %d\t pos %d\n", slave_filenum, slave_pos);
-sleep(1);
+        sleep(1);
     }
     while (slave_filenum < filenum || slave_pos < pos);
 }
@@ -1290,7 +1288,6 @@ void Mariadb_nodes::sync_slaves(int node)
                 {
                     if (i != node)
                     {
-printf("node to sync = %d\n", i)                        ;
                         wait_until_pos(this->nodes[i], filenum, pos);
                     }
                 }

@@ -196,7 +196,7 @@ add_test_executable(crash_out_of_files.cpp crash_out_of_files load LABELS maxsca
 add_test_executable(different_size_rwsplit.cpp different_size_rwsplit replication LABELS readwritesplit HEAVY REPL_BACKEND)
 
 # Tries to use 'maxkeys', 'maxpasswrd'
-add_test_executable(encrypted_passwords.cpp encrypted_passwords replication LABELS maxscale LIGHT REPL_BACKEND)
+add_test_executable(encrypted_passwords.cpp encrypted_passwords replication LABELS maxscale LIGHT REPL_BACKEND no_docker)
 
 # Basic MaxCtrl test
 add_test_executable(maxctrl_basic.cpp maxctrl_basic maxctrl_basic LABELS maxctrl REPL_BACKEND)
@@ -498,7 +498,7 @@ add_test_executable(mxs559_block_master.cpp mxs559_block_master mxs559 LABELS re
 add_test_script(mxs585.py mxs585.py replication LABELS readwritesplit readconnroute UNSTABLE HEAVY REPL_BACKEND)
 
 # Simple transactions in the loop from python script with client SSL on
-add_test_script(mxs598.py mxs598.py ssl LABELS MySQLProtocol UNSTABLE HEAVY REPL_BACKEND)
+add_test_script(mxs598.py mxs598.py ssl LABELS MySQLProtocol UNSTABLE HEAVY REPL_BACKEND SSL)
 
 # Regression case for the bug "MaxScale fails to start silently if config file is not readable"
 add_test_executable(mxs621_unreadable_cnf.cpp mxs621_unreadable_cnf replication LABELS maxscale REPL_BACKEND)
@@ -565,7 +565,7 @@ add_test_executable(mxs922_restart.cpp mxs922_restart mxs922 LABELS maxscale REP
 add_test_executable(mxs922_scaling.cpp mxs922_scaling mxs922_base LABELS maxscale REPL_BACKEND)
 
 # Dynamic listener SSL test
-add_test_executable(mxs922_listener_ssl.cpp mxs922_listener_ssl mxs922_base LABELS maxscale REPL_BACKEND)
+add_test_executable(mxs922_listener_ssl.cpp mxs922_listener_ssl mxs922_base LABELS maxscale REPL_BACKEND SSL)
 
 # Alter routers at runtime
 add_test_executable(alter_router.cpp alter_router alter_router LABELS maxscale REPL_BACKEND)
@@ -758,7 +758,7 @@ add_test_executable(readconnrouter_slave.cpp readconnrouter_slave replication LA
 add_test_executable(regexfilter1.cpp regexfilter1 regexfilter1 LABELS regexfilter LIGHT REPL_BACKEND)
 
 # check that Maxscale is reacting correctly on ctrc+c signal and termination does not take ages
-add_test_script(run_ctrl_c.sh run_ctrl_c.sh replication LABELS maxscale LIGHT REPL_BACKEND)
+add_test_script(run_ctrl_c.sh run_ctrl_c.sh replication LABELS maxscale LIGHT REPL_BACKEND no_docker)
 
 # run a set of queries in the loop (see setmix.sql) using Perl client
 add_test_script(run_session_hang.sh run_session_hang.sh replication LABELS readwritesplit REPL_BACKEND)
@@ -809,7 +809,7 @@ add_test_executable(sharding_load_data.cpp sharding_load_data sharding LABELS sc
 add_test_executable(short_sessions.cpp short_sessions replication LABELS readwritesplit readconnroute REPL_BACKEND)
 
 # Do short sessions (open conn, short query, close conn) in the loop, client ssl is ON
-add_test_derived(short_sessions_ssl short_sessions ssl LABELS readwritesplit readconnroute REPL_BACKEND)
+add_test_derived(short_sessions_ssl short_sessions ssl LABELS readwritesplit readconnroute REPL_BACKEND SSL)
 
 # Regression case for crash if maxadmin 'show monitors' command is issued, but no monitor is not running
 add_test_executable(show_monitor_crash.cpp show_monitor_crash show_monitor_crash LABELS maxscale REPL_BACKEND)
@@ -827,7 +827,7 @@ add_test_derived(sql_queries_pers1 sql_queries sql_queries_pers1 LABELS maxscale
 add_test_derived(sql_queries_pers10 sql_queries sql_queries_pers10 LABELS maxscale readwritesplit HEAVY REPL_BACKEND)
 
 # Execute queries of different size, check data is the same when accessing via Maxscale and directly to backend, client ssl is ON
-add_test_derived(ssl sql_queries ssl LABELS maxscale readwritesplit REPL_BACKEND)
+add_test_derived(ssl sql_queries ssl LABELS maxscale readwritesplit REPL_BACKEND SSL)
 
 # Testing slaves who have lost their master and how MaxScale works with them
 add_test_executable(stale_slaves.cpp stale_slaves stale_slaves LABELS mysqlmon REPL_BACKEND)
@@ -849,7 +849,7 @@ add_test_executable(test_hints.cpp test_hints hints2 LABELS hintfilter readwrite
 # works only with yum-based distributions
 # TODO: make it working with zypper and apt, move part of KDC setup to MDBCI
 add_test_executable(kerberos_setup.cpp kerberos_setup kerberos LABELS HEAVY gssapi REPL_BACKEND)
-add_test_derived(kerberos_setup_ssl kerberos_setup kerberos_ssl LABELS HEAVY gssapi REPL_BACKEND)
+add_test_derived(kerberos_setup_ssl kerberos_setup kerberos_ssl LABELS HEAVY gssapi REPL_BACKEND SSL)
 
 # Configures 'keepalived' on two Maxscale machines and tried failover
 add_test_executable(keepalived.cpp keepalived keepalived LABELS REPL_BACKEND TWO_MAXSCALES)

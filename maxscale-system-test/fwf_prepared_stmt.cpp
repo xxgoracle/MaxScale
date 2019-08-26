@@ -6,17 +6,23 @@
  */
 
 #include "testconnections.h"
+#include "fw_copy_rules.h"
+
+const char* rules = "rule test1 deny columns c on_queries select\n"
+                    "users %%@%% match any rules test1\n";
+
 
 int main(int argc, char** argv)
 {
     TestConnections::skip_maxscale_start(true);
     TestConnections test(argc, argv);
-    test.maxscales->ssh_node_f(0,
-                               true,
-                               "mkdir -p /home/vagrant/rules/;"
-                               "echo 'rule test1 deny columns c on_queries select' > /home/vagrant/rules/rules.txt;"
-                               "echo 'users %%@%% match any rules test1' >> /home/vagrant/rules/rules.txt;"
-                               "chmod a+r /home/vagrant/rules/rules.txt;");
+
+    /** Create the rule file */
+    FILE* file = fopen("rules.txt", "w");
+    fwrite(rules, 1, strlen(rules), file);
+    fclose(file);
+
+    copy_rules(&test, "rules.txt", ".");
 
     test.add_result(test.maxscales->restart_maxscale(0), "Restarting MaxScale failed");
 

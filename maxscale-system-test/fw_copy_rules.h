@@ -9,3 +9,5 @@
  * @param rules_dir Directory where file is located
  */
 void copy_rules(TestConnections* Test, const char* rules_name, const char* rules_dir);
+
+void copy_modified_rules(TestConnections* Test, const char* rules_name, const char* rules_dir, const char* sed_cmd);
