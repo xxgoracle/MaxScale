@@ -148,14 +148,25 @@ int main(int argc, char* argv[])
         Test->tprintf("Trying at_times clause");
     }
 
-    copy_modified_rules(Test, (char*) "rules_at_time", rules_dir,
-                       "start_time=`date +%T`;"
-                       "stop_time=` date --date \"now +30 secs\" +%T`;"
-                       "sed -i \"s/###time###/$start_time-$stop_time/\" ");
+    int block_time = Test->docker_backend ? 60:15;
+    if (Test->docker_backend)
+    {
+        copy_modified_rules(Test, (char*) "rules_at_time", rules_dir,
+                            "start_time=`date +%T`;"
+                            "stop_time=` date --date \"now +60 secs\" +%T`;"
+                            "sed -i \"s/###time###/$start_time-$stop_time/\" ");
+    }
+    else
+    {
+        copy_modified_rules(Test, (char*) "rules_at_time", rules_dir,
+                            "start_time=`date +%T`;"
+                            "stop_time=` date --date \"now +15 secs\" +%T`;"
+                            "sed -i \"s/###time###/$start_time-$stop_time/\" ");
+    }
 
     if (Test->verbose)
     {
-        Test->tprintf("DELETE quries without WHERE clause will be blocked during the 15 seconds");
+        Test->tprintf("DELETE quries without WHERE clause will be blocked during the %d seconds", block_time);
         Test->tprintf("Put time to rules.txt: %s", str);
     }
 
@@ -172,16 +183,15 @@ int main(int argc, char* argv[])
                          mysql_errno(Test->maxscales->conn_rwsplit[0]));
     }
 
-    Test->tprintf("Waiting 16 seconds and trying 'DELETE FROM t1', expecting OK");
+    Test->tprintf("Waiting %s seconds and trying 'DELETE FROM t1', expecting OK", block_time);
 
     Test->stop_timeout();
-    sleep(31);
+    sleep(block_time + 1);
     Test->set_timeout(180);
     Test->try_query(Test->maxscales->conn_rwsplit[0], "DELETE FROM t1");
 
     mysql_close(Test->maxscales->conn_rwsplit[0]);
     Test->maxscales->stop_maxscale(0);
-
     Test->tprintf("Trying limit_queries clause");
     Test->tprintf("Copying rules to Maxscale machine: %s", str);
     copy_rules(Test, (char*) "rules_limit_queries", rules_dir);

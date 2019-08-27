@@ -1,5 +1,6 @@
 #include "fw_copy_rules.h"
 #include <sstream>
+#include <linux/limits.h>
 
 void copy_rules(TestConnections* Test, const char* rules_name, const char* rules_dir)
 {
@@ -34,5 +35,7 @@ void copy_modified_rules(TestConnections* Test, const char* rules_name, const ch
     std::stringstream sed;
     sed << sed_cmd << rules_name;
     system(sed.str().c_str());
-    copy_rules(Test, rules_name, ".");
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    copy_rules(Test, rules_name, cwd);
 }
