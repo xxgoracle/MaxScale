@@ -501,7 +501,7 @@ add_test_script(mxs585.py mxs585.py replication LABELS readwritesplit readconnro
 add_test_script(mxs598.py mxs598.py ssl LABELS MySQLProtocol UNSTABLE HEAVY REPL_BACKEND SSL)
 
 # Regression case for the bug "MaxScale fails to start silently if config file is not readable"
-add_test_executable(mxs621_unreadable_cnf.cpp mxs621_unreadable_cnf replication LABELS maxscale REPL_BACKEND)
+add_test_executable(mxs621_unreadable_cnf.cpp mxs621_unreadable_cnf replication LABELS maxscale REPL_BACKEND no_docker)
 
 # playing with 'restart service' and restart Maxscale under load
 add_test_executable(mxs657_restart.cpp mxs657_restart replication LABELS maxscale HEAVY REPL_BACKEND)

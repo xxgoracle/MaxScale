@@ -107,6 +107,11 @@ public:
     char * backend_box;
 
     /**
+     * @brief mdbci_config_name Name of MDBCI VMs set
+     */
+    char * mdbci_config_name;
+
+    /**
      * @brief Get IP address
      *
      * @return The current IP address

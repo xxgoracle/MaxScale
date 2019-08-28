@@ -367,6 +367,8 @@ int Nodes::read_basic_env()
     backend_box = readenv("backend_box", "centos_7_libvirt");
     docker_backend = !strcmp(backend_box, "docker");
 
+    mdbci_config_name = readenv("mdbci_config_name", "local");
+
     if ((N > 0) && (N < 255))
     {
         for (int i = 0; i < N; i++)

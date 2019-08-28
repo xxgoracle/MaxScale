@@ -80,7 +80,6 @@ int Mariadb_nodes::connect(int i, const std::string& db)
         {
             mysql_close(nodes[i]);
         }
-printf("port %d ip %s\n", port[i], IP[i]);
         nodes[i] = open_conn_db_timeout(port[i], IP[i], db.c_str(), user_name, password, 50, ssl);
     }
 
@@ -406,11 +405,9 @@ int Mariadb_nodes::start_replication()
         }
         create_users(i);
     }
-//    connect("");
-printf("Trying to connect\n");
+
     robust_connect(10, "");
-printf("Create DB\n");
-execute_query(nodes[0], "RESET MASTER");
+    execute_query(nodes[0], "RESET MASTER");
 
     for (int i = 0; i < N; i++)
     {
@@ -1417,7 +1414,12 @@ char* extract_version_from_string(char* version)
 
 int Mariadb_nodes::prepare_server(int i)
 {
-    if (docker_backend) return(0);
+    if (docker_backend)
+    {
+        char cmd[15 + strlen(mdbci_config_name) + strlen(prefix)];
+        sprintf(cmd, "mdbci up %s/%s_%03d", mdbci_config_name, prefix, i);
+        return(system(cmd));
+    }
     cleanup_db_node(i);
     reset_server_settings(i);
 
@@ -1472,20 +1474,29 @@ int Mariadb_nodes::prepare_server(int i)
 int Mariadb_nodes::prepare_servers()
 {
     int rval = 0;
-    std::vector<std::thread> threads;
 
-    for (int i = 0; i < N; i++)
+    if (docker_backend)
     {
-        threads.emplace_back([&, i]() {
-                                 rval += prepare_server(i);
-                             });
+        char cmd[10 + strlen(mdbci_config_name)];
+        sprintf(cmd, "mdbci up %s", mdbci_config_name);
+        rval = system(cmd);
     }
-
-    for (auto& a : threads)
+    else
     {
-        a.join();
-    }
+        std::vector<std::thread> threads;
 
+        for (int i = 0; i < N; i++)
+        {
+            threads.emplace_back([&, i]() {
+                rval += prepare_server(i);
+            });
+        }
+
+        for (auto& a : threads)
+        {
+            a.join();
+        }
+    }
     return rval;
 }
 
