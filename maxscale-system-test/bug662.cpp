@@ -29,8 +29,14 @@ int main(int argc, char* argv[])
     Test->maxscales->restart_maxscale(0);
 
     Test->tprintf("Checking if MaxScale is alive by connecting to MaxAdmin\n");
-    Test->add_result(Test->maxscales->execute_maxadmin_command(0, (char*) "show servers"),
-                     "Maxadmin execution failed.\n");
+    int waits = 200;
+    int ma;
+    do
+    {
+        sleep(1);
+        ma = Test->maxscales->execute_maxadmin_command(0, (char*) "show servers");
+    } while ((waits > 0) and (ma != 0));
+    Test->add_result(ma, "Maxadmin execution failed.\n");
 
     for (int i = 0; i < Test->repl->N; i++)
     {

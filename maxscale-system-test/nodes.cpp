@@ -121,7 +121,6 @@ char* Nodes::ssh_node_output(int node, const char* ssh, bool sudo, int* exit_cod
     char* cmd = (char*)malloc(strlen(ssh) + 1024);
 
     generate_ssh_cmd(cmd, node, ssh, sudo);
-
     FILE* output = popen(cmd, "r");
 
     if (output == NULL)
@@ -189,20 +188,26 @@ int Nodes::ssh_node(int node, const char* ssh, bool sudo)
     }
 
     int rc = 1;
-    FILE* in = popen(cmd, "w");
-
-    if (in)
+    if (docker_backend)
     {
-        if (sudo)
-        {
-            fprintf(in, "sudo su -\n");
-            fprintf(in, "cd /home/%s\n", access_user[node]);
-        }
-
-        fprintf(in, "%s\n", ssh);
-        rc = pclose(in);
+        rc = system(cmd);
     }
+    else
+    {
+        FILE* in = popen(cmd, "w");
 
+        if (in)
+        {
+            if (sudo)
+            {
+                fprintf(in, "sudo su -\n");
+                fprintf(in, "cd /home/%s\n", access_user[node]);
+            }
+
+            fprintf(in, "%s\n", ssh);
+            rc = pclose(in);
+        }
+    }
 
     free(cmd);
 

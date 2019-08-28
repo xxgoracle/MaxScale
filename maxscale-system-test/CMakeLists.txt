@@ -529,7 +529,7 @@ add_test_executable(mxs812_1.cpp mxs812_1 longblob LABELS readwritesplit REPL_BA
 add_test_executable(mxs812_2.cpp mxs812_2 replication LABELS readwritesplit REPL_BACKEND)
 
 # Tests maxpasswd
-add_test_executable(mxs822_maxpasswd.cpp mxs822_maxpasswd maxpasswd LABELS maxscale REPL_BACKEND)
+add_test_executable(mxs822_maxpasswd.cpp mxs822_maxpasswd maxpasswd LABELS maxscale REPL_BACKEND no_docker)
 
 # Do only SELECTS during time > wait_timeout and then do INSERT
 add_test_executable(mxs827_write_timeout.cpp mxs827_write_timeout mxs827_write_timeout LABELS readwritesplit REPL_BACKEND)
