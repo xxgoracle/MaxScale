@@ -1178,9 +1178,7 @@ int Mariadb_nodes::configure_ssl(bool require)
         sprintf(str, "%s/ssl.cnf", test_dir);
         local_result += copy_to_node_legacy(str, (char*) "~/", i);
         sprintf(str, "cp %s/ssl.cnf /etc/my.cnf.d/", access_homedir[i]);
-printf("%s\n", str);
         local_result += ssh_node(i, str, true);
-ssh_node(i, "ls -la /etc/my.cnf.d/", true);
 
         sprintf(str, "cp -r %s/ssl-cert /etc/", access_homedir[i]);
         local_result += ssh_node(i, str, true);
