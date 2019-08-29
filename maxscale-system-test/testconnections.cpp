@@ -559,7 +559,7 @@ TestConnections::~TestConnections()
 
     if (backend_ssl)
     {
-//        repl->disable_ssl();
+        repl->disable_ssl();
         // galera->disable_ssl();
     }
 
