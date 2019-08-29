@@ -18,9 +18,9 @@ DROP USER IF EXISTS 'skysql'@'%';
 CREATE USER 'skysql'@'%' IDENTIFIED BY 'skysql';
 GRANT ALL ON *.* TO 'skysql'@'%' WITH GRANT OPTION;
 
-DROP USER IF EXISTS 'skysql'@'localhost';
-CREATE USER 'skysql'@'localhost' IDENTIFIED BY 'skysql';
-GRANT ALL ON *.* TO 'skysql'@'localhost' WITH GRANT OPTION;
+#DROP USER IF EXISTS 'skysql'@'localhost';
+#CREATE USER 'skysql'@'localhost' IDENTIFIED BY 'skysql';
+#GRANT ALL ON *.* TO 'skysql'@'localhost' WITH GRANT OPTION;
 
 DROP USER IF EXISTS 'maxskysql'@'%';
 CREATE USER 'maxskysql'@'%' IDENTIFIED BY 'skysql';
