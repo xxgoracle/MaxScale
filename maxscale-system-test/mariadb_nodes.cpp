@@ -1474,28 +1474,17 @@ int Mariadb_nodes::prepare_server(int i)
 int Mariadb_nodes::prepare_servers()
 {
     int rval = 0;
+    std::vector<std::thread> threads;
 
-    if (docker_backend)
+    for (int i = 0; i < N; i++)
     {
-        char cmd[10 + strlen(mdbci_config_name)];
-        sprintf(cmd, "mdbci up %s", mdbci_config_name);
-        rval = system(cmd);
+        threads.emplace_back([&, i]() {
+            rval += prepare_server(i);
+        });
     }
-    else
+    for (auto& a : threads)
     {
-        std::vector<std::thread> threads;
-
-        for (int i = 0; i < N; i++)
-        {
-            threads.emplace_back([&, i]() {
-                rval += prepare_server(i);
-            });
-        }
-
-        for (auto& a : threads)
-        {
-            a.join();
-        }
+        a.join();
     }
     return rval;
 }
