@@ -149,20 +149,17 @@ int main(int argc, char* argv[])
     }
 
     int block_time = Test->docker_backend ? 60:15;
-    if (Test->docker_backend)
-    {
-        copy_modified_rules(Test, (char*) "rules_at_time", rules_dir,
-                            "start_time=`date +%T`;"
-                            "stop_time=` date --date \"now +60 secs\" +%T`;"
-                            "sed -i \"s/###time###/$start_time-$stop_time/\" ");
-    }
-    else
-    {
-        copy_modified_rules(Test, (char*) "rules_at_time", rules_dir,
-                            "start_time=`date +%T`;"
-                            "stop_time=` date --date \"now +15 secs\" +%T`;"
-                            "sed -i \"s/###time###/$start_time-$stop_time/\" ");
-    }
+
+    int ec;
+    char * ds = Test->maxscales->ssh_node_output(0, "date +%T", false, &ec);
+    if (ds[strlen(ds) - 1] == '\n') ds[strlen(ds) - 1] = 0;
+    char d_cmd[35];
+    sprintf(d_cmd, "date --date \"now +%d secs\" +%%T", block_time);
+    char * de = Test->maxscales->ssh_node_output(0, d_cmd, false, &ec);
+    if (de[strlen(de) - 1] == '\n') de[strlen(de) - 1] = 0;
+    char rules[90 + strlen(ds) + strlen(de)];
+    sprintf(rules, "sed -i \"s/###time###/%s-%s/\" ", ds, de);
+    copy_modified_rules(Test, (char*) "rules_at_time", rules_dir, rules);
 
     if (Test->verbose)
     {
@@ -182,8 +179,7 @@ int main(int argc, char* argv[])
                          "Query succeded, but fail expected, errono is %d",
                          mysql_errno(Test->maxscales->conn_rwsplit[0]));
     }
-
-    Test->tprintf("Waiting %s seconds and trying 'DELETE FROM t1', expecting OK", block_time);
+    Test->tprintf("Waiting %d seconds and trying 'DELETE FROM t1', expecting OK", block_time);
 
     Test->stop_timeout();
     sleep(block_time + 1);

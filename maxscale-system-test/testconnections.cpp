@@ -1510,7 +1510,7 @@ int TestConnections::check_maxscale_processes(int m, int expected)
 {
     if (docker_backend)
     {
-        printf("Dcoker!!! no maxscale processes check\n");
+        printf("Docker!!! no maxscale processes check\n");
         return expected; // HACK!
     }
     const char* ps_cmd = maxscales->use_valgrind ?

@@ -7,6 +7,7 @@
 
 #include "testconnections.h"
 #include "fw_copy_rules.h"
+#include <linux/limits.h>
 
 const char* rules = "rule test1 deny columns c on_queries select\n"
                     "users %%@%% match any rules test1\n";
@@ -22,7 +23,9 @@ int main(int argc, char** argv)
     fwrite(rules, 1, strlen(rules), file);
     fclose(file);
 
-    copy_rules(&test, "rules.txt", ".");
+    char cwd[PATH_MAX + 1];
+    getcwd(cwd, sizeof(cwd));
+    copy_rules(&test, "rules.txt", cwd);
 
     test.add_result(test.maxscales->restart_maxscale(0), "Restarting MaxScale failed");
 

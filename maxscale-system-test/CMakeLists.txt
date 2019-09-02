@@ -868,7 +868,7 @@ add_test_executable_notest(long_sysbench.cpp long_sysbench replication LABELS re
 add_test_executable_notest(long_test.cpp long_test replication LABELS readwritesplit REPL_BACKEND)
 
 # test effect of local_address in configuration file
-add_test_executable(local_address.cpp local_address local_address LABELS REPL_BACKEND)
+add_test_executable(local_address.cpp local_address local_address LABELS REPL_BACKEND no_docker)
 
 # MXS-1628: Security scanner says MaxScale is vulnerable to ancient MySQL vulnerability
 # https://jira.mariadb.org/browse/MXS-1628
@@ -959,7 +959,7 @@ add_test_executable(mxs2417_ignore_persisted_cnf.cpp mxs2417_ignore_persisted_cn
 add_test_executable(mxs2450_change_user_crash.cpp mxs2450_change_user_crash mxs2450_change_user_crash LABELS REPL_BACKEND)
 
 # PAM authentication
-add_test_executable(pam_authentication.cpp pam_authentication pam_authentication LABELS REPL_BACKEND)
+add_test_executable(pam_authentication.cpp pam_authentication pam_authentication LABELS REPL_BACKEND no_docker)
 
 # MXS-2520: Allow master reconnection on reads
 add_test_executable(mxs2520_master_read_reconnect.cpp mxs2520_master_read_reconnect mxs2520_master_read_reconnect LABELS REPL_BACKEND readwritesplit)
