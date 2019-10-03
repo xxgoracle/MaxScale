@@ -1,0 +1,242 @@
+{
+  "node_000" :
+  {
+        "hostname" : "node000",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "REPL_BACKEND"
+        ],
+	"product" : {
+      		"name": "${product}",
+		"version": "${version}",
+                "cnf_template" : "server1.cnf",
+                "cnf_template_path": "${cnf_path}"
+	}
+
+  },
+
+  "node_001" :
+  {
+        "hostname" : "node001",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server2.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_002" :
+  {
+        "hostname" : "node002",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server3.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_003" :
+  {
+        "hostname" : "node003",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server4.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_004" :
+  {
+        "hostname" : "node004",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server5.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_005" :
+  {
+        "hostname" : "node005",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server6.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_006" :
+  {
+        "hostname" : "node006",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server7.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_007" :
+  {
+        "hostname" : "node007",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server8.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_008" :
+  {
+        "hostname" : "node008",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server9.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_009" :
+  {
+        "hostname" : "node009",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server10.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_010" :
+  {
+        "hostname" : "node010",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server11.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_011" :
+  {
+        "hostname" : "node011",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server12.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_012" :
+  {
+        "hostname" : "node012",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server13.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_013" :
+  {
+        "hostname" : "node013",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server14.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  },
+
+  "node_014" :
+  {
+        "hostname" : "node013",
+        "box" : "docker",
+        "memory_size" : "${vm_memory}",
+        "labels" : [
+                "BIG_REPL_BACKEND"
+        ],
+        "product" : {
+                "name": "${product}",
+                "version": "${version}",
+                "cnf_template" : "server15.cnf",
+                "cnf_template_path": "${cnf_path}"
+        }
+  }
+}
