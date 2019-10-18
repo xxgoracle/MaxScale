@@ -2180,12 +2180,10 @@ int TestConnections::call_mdbci(const char * options)
             tprintf("Failed to generate MDBCI virtual machines template");
             return 1;
         }
-        if (system((std::string("mdbci --override --template ") +
-                    vm_path +
-                    std::string(".json generate ") +
-                    std::string(mdbci_config_name)).c_str() ))
+        if (system((std::string("mkdir ") +
+                    std::string(vm_path)).c_str()))
         {
-            tprintf("MDBCI failed to generate virtual machines description");
+            tprintf("Failed to create directory for VMs");
             return 1;
         }
         if (system((std::string("cp -r ") +
@@ -2195,6 +2193,15 @@ int TestConnections::call_mdbci(const char * options)
                     std::string("/")).c_str()))
         {
             tprintf("Failed to copy my.cnf files");
+            return 1;
+        }
+        tprintf("Generate ...");
+        if (system((std::string("mdbci --override --template ") +
+                    vm_path +
+                    std::string(".json generate ") +
+                    std::string(mdbci_config_name)).c_str() ))
+        {
+            tprintf("MDBCI failed to generate virtual machines description");
             return 1;
         }
     }
