@@ -438,7 +438,7 @@ int Galera_nodes::start_galera()
                    true,
                    "sed -i 's/###NODE-ADDRESS###/%s/' /etc/my.cnf.d/* /etc/mysql/my.cnf.d/*;"
                    "sed -i \"s|###GALERA-LIB-PATH###|$(ls /usr/lib*/galera/*.so)|g\" /etc/my.cnf.d/* /etc/mysql/my.cnf.d/*",
-                   IP[i]);
+                   IP_private[i]);
     }
 
     printf("Starting new Galera cluster\n");
