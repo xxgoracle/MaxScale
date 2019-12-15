@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     TestConnections::skip_maxscale_start(true);
     TestConnections test(argc, argv);
 
-    copy_rules(test, (char*)"rules.txt", (char*)".");
+    copy_rules(&test, (char*) "rules.txt", (char*) ".");
 
     test.add_result(test.maxscales->restart_maxscale(0), "Restarting MaxScale failed");
 
