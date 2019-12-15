@@ -21,7 +21,7 @@ int main(int argc, char** argv)
     TestConnections::skip_maxscale_start(true);
     TestConnections test(argc, argv);
 
-    copy_rules(test, (char*)"rules.txt", (char*)".");
+    copy_rules(&test, (char*) "rules.txt", (char*) ".");
 
     int rc = 0;
 
