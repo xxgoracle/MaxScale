@@ -44,6 +44,7 @@ void test_script_monitor(TestConnections* Test, Mariadb_nodes* nodes, char* expe
                                 "cd %s;"
                                 "truncate -s 0 script_output;"
                                 "chown maxscale:maxscale script_output",
+                                "chmod a+r script_output",
                                 Test->maxscales->access_homedir[0]);
     sleep(10);
 
