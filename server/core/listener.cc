@@ -4,7 +4,7 @@
  * Use of this software is governed by the Business Source License included
  * in the LICENSE.TXT file and at www.mariadb.com/bsl11.
  *
- * Change Date: 2023-10-29
+ * Change Date: 2024-01-15
  *
  * On the date above, in accordance with the Business Source License, use
  * of this software will be governed by version 2 or later of the General
@@ -378,12 +378,18 @@ bool SSL_LISTENER_init(SSL_LISTENER* ssl)
         SSL_CTX_set_tmp_rsa_callback(ctx, tmp_rsa_callback);
     }
 
-    mxb_assert(ssl->ssl_ca_cert);
-
-    /* Load the CA certificate into the SSL_CTX structure */
-    if (!SSL_CTX_load_verify_locations(ctx, ssl->ssl_ca_cert, NULL))
+    if (ssl->ssl_ca_cert)
     {
-        MXS_ERROR("Failed to set Certificate Authority file: %s", get_ssl_errors());
+        /* Load the CA certificate into the SSL_CTX structure */
+        if (!SSL_CTX_load_verify_locations(ctx, ssl->ssl_ca_cert, NULL))
+        {
+            MXS_ERROR("Failed to set Certificate Authority file: %s", get_ssl_errors());
+            rval = false;
+        }
+    }
+    else if (SSL_CTX_set_default_verify_paths(ctx) == 0)
+    {
+        MXS_ERROR("Failed to set default CA verify paths: %s", get_ssl_errors());
         rval = false;
     }
 

@@ -4,7 +4,7 @@
  * Use of this software is governed by the Business Source License included
  * in the LICENSE.TXT file and at www.mariadb.com/bsl11.
  *
- * Change Date: 2023-10-29
+ * Change Date: 2024-01-15
  *
  * On the date above, in accordance with the Business Source License, use
  * of this software will be governed by version 2 or later of the General
@@ -1422,7 +1422,7 @@ static int gw_backend_close(DCB* dcb)
         || proto->protocol_auth_state == MXS_AUTH_STATE_CONNECTED)
     {
         MYSQL_session client;
-        gw_get_shared_session_auth_info(dcb->session->client_dcb, &client);
+        gw_get_shared_session_auth_info(dcb, &client);
         memset(proto->scramble, 0, sizeof(proto->scramble));
         dcb_write(dcb, gw_generate_auth_response(&client, proto, false, false, 0));
     }

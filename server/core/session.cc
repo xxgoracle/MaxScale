@@ -4,7 +4,7 @@
  * Use of this software is governed by the Business Source License included
  * in the LICENSE.TXT file and at www.mariadb.com/bsl11.
  *
- * Change Date: 2023-10-29
+ * Change Date: 2024-01-15
  *
  * On the date above, in accordance with the Business Source License, use
  * of this software will be governed by version 2 or later of the General
@@ -335,23 +335,6 @@ void session_close(MXS_SESSION* session)
         router->closeSession(router_instance, session->router_session);
     }
 }
-
-class ServiceDestroyTask : public Worker::DisposableTask
-{
-public:
-    ServiceDestroyTask(Service* service)
-        : m_service(service)
-    {
-    }
-
-    void execute(Worker& worker) override
-    {
-        service_free(m_service);
-    }
-
-private:
-    Service* m_service;
-};
 
 /**
  * Deallocate the specified session
@@ -1253,7 +1236,6 @@ Session::Session(SERVICE* service)
 
     mxb::atomic::add(&service->stats.n_current, 1, mxb::atomic::RELAXED);
     mxb_assert(service->stats.n_current >= 0);
-    mxb::atomic::add(&service->client_count, 1, mxb::atomic::RELAXED);
 }
 
 Session::~Session()
@@ -1271,17 +1253,6 @@ Session::~Session()
 
     mxb::atomic::add(&service->stats.n_current, -1, mxb::atomic::RELAXED);
     mxb_assert(service->stats.n_current >= 0);
-
-    bool should_destroy = !mxb::atomic::load(&service->active);
-
-    if (mxb::atomic::add(&service->client_count, -1) == 1 && should_destroy)
-    {
-        // Destroy the service in the main routing worker thread
-        mxs::RoutingWorker* main_worker = mxs::RoutingWorker::get(mxs::RoutingWorker::MAIN);
-        main_worker->execute(
-            std::unique_ptr<ServiceDestroyTask>(new ServiceDestroyTask(static_cast<Service*>(service))),
-            Worker::EXECUTE_AUTO);
-    }
 }
 
 namespace

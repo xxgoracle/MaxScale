@@ -4,7 +4,7 @@
  * Use of this software is governed by the Business Source License included
  * in the LICENSE.TXT file and at www.mariadb.com/bsl11.
  *
- * Change Date: 2023-10-29
+ * Change Date: 2024-01-15
  *
  * On the date above, in accordance with the Business Source License, use
  * of this software will be governed by version 2 or later of the General
@@ -2756,15 +2756,6 @@ bool config_create_ssl(const char* name,
         char* ssl_key = config_get_value(params, CN_SSL_KEY);
         char* ssl_ca_cert = config_get_value(params, CN_SSL_CA_CERT);
 
-        if (ssl_ca_cert == NULL)
-        {
-            MXS_ERROR("CA Certificate missing for '%s'."
-                      "Please provide the path to the certificate authority "
-                      "certificate by adding the ssl_ca_cert=<path> parameter",
-                      name);
-            error = true;
-        }
-
         if (require_cert)
         {
             if (ssl_cert == NULL)
@@ -2803,7 +2794,7 @@ bool config_create_ssl(const char* name,
 
         listener_set_certificates(ssl, ssl_cert, ssl_key, ssl_ca_cert);
 
-        mxb_assert(access(ssl_ca_cert, F_OK) == 0);
+        mxb_assert(!ssl_ca_cert || access(ssl_ca_cert, F_OK) == 0);
         mxb_assert(!ssl_cert || access(ssl_cert, F_OK) == 0);
         mxb_assert(!ssl_key || access(ssl_key, F_OK) == 0);
 
