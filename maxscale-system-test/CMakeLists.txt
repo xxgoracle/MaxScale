@@ -199,7 +199,7 @@ add_test_executable(mxs2443_global_causal_reads.cpp mxs2443_global_causal_reads 
 add_test_executable(mxs2785_binlogfilter_rewrite.cpp mxs2785_binlogfilter_rewrite mxs2785_binlogfilter_rewrite LABELS binlogfilter REPL_BACKEND)
 
 # KafkaCDC test case
-add_test_executable(test_kafkacdc.cpp test_kafkacdc test_kafkacdc LABELS kafkacdc REPL_BACKEND)
+#add_test_executable(test_kafkacdc.cpp test_kafkacdc test_kafkacdc LABELS kafkacdc REPL_BACKEND)
 
 ############################################
 # END: Tests that require GTID             #

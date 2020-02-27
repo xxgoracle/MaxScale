@@ -1802,6 +1802,11 @@ int main(int argc, char** argv)
 
     if (!config_load_global(cnf_file_path.c_str()))
     {
+        if (!this_unit.daemon_mode)
+        {
+            print_alert("Fatal error when reading configuration file, check log file for details.");
+        }
+
         rc = MAXSCALE_BADCONFIG;
         return rc;
     }

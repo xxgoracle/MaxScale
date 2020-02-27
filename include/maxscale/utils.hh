@@ -374,6 +374,20 @@ struct hex_iterator<T, uint8_t>
     }
 };
 
+template<typename T>
+struct hex_iterator<T, char>
+{
+    std::string operator()(T begin, T end)
+    {
+        std::string rval;
+        for (auto it = begin; it != end; it++)
+        {
+            rval += to_hex(*it);
+        }
+        return rval;
+    }
+};
+
 /**
  * Create hexadecimal representation of a type
  *

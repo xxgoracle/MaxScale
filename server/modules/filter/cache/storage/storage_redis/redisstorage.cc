@@ -557,6 +557,10 @@ public:
                     switch (reply.type())
                     {
                     case REDIS_REPLY_STRING:
+                        MXS_NOTICE("Received for key '%s', value '%s', %d.",
+                                   mxs::to_hex(rkey.begin(), rkey.end()).c_str(),
+                                   mxs::to_hex(reply.str(), reply.str() + reply.len()).c_str(),
+                                   (int)reply.len());
                         pValue = gwbuf_alloc_and_load(reply.len(), reply.str());
                         rv = CACHE_RESULT_OK;
                         break;
@@ -767,7 +771,11 @@ private:
         }
 
         // Then the actual value is stored.
-        MXB_AT_DEBUG(rc =) m_redis.appendCommand("SET %b %b%s",
+        MXS_NOTICE("Storing key '%s', value '%s', %d.",
+                   mxs::to_hex(rkey.begin(), rkey.end()).c_str(),
+                   mxs::to_hex(GWBUF_DATA(pClone), GWBUF_DATA(pClone) + GWBUF_LENGTH(pClone)).c_str(),
+                   (int)GWBUF_LENGTH(pClone));
+        MXB_AT_DEBUG(rc =) m_redis.appendCommand("SET %b %b %s",
                                                  rkey.data(), rkey.size(),
                                                  reinterpret_cast<const char*>(GWBUF_DATA(pClone)),
                                                  GWBUF_LENGTH(pClone),
