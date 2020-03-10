@@ -74,11 +74,16 @@ using namespace maxscale;
 using LockGuard = std::lock_guard<std::mutex>;
 using UniqueLock = std::unique_lock<std::mutex>;
 
-static struct
+namespace
+{
+const char CN_AUTH_ALL_SERVERS[] = "auth_all_servers";
+
+struct ThisUnit
 {
     std::mutex            lock;
     std::vector<Service*> services;
 } this_unit;
+}
 
 Service* Service::create(const char* name, const char* router, mxs::ConfigParameters* params)
 {
@@ -1220,10 +1225,16 @@ void Service::update_basic_parameter(const std::string& key, const std::string& 
     }
 
     // If the parameter affects the user account manager, update its settings.
-    auto manager = user_account_manager();
-    if (manager && (key == CN_USER || key == CN_PASSWORD))
+    if (m_usermanager)
     {
-        manager->set_credentials(m_config->user, m_config->password);
+        if ((key == CN_USER || key == CN_PASSWORD))
+        {
+            m_usermanager->set_credentials(m_config->user, m_config->password);
+        }
+        else if (key == CN_AUTH_ALL_SERVERS)
+        {
+            m_usermanager->set_union_over_backends(m_config->users_from_all);
+        }
     }
 }
 
@@ -1681,6 +1692,7 @@ void Service::set_start_user_account_manager(SAccountManager user_manager)
     m_usermanager = std::move(user_manager);
     m_usermanager->set_credentials(m_config->user, m_config->password);
     m_usermanager->set_backends(m_data->servers);
+    m_usermanager->set_union_over_backends(m_config->users_from_all);
     m_usermanager->set_service(this);
 
     // Message each routingworker to initialize their own user caches. Wait for completion so that
