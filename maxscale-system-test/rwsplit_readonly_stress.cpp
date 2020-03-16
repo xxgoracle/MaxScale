@@ -104,6 +104,7 @@ int main(int argc, char* argv[])
     Test->tprintf("Waiting for all threads to finish\n");
     running = 0;
 
+    Test->set_timeout(600);
     for (int i = 0; i < THREADS; i++)
     {
         void* val;
