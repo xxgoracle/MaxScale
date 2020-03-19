@@ -80,9 +80,9 @@ fi
 if [ ! -z "${named_test}" ] ; then
     eval ${named_test}
 else
-    echo ${test_set}
-    ctest -N ${test_set}
-    ctest -VV ${test_set}
+    eval "arguments=(${test_set})"
+    ctest -N "${arguments[@]}"
+    ctest -VV "${arguments[@]}"
 fi
 cp core.* ${logs_publish_dir}
 ${script_dir}/copy_logs.sh
